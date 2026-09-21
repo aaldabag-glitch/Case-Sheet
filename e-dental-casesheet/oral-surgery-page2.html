@@ -114,6 +114,72 @@
       font-family: 'Plus Jakarta Sans', monospace;
     }
 
+    /* FDI Interactive Odontogram Styles */
+    .tooth-box {
+      width: 42px;
+      height: 60px;
+      border-radius: 0.5rem;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 2px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      position: relative;
+    }
+    .tooth-box:hover {
+      transform: translateY(-2px);
+      border-color: #0284c7;
+      box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+    }
+    .tooth-box.selected {
+      outline: 2px solid #0284c7;
+      outline-offset: 2px;
+      background-color: #f0f9ff;
+    }
+    .tooth-box[data-condition="caries"] {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+    }
+    .tooth-box[data-condition="caries"] .tooth-crown {
+      fill: #fca5a5;
+      stroke: #dc2626;
+    }
+    .tooth-box[data-condition="filled"] {
+      border-color: #0284c7;
+      background-color: #f0f9ff;
+    }
+    .tooth-box[data-condition="filled"] .tooth-crown {
+      fill: #bae6fd;
+      stroke: #0284c7;
+    }
+    .tooth-box[data-condition="endo"] {
+      border-color: #f59e0b;
+      background-color: #fffbeb;
+    }
+    .tooth-box[data-condition="endo"] .tooth-crown {
+      fill: #fde68a;
+      stroke: #d97706;
+    }
+    .tooth-box[data-condition="missing"] {
+      border-color: #94a3b8;
+      background-color: #f1f5f9;
+      opacity: 0.45;
+      text-decoration: line-through;
+    }
+    .tooth-box[data-condition="crowned"] {
+      border-color: #8b5cf6;
+      background-color: #f5f3ff;
+    }
+    .tooth-box[data-condition="crowned"] .tooth-crown {
+      fill: #ddd6fe;
+      stroke: #7c3aed;
+    }
+
     /* Print Formatting */
     @media print {
       body {
@@ -233,24 +299,21 @@
             <!-- Left Column: Lips & Labial Mucosa -->
             <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Lips & Labial Mucosa:</td>
             <td class="w-2/6 p-1.5 border border-slate-800">
-              <select id="p2-lips" class="select-clean">
-                <option selected>Normal (طبيعي وسليم بدون آفات)</option>
-                <option>Lesion / Ulcer (وجود قرحة أو آفة مخاطية)</option>
-                <option>Herpetic Vesicles / Aphthous (حويصلات / قلاع)</option>
-                <option>Swelling / Mucocele (تورم / قيلة مخاطية شفوية)</option>
-                <option>Cyanosis / Pallor (زرقة أو شحوب شفتين)</option>
+              <select id="p2-lips" class="select-clean font-semibold">
+                <option value="Normal" selected>Normal (طبيعي وسليم)</option>
+                <option value="Lesion / Ulcer">Lesion / Ulcer (قرحة أو آفة شفوية)</option>
+                <option value="Swelling / Mucocele">Swelling / Mucocele (تورم / قيلة مخاطية)</option>
               </select>
             </td>
 
             <!-- Right Column: Buccal Mucosa & Sulcus -->
             <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Buccal Mucosa & Sulcus:</td>
             <td class="w-2/6 p-1.5 border border-slate-800">
-              <select id="p2-buccal" class="select-clean">
-                <option selected>Normal (مخاطية الخد والميزاب سليمة)</option>
-                <option>Obliterated / Swollen Sulcus (ميزاب فموي متورم وممحو)</option>
-                <option>Linea Alba (خط أبيض احتكاكي طبيعي)</option>
-                <option>Cheek Biting / Traumatic Ulcer (عض الخد / قرحة رضية)</option>
-                <option>Leukoplakia / White Patch (لطاخات بيضاء تحتاج فحص)</option>
+              <select id="p2-buccal" class="select-clean font-semibold">
+                <option value="Normal" selected>Normal (طبيعي وسليم)</option>
+                <option value="Obliterated Sulcus">Obliterated Sulcus (ميزاب فموي ممحو / مسطح)</option>
+                <option value="Swollen / Abscess">Swollen / Abscess (ميزاب متورم / خراج دهليزي)</option>
+                <option value="Linea Alba">Linea Alba (خط أبيض احتكاكي طبيعي)</option>
               </select>
             </td>
           </tr>
@@ -259,25 +322,22 @@
             <!-- Left Column: Tongue -->
             <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Tongue:</td>
             <td class="p-1.5 border border-slate-800">
-              <select id="p2-tongue" class="select-clean">
-                <option selected>Normal (اللسان طبيعي وحركته سليمة)</option>
-                <option>Coated Tongue (لسان مغطى بطبقة بيضاء)</option>
-                <option>Lateral border lesion / ulcer (آفة أو قرحة بالحافة الجانبية)</option>
-                <option>Macroglossia (تضخم حجم اللسان)</option>
-                <option>Fissured / Geographic Tongue (لسان مشقق أو جغرافي)</option>
-                <option>Ankyloglossia / Tongue Tie (التصاق اللسان)</option>
+              <select id="p2-tongue" class="select-clean font-semibold">
+                <option value="Normal" selected>Normal (طبيعي وحركته سليمة)</option>
+                <option value="Coated">Coated (لسان مغطى بطبقة بيضاء)</option>
+                <option value="Lateral border lesion">Lateral border lesion (آفة أو قرحة بالحافة الجانبية)</option>
+                <option value="Depapillated / Glossitis">Depapillated / Glossitis (ضمور حليمات / التهاب لسان)</option>
               </select>
             </td>
 
             <!-- Right Column: Floor of Mouth -->
             <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Floor of Mouth:</td>
             <td class="p-1.5 border border-slate-800">
-              <select id="p2-floor" class="select-clean">
-                <option selected>Normal (قاع الفم طبيعي وسليم)</option>
-                <option>Bimanual Palpation: Soft & Normal (جس سليم بكلتا اليدين)</option>
-                <option>Swelling / Ranula (تورم / ضفيدعة تحت اللسان)</option>
-                <option>Submandibular Duct Stone (حصوة قناة الغدة تحت الفك)</option>
-                <option>Indurated Mass (كتلة متصلبة مشبوهة)</option>
+              <select id="p2-floor" class="select-clean font-semibold">
+                <option value="Normal" selected>Normal (قاع الفم طبيعي وسليم)</option>
+                <option value="Bimanual: Soft / Non-tender">Bimanual: Soft / Non-tender (جس بكلتا اليدين: سليم وطري)</option>
+                <option value="Bimanual: Firm / Tender / Sialolith">Bimanual: Firm / Tender / Sialolith (جس قاسي / مؤلم / حصوة لعابية)</option>
+                <option value="Ranula">Ranula (ضفيدعة تحت اللسان)</option>
               </select>
             </td>
           </tr>
@@ -286,26 +346,23 @@
             <!-- Left Column: Hard & Soft Palate -->
             <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Hard & Soft Palate:</td>
             <td class="p-1.5 border border-slate-800">
-              <select id="p2-palate" class="select-clean">
-                <option selected>Normal (قبة الحنك الصلب والرخو سليمة)</option>
-                <option>Torus Palatinus (بروز عظمي حنكي حميد)</option>
-                <option>Palatal Abscess (خراج قيحي حنكي)</option>
-                <option>Denture Stomatitis (التهاب حنكي ناجم عن الطقم)</option>
-                <option>High-arched Palate (حنك مقوس مرتفع ضيق)</option>
-                <option>Cleft Palate / Scar (شق قبة الحنك أو ندبة سابقة)</option>
+              <select id="p2-palate" class="select-clean font-semibold">
+                <option value="Normal" selected>Normal (قبة الحنك طبيعية وسليمة)</option>
+                <option value="Torus Palatinus">Torus Palatinus (بروز عظمي حنكي حميد)</option>
+                <option value="Abscess">Abscess (خراج حنكي قيحي)</option>
+                <option value="Ulceration / Erythema">Ulceration / Erythema (تقرحات / احمرار والتهاب)</option>
               </select>
             </td>
 
             <!-- Right Column: Gingiva & Periodontium -->
             <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Gingiva & Periodontium:</td>
             <td class="p-1.5 border border-slate-800">
-              <select id="p2-gingiva" class="select-clean">
-                <option selected>Normal - Coral pink & Stippled (لثة وردية متماسكة طبيعية)</option>
-                <option>BOP - Bleeding on Probing (نزيف لثوي عند السبر)</option>
-                <option>Deep Periodontal Pocket (> 4mm) (جيوب لثوية عميقة)</option>
-                <option>Calculus & Plaque (ترسبات جيرية وقلح سني)</option>
-                <option>Gingival Enlargement / Hyperplasia (تضخم لثوي)</option>
-                <option>Gingival Recession (انحسار وتراجع لثوي كاشف للجذور)</option>
+              <select id="p2-gingiva" class="select-clean font-semibold">
+                <option value="Normal" selected>Normal (لثة وردية طبيعية وسليمة)</option>
+                <option value="BOP">BOP (نزيف عند السبر - Bleeding on Probing)</option>
+                <option value="Periodontal Pocket > 4mm">Periodontal Pocket > 4mm (جيوب لثوية عميقة > 4 ملم)</option>
+                <option value="Calculus & Plaque">Calculus & Plaque (ترسبات جيرية وقلح سني)</option>
+                <option value="ANUG">ANUG (التهاب لثة تقرحي نخري حاد)</option>
               </select>
             </td>
           </tr>
@@ -394,6 +451,91 @@
     </div>
 
     <!-- ========================================================================
+         INTERACTIVE DENTAL ODONTOGRAM (FDI TWO-DIGIT SYSTEM)
+         ======================================================================== -->
+    <div class="mb-3 border border-slate-800 rounded-lg overflow-hidden bg-white shadow-xs">
+      <div class="sheet-header-box flex items-center justify-between font-latin">
+        <div class="flex items-center gap-2">
+          <i data-lucide="grid-3x3" class="w-3.5 h-3.5 text-sky-400"></i>
+          <span>INTERACTIVE DENTAL ODONTOGRAM (FDI TWO-DIGIT SYSTEM)</span>
+        </div>
+        <span class="text-[10px] font-normal text-sky-200">انقر على رقم أي سن لاختياره وتحديد حالته وربطه التلقائي بفحص السن المعني</span>
+      </div>
+
+      <div class="p-3 bg-slate-50/80 space-y-3">
+        <!-- Odontogram Header Controls -->
+        <div class="flex flex-col sm:flex-row items-center justify-between gap-2 pb-2 border-b border-slate-200">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-700">السن المحدد في المخطط:</span>
+            <span id="p2-active-tooth-display" class="text-xs font-black text-sky-800 bg-sky-100 px-3 py-1 rounded-lg border border-sky-300 font-latin">
+              Tooth #46 (Lower Right 1st Molar)
+            </span>
+          </div>
+
+          <!-- Condition selector buttons -->
+          <div class="flex flex-wrap items-center gap-1.5">
+            <span class="text-[11px] font-bold text-slate-500 ml-1">تعيين الحالة:</span>
+            <button type="button" data-p2-condition="sound" class="px-2 py-0.5 rounded text-[11px] font-bold bg-white hover:bg-slate-100 border border-slate-300 text-slate-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-slate-300"></span>
+              <span>سليم</span>
+            </button>
+            <button type="button" data-p2-condition="caries" class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-50 hover:bg-rose-100 border border-rose-300 text-rose-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-rose-500"></span>
+              <span>نخر/تسوس</span>
+            </button>
+            <button type="button" data-p2-condition="filled" class="px-2 py-0.5 rounded text-[11px] font-bold bg-sky-50 hover:bg-sky-100 border border-sky-300 text-sky-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-sky-500"></span>
+              <span>حشوة</span>
+            </button>
+            <button type="button" data-p2-condition="endo" class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span>عصب RCT</span>
+            </button>
+            <button type="button" data-p2-condition="missing" class="px-2 py-0.5 rounded text-[11px] font-bold bg-slate-100 hover:bg-slate-200 border border-slate-300 text-slate-500 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+              <span>مفقود</span>
+            </button>
+            <button type="button" data-p2-condition="crowned" class="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+              <span>تاج Crown</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Odontogram FDI Grids (4 quadrants) -->
+        <div class="space-y-2 overflow-x-auto py-1">
+          <!-- Upper Jaw -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 px-2 font-latin">
+              <span>Upper Right (18 - 11)</span>
+              <span class="text-sky-800 font-extrabold">الفك العلوي (Maxilla)</span>
+              <span>Upper Left (21 - 28)</span>
+            </div>
+            <div class="flex items-center justify-center gap-2 p-2 bg-white rounded-lg border border-slate-200 min-w-[620px]">
+              <div class="flex items-center gap-1" id="p2-odont-ur"></div>
+              <div class="w-0.5 h-10 bg-slate-400 mx-1"></div>
+              <div class="flex items-center gap-1" id="p2-odont-ul"></div>
+            </div>
+          </div>
+
+          <!-- Lower Jaw -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-center gap-2 p-2 bg-white rounded-lg border border-slate-200 min-w-[620px]">
+              <div class="flex items-center gap-1" id="p2-odont-lr"></div>
+              <div class="w-0.5 h-10 bg-slate-400 mx-1"></div>
+              <div class="flex items-center gap-1" id="p2-odont-ll"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 px-2 font-latin">
+              <span>Lower Right (48 - 41)</span>
+              <span class="text-teal-800 font-extrabold">الفك السفلي (Mandible)</span>
+              <span>Lower Left (31 - 38)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================
          3. DETAILED EXAMINATION OF OFFENDING / TARGET TOOTH
          ======================================================================== -->
     <div class="mb-3">
@@ -404,146 +546,163 @@
 
       <table class="sheet-table text-xs border border-slate-800">
         <tbody>
-          <!-- Row 1: Target Tooth # & Tooth Condition -->
-          <tr>
-            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800 text-red-700">Target Tooth #:</td>
-            <td class="w-2/6 p-1.5 border border-slate-800">
-              <select id="p2-target-tooth" class="select-clean font-bold text-[#0f2d59]">
-                <option value="46" selected>#46 - Lower Right 1st Molar (الرحى الأولى السفلية يمين)</option>
-                <option value="47">#47 - Lower Right 2nd Molar (الرحى الثانية السفلية يمين)</option>
-                <option value="48">#48 - Lower Right 3rd Molar / Wisdom (ضرس العقل سفلي يمين)</option>
-                <option value="36">#36 - Lower Left 1st Molar (الرحى الأولى السفلية يسار)</option>
-                <option value="37">#37 - Lower Left 2nd Molar (الرحى الثانية السفلية يسار)</option>
-                <option value="38">#38 - Lower Left 3rd Molar / Wisdom (ضرس العقل سفلي يسار)</option>
-                <option value="16">#16 - Upper Right 1st Molar (الرحى الأولى العلوية يمين)</option>
-                <option value="26">#26 - Upper Left 1st Molar (الرحى الأولى العلوية يسار)</option>
-                <option value="11">#11 - Upper Right Central Incisor (الثنية العلوية يمين)</option>
-                <option value="21">#21 - Upper Left Central Incisor (الثنية العلوية يسار)</option>
-                <option value="other">الأسنان الأخرى (اختر السن المعني بالقلع)</option>
-              </select>
-            </td>
-            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Tooth Condition:</td>
-            <td class="w-2/6 p-1.5 border border-slate-800">
-              <select id="p2-tooth-condition" class="select-clean font-semibold">
-                <option selected>Crown Intact (التاج سليم ومكتمل)</option>
-                <option>Broken / Severely Carious (مكسور / نخر متهدم شديد)</option>
-                <option>Retained Root (جذر متبقي تحت مستوى اللثة)</option>
-                <option>Crown-Root Fracture (كسر تاجي جذري ممتد)</option>
-                <option>Severe Attrition / Abrasion (تآكل شديد كاشف للعاج)</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Row 2: Inspection & Percussion -->
-          <tr>
-            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Inspection:</td>
-            <td class="p-1.5 border border-slate-800">
-              <select id="p2-inspection" class="select-clean">
-                <option selected>Gross Caries (نخر سني عميق متقدم)</option>
-                <option>Defective Filling / Restoration (حشوة معيبة مكسورة أو متسربة)</option>
-                <option>Food Impaction / Operculum (انحشار طعام / قلنسوة لثوية ملتهبة)</option>
-                <option>Crown Discoloration (تغير لون التاج إلى الداكن/الرمادي)</option>
-                <option>Pus Discharge / Sinus Tract (ناسور قيحي مفرغ على اللثة)</option>
-                <option>Sound Intact Tooth (السن سليم شكلياً)</option>
-              </select>
-            </td>
-            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Percussion (TTP):</td>
-            <td class="p-1.5 border border-slate-800">
-              <div class="grid grid-cols-2 gap-1 font-latin text-[11px]">
-                <div class="flex items-center gap-1">
-                  <span class="font-bold">Vertical:</span>
-                  <select id="p2-ttp-vert" class="p-0.5 border border-slate-300 rounded text-[10px] font-bold">
-                    <option selected>Negative [-] (سليم)</option>
-                    <option class="text-red-700">Positive [+] (مؤلم)</option>
-                  </select>
-                </div>
-                <div class="flex items-center gap-1">
-                  <span class="font-bold">Horizontal:</span>
-                  <select id="p2-ttp-horiz" class="p-0.5 border border-slate-300 rounded text-[10px] font-bold">
-                    <option selected>Negative [-] (سليم)</option>
-                    <option class="text-red-700">Positive [+] (مؤلم)</option>
-                  </select>
-                </div>
-              </div>
-            </td>
-          </tr>
-
-          <!-- Row 3: Palpation & Mobility Grade -->
-          <tr>
-            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Palpation (Apical):</td>
-            <td class="p-1.5 border border-slate-800">
-              <select id="p2-palpation" class="select-clean">
-                <option selected>Non-tender (غير مؤلم عند جس المنطقة الذروية)</option>
-                <option>Tender on Apical Palpation (ألم عند جس ذروة السن)</option>
-                <option>Bony Expansion / Cortical Plate (توسع وبروز عظمي)</option>
-                <option>Fluctuant Swelling (تموج وخراج قيحي متجمع)</option>
-              </select>
-            </td>
-            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Mobility Grade:</td>
-            <td class="p-1.5 border border-slate-800">
-              <select id="p2-mobility" class="select-clean font-semibold">
-                <option selected>Grade 0: Normal Physiologic (< 0.2 mm)</option>
-                <option>Grade I: Horizontal mobility slightly increased (0.2 - 1 mm)</option>
-                <option>Grade II: Horizontal mobility > 1 mm (بدون حركة عمودية)</option>
-                <option class="text-red-700 font-bold">Grade III: Horizontal & Vertical mobility (حركة أفقية وعمودية)</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Row 4: Pulp Vitality & Occlusion -->
-          <tr>
-            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Pulp Vitality:</td>
-            <td class="p-1.5 border border-slate-800">
-              <div class="flex items-center gap-2">
-                <select id="p2-vitality-thermal" class="select-clean">
-                  <option selected>Non-vital / Necrotic (متموت فاقد الحيوية)</option>
-                  <option>Vital / Responsive (حي يستجيب للفحص)</option>
-                  <option>Hypersensitive / Exaggerated (استجابة حادة مفرطة)</option>
+            <!-- Row 1: Target Tooth # & Tooth Condition -->
+            <tr>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800 text-red-700">Target Tooth #:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800">
+                <select id="p2-target-tooth" class="select-clean font-bold text-[#0f2d59]">
+                  <optgroup label="Lower Right Quadrant (الفك السفلي يمين)">
+                    <option value="48">#48 - Lower Right 3rd Molar / Wisdom (ضرس العقل سفلي يمين)</option>
+                    <option value="47">#47 - Lower Right 2nd Molar (الرحى الثانية السفلية يمين)</option>
+                    <option value="46" selected>#46 - Lower Right 1st Molar (الرحى الأولى السفلية يمين)</option>
+                    <option value="45">#45 - Lower Right 2nd Premolar (الضاحك الثاني سفلي يمين)</option>
+                    <option value="44">#44 - Lower Right 1st Premolar (الضاحك الأول سفلي يمين)</option>
+                    <option value="43">#43 - Lower Right Canine (الناب سفلي يمين)</option>
+                    <option value="42">#42 - Lower Right Lateral Incisor (الرباعية السفلية يمين)</option>
+                    <option value="41">#41 - Lower Right Central Incisor (الثنية السفلية يمين)</option>
+                  </optgroup>
+                  <optgroup label="Lower Left Quadrant (الفك السفلي يسار)">
+                    <option value="31">#31 - Lower Left Central Incisor (الثنية السفلية يسار)</option>
+                    <option value="32">#32 - Lower Left Lateral Incisor (الرباعية السفلية يسار)</option>
+                    <option value="33">#33 - Lower Left Canine (الناب سفلي يسار)</option>
+                    <option value="34">#34 - Lower Left 1st Premolar (الضاحك الأول سفلي يسار)</option>
+                    <option value="35">#35 - Lower Left 2nd Premolar (الضاحك الثاني سفلي يسار)</option>
+                    <option value="36">#36 - Lower Left 1st Molar (الرحى الأولى السفلية يسار)</option>
+                    <option value="37">#37 - Lower Left 2nd Molar (الرحى الثانية السفلية يسار)</option>
+                    <option value="38">#38 - Lower Left 3rd Molar / Wisdom (ضرس العقل سفلي يسار)</option>
+                  </optgroup>
+                  <optgroup label="Upper Right Quadrant (الفك العلوي يمين)">
+                    <option value="18">#18 - Upper Right 3rd Molar / Wisdom (ضرس العقل علوي يمين)</option>
+                    <option value="17">#17 - Upper Right 2nd Molar (الرحى الثانية العلوية يمين)</option>
+                    <option value="16">#16 - Upper Right 1st Molar (الرحى الأولى العلوية يمين)</option>
+                    <option value="15">#15 - Upper Right 2nd Premolar (الضاحك الثاني علوي يمين)</option>
+                    <option value="14">#14 - Upper Right 1st Premolar (الضاحك الأول علوي يمين)</option>
+                    <option value="13">#13 - Upper Right Canine (الناب علوي يمين)</option>
+                    <option value="12">#12 - Upper Right Lateral Incisor (الرباعية العلوية يمين)</option>
+                    <option value="11">#11 - Upper Right Central Incisor (الثنية العلوية يمين)</option>
+                  </optgroup>
+                  <optgroup label="Upper Left Quadrant (الفك العلوي يسار)">
+                    <option value="21">#21 - Upper Left Central Incisor (الثنية العلوية يسار)</option>
+                    <option value="22">#22 - Upper Left Lateral Incisor (الرباعية العلوية يسار)</option>
+                    <option value="23">#23 - Upper Left Canine (الناب علوي يسار)</option>
+                    <option value="24">#24 - Upper Left 1st Premolar (الضاحك الأول علوي يسار)</option>
+                    <option value="25">#25 - Upper Left 2nd Premolar (الضاحك الثاني علوي يسار)</option>
+                    <option value="26">#26 - Upper Left 1st Molar (الرحى الأولى العلوية يسار)</option>
+                    <option value="27">#27 - Upper Left 2nd Molar (الرحى الثانية العلوية يسار)</option>
+                    <option value="28">#28 - Upper Left 3rd Molar / Wisdom (ضرس العقل علوي يسار)</option>
+                  </optgroup>
                 </select>
-                <input type="text" id="p2-vitality-ept" class="w-24 p-1 border border-slate-300 rounded text-[10px] text-center font-latin" placeholder="EPT: 64">
-              </div>
-            </td>
-            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Occlusion / Arch:</td>
-            <td class="p-1.5 border border-slate-800">
-              <select id="p2-occlusion" class="select-clean">
-                <option selected>Normal Overlap (إطباق وتراكب طبيعي Class I)</option>
-                <option>Open Bite (عضة مفتوحة موضعية)</option>
-                <option>Crossbite (عضة متصالبة دهليزية/لسانية)</option>
-                <option>Over-erupted / Supraxclusion (سن متطاول فاقد للسن المقابل)</option>
-                <option>Crowding / Malaligned (تزاحم وسوء رصف سني)</option>
-              </select>
-            </td>
-          </tr>
+              </td>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Tooth Condition:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800">
+                <select id="p2-tooth-condition" class="select-clean font-semibold">
+                  <option value="Crown Intact" selected>Crown Intact (التاج سليم ومكتمل)</option>
+                  <option value="Carious / Broken Crown">Carious / Broken Crown (مكسور / نخر متهدم)</option>
+                  <option value="Retained Root">Retained Root (جذر متبقي تحت مستوى اللثة)</option>
+                  <option value="Impacted">Impacted (سن مدفون / منطمر عظمياً أو لثوياً)</option>
+                </select>
+              </td>
+            </tr>
 
-          <!-- Row 5: Radiographic Finding -->
-          <tr>
-            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-sky-900">Radiographic Finding:</td>
-            <td colspan="3" class="p-1.5 border border-slate-800 space-y-1.5">
-              <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
-                <div class="sm:col-span-4 flex items-center gap-1">
-                  <span class="text-[10px] font-bold text-slate-700 whitespace-nowrap">Image Type:</span>
-                  <select id="p2-rad-type" class="select-clean font-bold">
-                    <option selected>IOPA (أشعة ذروية رقمية داخل الفم)</option>
-                    <option>Bitewing (أشعة بينية تاجية)</option>
-                    <option>OPG (بانوراما فكية كاملة)</option>
-                    <option>CBCT (أشعة مقطعية مخروطية ثلاثية الأبعاد)</option>
+            <!-- Row 2: Inspection & Percussion -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Inspection:</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-inspection" class="select-clean font-semibold">
+                  <option value="Gross Caries" selected>Gross Caries (نخر سني عميق متقدم)</option>
+                  <option value="Defective Restoration">Defective Restoration (حشوة معيبة أو متسربة)</option>
+                  <option value="Food Impaction">Food Impaction (انحشار طعام مزمن)</option>
+                  <option value="Operculum / Pericoronitis">Operculum / Pericoronitis (قلنسوة لثوية ملتهبة حول التاج)</option>
+                  <option value="Crown Fracture">Crown Fracture (كسر في التاج السني)</option>
+                </select>
+              </td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Percussion (TTP):</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-ttp" class="select-clean font-semibold">
+                  <option value="Negative" selected>Negative (سلبي [-] - لا يوجد ألم بالقرع)</option>
+                  <option value="Vertical Positive">Vertical Positive (إيجابي عمودي [Vert +] - ألم ذروي)</option>
+                  <option value="Horizontal Positive">Horizontal Positive (إيجابي أفقي [Horiz +] - ألم رباطي/لثوي)</option>
+                  <option value="Both Positive">Both Positive (إيجابي عمودي وأفقي [Both +] - إصابة مختلطة)</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 3: Palpation & Mobility Grade -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Palpation (Apical):</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-palpation" class="select-clean font-semibold">
+                  <option value="Non-tender" selected>Non-tender (غير مؤلم عند الجس الذروي)</option>
+                  <option value="Tender">Tender (ألم عند جس ذروة السن)</option>
+                  <option value="Bony Expansion">Bony Expansion (توسع وبروز في الصفيحة العظمية)</option>
+                  <option value="Fluctuant Swelling">Fluctuant Swelling (تموج وتورم قيحي متجمع)</option>
+                </select>
+              </td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Mobility Grade:</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-mobility" class="select-clean font-semibold">
+                  <option value="Grade 0" selected>Grade 0 (حركة فسيولوجية طبيعية < 0.2 مم)</option>
+                  <option value="Grade I">Grade I (حركة أفقية طفيفة 0.2 - 1 مم)</option>
+                  <option value="Grade II">Grade II (حركة أفقية ملحوظة > 1 مم)</option>
+                  <option value="Grade III" class="text-red-700 font-bold">Grade III (حركة أفقية وعمودية شديدة)</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 4: Pulp Vitality & Occlusion -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Pulp Vitality:</td>
+              <td class="p-1.5 border border-slate-800">
+                <div class="flex items-center gap-1.5">
+                  <select id="p2-vitality" class="select-clean font-semibold">
+                    <option value="Thermal: Vital">Thermal: Vital (حي يستجيب طبيعياً)</option>
+                    <option value="Hypersensitive">Hypersensitive (تحسس مفرط حاد ومستمر)</option>
+                    <option value="Non-vital / Necrotic" selected>Non-vital / Necrotic (متموت فاقد الحيوية)</option>
+                    <option value="EPT: Responded">EPT: Responded (استجابة إيجابية بالفحص الكهربائي)</option>
+                    <option value="EPT: No Response">EPT: No Response (لا استجابة بالفحص الكهربائي)</option>
                   </select>
+                  <input type="text" id="p2-vitality-val" class="w-16 p-1 border border-slate-300 rounded text-[10px] text-center font-latin" placeholder="64" title="قراءة الفحص الكهربائي الاختيارية">
                 </div>
-                <div class="sm:col-span-8 flex items-center gap-1">
-                  <span class="text-[10px] font-bold text-slate-700 whitespace-nowrap">Findings:</span>
-                  <select id="p2-rad-findings" class="select-clean font-semibold text-sky-950">
-                    <option selected>Periapical Radiolucency (شفافية شعاعية ذروية متسعة - آفة ذروية)</option>
-                    <option>Normal PDL & Intact Lamina Dura (مسافة رباط سليم وصفيحة عظمية طبيعية)</option>
-                    <option>Root Curvature / Severe Dilaceration (التواء وانحناء جذري حاد - صعوبة قلع)</option>
-                    <option>Proximity to ID Canal (ملاصقة لقناة العصب السنخي السفلي)</option>
-                    <option>Proximity to Maxillary Sinus / Pneumatization (ملاصقة لجيب الفك العلوي)</option>
-                    <option>Hypercementosis / Bulbous Root (فرط تكون ملاط تاجي bulbous)</option>
-                    <option>External / Internal Root Resorption (امتصاص جذري داخلي أو خارجي)</option>
-                  </select>
+              </td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Occlusion / Arch:</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-occlusion" class="select-clean font-semibold">
+                  <option value="Normal Overlap" selected>Normal Overlap (إطباق وتراكب طبيعي Class I)</option>
+                  <option value="Open bite">Open bite (عضة مفتوحة موضعية)</option>
+                  <option value="Crossbite">Crossbite (عضة متصالبة دهليزية/لسانية)</option>
+                  <option value="Trauma from occlusion">Trauma from occlusion (رض إطباقي من الإطباق الزائد)</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 5: Radiographic Finding -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-sky-900">Radiographic Finding:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800 space-y-1.5">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                  <div class="sm:col-span-4 flex items-center gap-1">
+                    <span class="text-[10px] font-bold text-slate-700 whitespace-nowrap">Image Type:</span>
+                    <select id="p2-rad-type" class="select-clean font-bold">
+                      <option value="IOPA" selected>IOPA (أشعة ذروية داخل الفم)</option>
+                      <option value="OPG">OPG (بانوراما فكية كاملة)</option>
+                      <option value="Bitewing">Bitewing (أشعة بينية تاجية)</option>
+                      <option value="CBCT">CBCT (أشعة مقطعية ثلاثية الأبعاد)</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-8 flex items-center gap-1">
+                    <span class="text-[10px] font-bold text-slate-700 whitespace-nowrap">Findings:</span>
+                    <select id="p2-rad-findings" class="select-clean font-semibold text-sky-950">
+                      <option value="Normal">Normal (مسافة رباط وصفيحة طبيعية)</option>
+                      <option value="Periapical Radiolucency" selected>Periapical Radiolucency (شفافية ذروية شعاعية)</option>
+                      <option value="Dilaceration">Dilaceration (انحناء وانعطاف حاد بالجذر)</option>
+                      <option value="Proximity to ID Canal">Proximity to ID Canal (ملاصقة لقناة العصب السنخي السفلي)</option>
+                      <option value="Maxillary Sinus proximity">Maxillary Sinus proximity (ملاصقة لجيب الفك العلوي)</option>
+                      <option value="Ankylosis">Ankylosis (التصاق سني عظمي وفقدان الرباط)</option>
+                    </select>
+                  </div>
                 </div>
-              </div>
-            </td>
-          </tr>
+              </td>
+            </tr>
         </tbody>
       </table>
     </div>
@@ -601,26 +760,42 @@
           <!-- Row 2: Treatment Plan -->
           <tr>
             <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-emerald-800">Treatment Plan:</td>
-            <td colspan="3" class="p-1.5 border border-slate-800">
-              <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 text-xs">
+            <td colspan="3" class="p-1.5 border border-slate-800 space-y-1.5">
+              <div class="flex items-center gap-2">
+                <select id="p2-treatment-plan" class="select-clean font-bold text-emerald-950" onchange="
+                  var val = this.value;
+                  if(document.getElementById('p2-tp-simple')) document.getElementById('p2-tp-simple').checked = (val==='Simple Extraction');
+                  if(document.getElementById('p2-tp-surgical')) document.getElementById('p2-tp-surgical').checked = (val==='Surgical Extraction');
+                  if(document.getElementById('p2-tp-drainage')) document.getElementById('p2-tp-drainage').checked = (val==='Incision & Drainage');
+                  if(document.getElementById('p2-tp-operculectomy')) document.getElementById('p2-tp-operculectomy').checked = (val==='Operculectomy');
+                  if(document.getElementById('p2-tp-referral')) document.getElementById('p2-tp-referral').checked = (val==='Referral / Endodontics');
+                ">
+                  <option value="Simple Extraction" selected>Simple Extraction (قلع سن بسيط بالكلابات والروافع)</option>
+                  <option value="Surgical Extraction">Surgical Extraction (قلع جراحي مع شريحة وفصل جذور)</option>
+                  <option value="Incision & Drainage">Incision & Drainage (شق وتصريف جراحي للخراج)</option>
+                  <option value="Operculectomy">Operculectomy (استئصال القلنسوة اللثوية فوق التاج)</option>
+                  <option value="Referral / Endodontics">Referral / Endodontics (تحويل لمعالجة لبية تحفظية)</option>
+                </select>
+              </div>
+              <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-[11px] pt-1 border-t border-slate-200">
                 <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
-                  <input type="checkbox" id="p2-tp-simple" class="rounded text-sky-600 w-4 h-4" checked>
+                  <input type="checkbox" id="p2-tp-simple" class="rounded text-sky-600 w-3.5 h-3.5" checked>
                   <span>Simple Extraction</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
-                  <input type="checkbox" id="p2-tp-surgical" class="rounded text-sky-600 w-4 h-4">
+                  <input type="checkbox" id="p2-tp-surgical" class="rounded text-sky-600 w-3.5 h-3.5">
                   <span>Surgical Extraction</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
-                  <input type="checkbox" id="p2-tp-drainage" class="rounded text-sky-600 w-4 h-4">
+                  <input type="checkbox" id="p2-tp-drainage" class="rounded text-sky-600 w-3.5 h-3.5">
                   <span>Incision & Drainage</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
-                  <input type="checkbox" id="p2-tp-operculectomy" class="rounded text-sky-600 w-4 h-4">
+                  <input type="checkbox" id="p2-tp-operculectomy" class="rounded text-sky-600 w-3.5 h-3.5">
                   <span>Operculectomy</span>
                 </label>
                 <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
-                  <input type="checkbox" id="p2-tp-referral" class="rounded text-sky-600 w-4 h-4">
+                  <input type="checkbox" id="p2-tp-referral" class="rounded text-sky-600 w-3.5 h-3.5">
                   <span>Referral / Endodontics</span>
                 </label>
               </div>
@@ -635,22 +810,22 @@
                 <div class="flex items-center gap-1.5">
                   <span class="font-bold text-slate-700 whitespace-nowrap">Technique:</span>
                   <select id="p2-la-tech" class="select-clean font-semibold">
-                    <option selected>Inferior Dental (ID) Block + Long Buccal (حصار العصب الفكي السفلي والدهليزي)</option>
-                    <option>Infiltration - Supraperiosteal (حقن ارتشاحي فوق السمحاق)</option>
-                    <option>Mental Nerve Block + Incisive (حصار العصب الذقني والقاطعي)</option>
-                    <option>Greater Palatine Nerve Block (حصار العصب الحنكي الكبير)</option>
-                    <option>Nasopalatine Nerve Block (حصار العصب الحنفي الأنفي)</option>
-                    <option>Intraligamentary / Intraseptal (حقن ضمن الرباط السني أو الحاجز العظمي)</option>
+                    <option value="Inferior Dental (ID) Block + Long Buccal" selected>Inferior Dental (ID) Block + Long Buccal (حصار العصب الفكي السفلي والشدقي)</option>
+                    <option value="Infiltration - Supraperiosteal">Infiltration - Supraperiosteal (حقن ارتشاحي فوق السمحاق)</option>
+                    <option value="Mental Nerve Block + Incisive">Mental Nerve Block + Incisive (حصار العصب الذقني والقاطعي)</option>
+                    <option value="Greater Palatine Nerve Block">Greater Palatine Nerve Block (حصار العصب الحنكي الكبير)</option>
+                    <option value="Nasopalatine Nerve Block">Nasopalatine Nerve Block (حصار العصب الحنفي الأنفي)</option>
+                    <option value="Intraligamentary">Intraligamentary (حقن ضمن الرباط السني)</option>
                   </select>
                 </div>
                 <div class="flex items-center gap-1.5">
-                  <span class="font-bold text-slate-700 whitespace-nowrap">Agent & Dose:</span>
+                  <span class="font-bold text-slate-700 whitespace-nowrap">Agent & Vasoconstrictor:</span>
                   <select id="p2-la-agent" class="select-clean font-semibold">
-                    <option selected>Lidocaine 2% with 1:80,000 Adrenaline (1 Cartridge - 1.8ml)</option>
-                    <option>Lidocaine 2% with 1:80,000 Adrenaline (2 Cartridges - 3.6ml)</option>
-                    <option>Articaine 4% with 1:100,000 Adrenaline (Septanest 1.7ml)</option>
-                    <option>Mepivacaine 3% Plain (بدون مقبض وعائي - لمرضى القلب والضغط الشديد)</option>
-                    <option>Bupivacaine 0.5% with Adrenaline (تخدير طويل الأمد للعمليات الجراحية)</option>
+                    <option value="Lidocaine 2% with 1:80,000 Adrenaline (1 Cartridge - 1.8ml)" selected>Lidocaine 2% with 1:80,000 Adrenaline (1 Cartridge - 1.8ml)</option>
+                    <option value="Lidocaine 2% with 1:80,000 Adrenaline (2 Cartridges - 3.6ml)">Lidocaine 2% with 1:80,000 Adrenaline (2 Cartridges - 3.6ml)</option>
+                    <option value="Articaine 4% with 1:100,000 Adrenaline (Septanest 1.7ml)">Articaine 4% with 1:100,000 Adrenaline (Septanest 1.7ml)</option>
+                    <option value="Mepivacaine 3% Plain (بدون مقبض وعائي)">Mepivacaine 3% Plain (بدون مقبض وعائي - لمرضى القلب والضغط)</option>
+                    <option value="Bupivacaine 0.5% with Adrenaline">Bupivacaine 0.5% with Adrenaline (تخدير ممتد المفعول)</option>
                   </select>
                 </div>
               </div>
@@ -662,21 +837,21 @@
             <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Medications / Post-Op:</td>
             <td colspan="3" class="p-1.5 border border-slate-800">
               <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs">
-                <label class="flex items-center gap-1.5 p-1 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
                   <input type="checkbox" id="p2-med-analgesics" class="rounded text-sky-600" checked>
                   <span class="text-[11px] font-semibold">Analgesics (Ibuprofen / Paracetamol)</span>
                 </label>
-                <label class="flex items-center gap-1.5 p-1 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
                   <input type="checkbox" id="p2-med-antibiotics" class="rounded text-sky-600">
                   <span class="text-[11px] font-semibold">Antibiotics (Amoxicillin / Clindamycin)</span>
                 </label>
-                <label class="flex items-center gap-1.5 p-1 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
                   <input type="checkbox" id="p2-med-mouthwash" class="rounded text-sky-600" checked>
                   <span class="text-[11px] font-semibold">Antiseptic Mouthwash (CHX 0.12%)</span>
                 </label>
-                <label class="flex items-center gap-1.5 p-1 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
                   <input type="checkbox" id="p2-med-gauze" class="rounded text-sky-600" checked>
-                  <span class="text-[11px] font-semibold">Hemostatic Gauze & Verbal Instructions</span>
+                  <span class="text-[11px] font-semibold">Hemostatic Gauze & Strict Post-Op Instructions</span>
                 </label>
               </div>
             </td>
@@ -751,6 +926,131 @@
       window.lucide.createIcons();
     }
 
+    // State for Standalone Page 2 Odontogram
+    const page2State = {
+      activeTooth: '46',
+      toothConditions: {}
+    };
+
+    const toothNames = {
+      '18': 'Upper Right 3rd Molar (18)', '17': 'Upper Right 2nd Molar (17)', '16': 'Upper Right 1st Molar (16)',
+      '15': 'Upper Right 2nd Premolar (15)', '14': 'Upper Right 1st Premolar (14)', '13': 'Upper Right Canine (13)',
+      '12': 'Upper Right Lateral Incisor (12)', '11': 'Upper Right Central Incisor (11)',
+      '21': 'Upper Left Central Incisor (21)', '22': 'Upper Left Lateral Incisor (22)', '23': 'Upper Left Canine (23)',
+      '24': 'Upper Left 1st Premolar (24)', '25': 'Upper Left 2nd Premolar (25)', '26': 'Upper Left 1st Molar (26)',
+      '27': 'Upper Left 2nd Molar (27)', '28': 'Upper Left 3rd Molar (28)',
+      '48': 'Lower Right 3rd Molar (48)', '47': 'Lower Right 2nd Molar (47)', '46': 'Lower Right 1st Molar (46)',
+      '45': 'Lower Right 2nd Premolar (45)', '44': 'Lower Right 1st Premolar (44)', '43': 'Lower Right Canine (43)',
+      '42': 'Lower Right Lateral Incisor (42)', '41': 'Lower Right Central Incisor (41)',
+      '31': 'Lower Left Central Incisor (31)', '32': 'Lower Left Lateral Incisor (32)', '33': 'Lower Left Canine (33)',
+      '34': 'Lower Left 1st Premolar (34)', '35': 'Lower Left 2nd Premolar (35)', '36': 'Lower Left 1st Molar (36)',
+      '37': 'Lower Left 2nd Molar (37)', '38': 'Lower Left 3rd Molar (38)'
+    };
+
+    // Render FDI Odontogram
+    function initOdontogram() {
+      const upperRight = [18, 17, 16, 15, 14, 13, 12, 11];
+      const upperLeft = [21, 22, 23, 24, 25, 26, 27, 28];
+      const lowerRight = [48, 47, 46, 45, 44, 43, 42, 41];
+      const lowerLeft = [31, 32, 33, 34, 35, 36, 37, 38];
+
+      const renderQuad = (container, teeth) => {
+        if (!container) return;
+        container.innerHTML = teeth.map(tNum => `
+          <div class="tooth-box group" data-tooth-num="${tNum}" title="سن #${tNum}">
+            <span class="text-[10px] font-bold text-slate-600 font-latin">${tNum}</span>
+            <svg class="w-6 h-6 tooth-crown" viewBox="0 0 24 24" fill="#ffffff" stroke="#64748b" stroke-width="1.5">
+              <path d="M7 2h10c2 0 3 1.5 3 3.5 0 2-1 4.5-2 9.5-1 4.5-3 7-6 7s-5-2.5-6-7C5 10 4 5.5 4 3.5 4 1.5 5 2 7 2z"/>
+            </svg>
+            <span class="text-[8px] tooth-status-lbl text-slate-400 font-latin">Sound</span>
+          </div>
+        `).join('');
+      };
+
+      renderQuad(document.getElementById('p2-odont-ur'), upperRight);
+      renderQuad(document.getElementById('p2-odont-ul'), upperLeft);
+      renderQuad(document.getElementById('p2-odont-lr'), lowerRight);
+      renderQuad(document.getElementById('p2-odont-ll'), lowerLeft);
+
+      // Tooth click listeners
+      document.querySelectorAll('.tooth-box').forEach(box => {
+        box.addEventListener('click', () => {
+          const tNum = box.dataset.toothNum;
+          selectTooth(tNum);
+        });
+      });
+
+      // Target Tooth dropdown sync
+      const targetSelect = document.getElementById('p2-target-tooth');
+      if (targetSelect) {
+        targetSelect.addEventListener('change', (e) => {
+          selectTooth(e.target.value, false);
+        });
+      }
+
+      // Condition buttons listener
+      document.querySelectorAll('button[data-p2-condition]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyCondition(btn.dataset.p2Condition);
+        });
+      });
+
+      // Default select #46
+      selectTooth('46');
+    }
+
+    function selectTooth(tNum, syncSelect = true) {
+      page2State.activeTooth = tNum;
+      document.querySelectorAll('.tooth-box').forEach(b => {
+        if (b.dataset.toothNum === tNum) {
+          b.classList.add('selected');
+        } else {
+          b.classList.remove('selected');
+        }
+      });
+
+      const display = document.getElementById('p2-active-tooth-display');
+      if (display) {
+        display.textContent = toothNames[tNum] || `Tooth #${tNum}`;
+      }
+
+      if (syncSelect) {
+        const select = document.getElementById('p2-target-tooth');
+        if (select && select.value !== tNum) {
+          select.value = tNum;
+        }
+      }
+    }
+
+    function applyCondition(condition) {
+      if (!page2State.activeTooth) return;
+      const tNum = page2State.activeTooth;
+      const box = document.querySelector(`.tooth-box[data-tooth-num="${tNum}"]`);
+      if (!box) return;
+
+      const conditionLabels = {
+        'sound': 'Sound',
+        'caries': 'Caries',
+        'filled': 'Filled',
+        'endo': 'Endo',
+        'missing': 'Missing',
+        'crowned': 'Crown'
+      };
+
+      box.setAttribute('data-condition', condition);
+      const lbl = box.querySelector('.tooth-status-lbl');
+      if (lbl) lbl.textContent = conditionLabels[condition] || 'Sound';
+      page2State.toothConditions[tNum] = condition;
+
+      // Sync tooth condition dropdown
+      const condSelect = document.getElementById('p2-tooth-condition');
+      if (condSelect) {
+        if (condition === 'caries') condSelect.value = 'Carious / Broken Crown';
+        else if (condition === 'sound') condSelect.value = 'Crown Intact';
+        else if (condition === 'missing') condSelect.value = 'Retained Root';
+      }
+    }
+
     // Calculate Total Evaluation Score
     function calculateTotalScore() {
       let sum = 0;
@@ -812,18 +1112,19 @@
           number: document.getElementById('p2-target-tooth')?.value || '',
           condition: document.getElementById('p2-tooth-condition')?.value || '',
           inspection: document.getElementById('p2-inspection')?.value || '',
-          ttpVert: document.getElementById('p2-ttp-vert')?.value || '',
-          ttpHoriz: document.getElementById('p2-ttp-horiz')?.value || '',
+          ttp: document.getElementById('p2-ttp')?.value || '',
           palpation: document.getElementById('p2-palpation')?.value || '',
           mobility: document.getElementById('p2-mobility')?.value || '',
-          vitalityThermal: document.getElementById('p2-vitality-thermal')?.value || '',
-          vitalityEpt: document.getElementById('p2-vitality-ept')?.value || '',
+          vitality: document.getElementById('p2-vitality')?.value || '',
+          vitalityVal: document.getElementById('p2-vitality-val')?.value || '',
           occlusion: document.getElementById('p2-occlusion')?.value || '',
           radType: document.getElementById('p2-rad-type')?.value || '',
           radFindings: document.getElementById('p2-rad-findings')?.value || ''
         },
+        diffDiagnosis: document.getElementById('p2-diff-text')?.value || '',
         diagnosis: document.getElementById('p2-diag-text')?.value || '',
         treatmentPlan: {
+          plan: document.getElementById('p2-treatment-plan')?.value || '',
           simple: document.getElementById('p2-tp-simple')?.checked || false,
           surgical: document.getElementById('p2-tp-surgical')?.checked || false,
           drainage: document.getElementById('p2-tp-drainage')?.checked || false,
@@ -882,8 +1183,9 @@
       alert('تم حفظ بيانات الصفحة الثانية (Page 2) بنجاح محلياً! (الدرجة الإجمالية: ' + totalScore + ' / 10)');
     }
 
-    // Auto-load previously saved data
+    // Auto-load previously saved data and init
     window.addEventListener('load', () => {
+      initOdontogram();
       try {
         const saved = JSON.parse(localStorage.getItem('al_qabas_oral_surgery_page2') || '{}');
         if (saved.date && document.getElementById('p2-date')) document.getElementById('p2-date').value = saved.date;

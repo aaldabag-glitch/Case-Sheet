@@ -230,8 +230,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Auto-update differential diagnosis on clinical input changes
     const clinicalInputs = [
-      'p2-tooth-condition', 'p2-inspection', 'p2-ttp-vert', 'p2-ttp-horiz',
-      'p2-palpation', 'p2-mobility', 'p2-vitality-thermal', 'p2-rad-findings'
+      'p2-tooth-condition', 'p2-inspection', 'p2-ttp', 'p2-ttp-vert', 'p2-ttp-horiz',
+      'p2-palpation', 'p2-mobility', 'p2-vitality', 'p2-vitality-thermal', 'p2-rad-findings',
+      'p2-target-tooth', 'p2-rad-type', 'p2-occlusion'
     ];
     clinicalInputs.forEach(id => {
       const el = document.getElementById(id);
@@ -239,6 +240,24 @@ document.addEventListener('DOMContentLoaded', () => {
         el.addEventListener('change', () => suggestDifferentialDiagnosis());
       }
     });
+
+    // Treatment Plan Dropdown Sync with Checkboxes
+    const tpSelect = document.getElementById('p2-treatment-plan');
+    if (tpSelect) {
+      tpSelect.addEventListener('change', () => {
+        const val = tpSelect.value;
+        const simple = document.getElementById('p2-tp-simple');
+        const surgical = document.getElementById('p2-tp-surgical');
+        const drainage = document.getElementById('p2-tp-drainage');
+        const operculectomy = document.getElementById('p2-tp-operculectomy');
+        const referral = document.getElementById('p2-tp-referral');
+        if (simple) simple.checked = (val === 'Simple Extraction');
+        if (surgical) surgical.checked = (val === 'Surgical Extraction');
+        if (drainage) drainage.checked = (val === 'Incision & Drainage');
+        if (operculectomy) operculectomy.checked = (val === 'Operculectomy');
+        if (referral) referral.checked = (val === 'Referral / Endodontics');
+      });
+    }
 
     // Odontogram Condition Picker Listeners (Supports both Al-Qabas and standard views)
     const conditionButtons = document.querySelectorAll('[data-tooth-condition], [data-p2-condition]');
@@ -721,11 +740,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const toothConditionSelect = document.getElementById('p2-tooth-condition');
     if (toothConditionSelect) {
       if (condition === 'caries') {
-        toothConditionSelect.value = 'Broken / Severely Carious (مكسور / نخر متهدم شديد)';
+        toothConditionSelect.value = 'Carious / Broken Crown';
       } else if (condition === 'sound') {
-        toothConditionSelect.value = 'Crown Intact (التاج سليم ومكتمل)';
+        toothConditionSelect.value = 'Crown Intact';
       } else if (condition === 'missing') {
-        toothConditionSelect.value = 'Retained Root (جذر متبقي تحت مستوى اللثة)';
+        toothConditionSelect.value = 'Retained Root';
+      } else if (condition === 'endo') {
+        toothConditionSelect.value = 'Carious / Broken Crown';
       }
       suggestDifferentialDiagnosis();
     }
@@ -738,29 +759,40 @@ document.addEventListener('DOMContentLoaded', () => {
     const tooth = document.getElementById('p2-target-tooth')?.value || '46';
     const condition = document.getElementById('p2-tooth-condition')?.value || '';
     const inspection = document.getElementById('p2-inspection')?.value || '';
-    const ttpVert = document.getElementById('p2-ttp-vert')?.value || 'Neg [-]';
-    const ttpHoriz = document.getElementById('p2-ttp-horiz')?.value || 'Neg [-]';
+    const ttp = document.getElementById('p2-ttp')?.value || '';
+    const ttpVert = document.getElementById('p2-ttp-vert')?.value || '';
+    const ttpHoriz = document.getElementById('p2-ttp-horiz')?.value || '';
     const palpation = document.getElementById('p2-palpation')?.value || '';
     const mobility = document.getElementById('p2-mobility')?.value || '';
-    const vitality = document.getElementById('p2-vitality-thermal')?.value || '';
+    const vitality = document.getElementById('p2-vitality')?.value || document.getElementById('p2-vitality-thermal')?.value || '';
     const rad = document.getElementById('p2-rad-findings')?.value || '';
 
     let diffOptions = [];
     let definitiveDiag = '';
     let rationale = '';
-    let suggestedTreatments = { simple: true, surgical: false, drainage: false, operculectomy: false, referral: false };
+    let suggestedTreatments = { simple: true, surgical: false, drainage: false, operculectomy: false, referral: false, plan: 'Simple Extraction' };
 
     // Clinical Logic Rules
     const isWisdom = ['18', '28', '38', '48'].includes(tooth);
-    const hasOperculum = inspection.includes('Operculum') || inspection.includes('Food Impaction');
-    const isNecrotic = vitality.includes('Necrotic') || vitality.includes('Non-vital');
+    const hasOperculum = inspection.includes('Operculum') || inspection.includes('Food Impaction') || condition.includes('Impacted');
+    const isNecrotic = vitality.includes('Necrotic') || vitality.includes('Non-vital') || vitality.includes('No Response');
     const isHypersensitive = vitality.includes('Hypersensitive');
-    const hasAbscess = palpation.includes('Fluctuant') || palpation.includes('Tender');
+    const hasAbscess = palpation.includes('Fluctuant') || palpation.includes('Tender') || palpation.includes('Swelling');
     const isRetainedRoot = condition.includes('Retained Root');
-    const isFractured = condition.includes('Fracture');
+    const isFractured = condition.includes('Fracture') || inspection.includes('Crown Fracture');
     const isGrade3Mob = mobility.includes('Grade III');
+    const isAnkylosed = rad.includes('Ankylosis');
+    const hasDilaceration = rad.includes('Dilaceration');
 
-    if (isWisdom && (hasOperculum || tooth === '48' || tooth === '38')) {
+    if (isAnkylosed) {
+      diffOptions = [
+        'Ankylosed Tooth with Loss of Periodontal Space vs Severe Hypercementosis',
+        'Failed Surgical Eruption / Bony Impaction with Ankylosis vs Dense Alveolar Sclerosis'
+      ];
+      definitiveDiag = 'Ankylosed Tooth / Failed Eruption';
+      rationale = 'غياب مسافة الرباط السني والتحام الملاط بالعظم السنخي شعاعياً؛ يستدعي قلعاً جراحياً مع تجزئة عظمية وسنية.';
+      suggestedTreatments = { simple: false, surgical: true, drainage: false, operculectomy: false, referral: false, plan: 'Surgical Extraction' };
+    } else if (isWisdom && (hasOperculum || tooth === '48' || tooth === '38')) {
       diffOptions = [
         'Pericoronitis of Partially Erupted 3rd Molar vs Deep Distal Caries of Adjacent 2nd Molar',
         'Acute Pericoronitis with Trismus vs Masticatory Space Infection / Cellulitis',
@@ -768,7 +800,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
       definitiveDiag = 'Pericoronitis of Impacted Mandibular 3rd Molar';
       rationale = `سن عقل سفلي (#${tooth}) مع قلنسوة لثوية ملتهبة (Operculum) وانحشار طعام يسبب ألماً موضعياً وتشنجاً فكياً.`;
-      suggestedTreatments = { simple: false, surgical: true, drainage: false, operculectomy: true, referral: false };
+      suggestedTreatments = { simple: false, surgical: true, drainage: false, operculectomy: true, referral: false, plan: 'Surgical Extraction' };
     } else if (isRetainedRoot) {
       diffOptions = [
         'Retained Root with Chronic Periapical Pathology vs Residual Radicular Cyst',
@@ -777,7 +809,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
       definitiveDiag = 'Retained Root with Chronic Periapical Pathology';
       rationale = 'جذر سني متبقي تحت اللثة مع نخر تاجي متهدم بالكامل وشفافية شعاعية ذروية مزمنة.';
-      suggestedTreatments = { simple: true, surgical: true, drainage: false, operculectomy: false, referral: false };
+      suggestedTreatments = { simple: true, surgical: true, drainage: false, operculectomy: false, referral: false, plan: 'Simple Extraction' };
     } else if (isFractured) {
       diffOptions = [
         'Unrestorable Crown-Root Fracture vs Vertical Root Fracture (VRF)',
@@ -785,7 +817,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
       definitiveDiag = 'Unrestorable Crown-Root Fracture';
       rationale = 'كسر تاجي جذري ممتد عميقاً تحت الحافة السنخية يستحيل عزله أو ترميمه تعويضياً.';
-      suggestedTreatments = { simple: false, surgical: true, drainage: false, operculectomy: false, referral: false };
+      suggestedTreatments = { simple: false, surgical: true, drainage: false, operculectomy: false, referral: false, plan: 'Surgical Extraction' };
     } else if (isGrade3Mob) {
       diffOptions = [
         'Severe Periodontal Breakdown (Grade III Mobility) vs Combined Endo-Perio Lesion',
@@ -793,7 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
       definitiveDiag = 'Severe Periodontal Breakdown (Grade III Mobility)';
       rationale = 'تخلخل سني شديد من الدرجة الثالثة (أفقي وعمودي) مع امتصاص عظمي سنخي متقدم وفقدان الدعم السنخي.';
-      suggestedTreatments = { simple: true, surgical: false, drainage: false, operculectomy: false, referral: false };
+      suggestedTreatments = { simple: true, surgical: false, drainage: false, operculectomy: false, referral: false, plan: 'Simple Extraction' };
     } else if (hasAbscess && isNecrotic) {
       diffOptions = [
         'Acute Dentoalveolar Abscess with Vestibular Cellulitis vs Phoenix Abscess',
@@ -802,7 +834,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
       definitiveDiag = 'Acute Dentoalveolar Abscess';
       rationale = 'تموت اللب السني مع تورم دهليزي قيحي متموج وألم شديد عند جس الذروة مع إيجابية الفحص الارتجاجي.';
-      suggestedTreatments = { simple: true, surgical: false, drainage: true, operculectomy: false, referral: false };
+      suggestedTreatments = { simple: true, surgical: false, drainage: true, operculectomy: false, referral: false, plan: 'Incision & Drainage' };
     } else if (isHypersensitive) {
       diffOptions = [
         'Irreversible Pulpitis with Partial Necrosis vs Symptomatic Reversible Pulpitis',
@@ -810,7 +842,7 @@ document.addEventListener('DOMContentLoaded', () => {
       ];
       definitiveDiag = 'Irreversible Pulpitis with Partial Necrosis';
       rationale = 'استجابة حرارية حادة وممتدة بعد زوال المحفز ناتجة عن نخر عميق ممتد للحجرة اللبية.';
-      suggestedTreatments = { simple: false, surgical: false, drainage: false, operculectomy: false, referral: true };
+      suggestedTreatments = { simple: false, surgical: false, drainage: false, operculectomy: false, referral: true, plan: 'Referral / Endodontics' };
     } else {
       diffOptions = [
         'Chronic Apical Periodontitis with Periapical Granuloma vs Periapical Radicular Cyst',
@@ -818,8 +850,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'Chronic Dentoalveolar Abscess with Draining Sinus vs Cementoma (Early Osteolytic Stage)'
       ];
       definitiveDiag = 'Chronic Apical Periodontitis with Periapical Granuloma';
-      rationale = 'لب سني متموت تماماً مع شفافية شعاعية ذروية مستديرة وإيجابية الطرق العمودي [Pos +] بدون تورم حاد.';
-      suggestedTreatments = { simple: true, surgical: false, drainage: false, operculectomy: false, referral: false };
+      rationale = 'لب سني متموت تماماً مع شفافية شعاعية ذروية مستديرة وإيجابية الطرق السني بدون تورم حاد.';
+      suggestedTreatments = { simple: true, surgical: false, drainage: false, operculectomy: false, referral: false, plan: 'Simple Extraction' };
     }
 
     // Populate Differential Diagnosis Dropdown and Text
@@ -858,7 +890,11 @@ document.addEventListener('DOMContentLoaded', () => {
       diagText.value = definitiveDiag;
     }
 
-    // Auto-check suggested treatments
+    // Auto-update Treatment Plan Dropdown & Checkboxes
+    const tpDropdown = document.getElementById('p2-treatment-plan');
+    if (tpDropdown && suggestedTreatments.plan) {
+      tpDropdown.value = suggestedTreatments.plan;
+    }
     if (document.getElementById('p2-tp-simple')) document.getElementById('p2-tp-simple').checked = suggestedTreatments.simple;
     if (document.getElementById('p2-tp-surgical')) document.getElementById('p2-tp-surgical').checked = suggestedTreatments.surgical;
     if (document.getElementById('p2-tp-drainage')) document.getElementById('p2-tp-drainage').checked = suggestedTreatments.drainage;
@@ -995,12 +1031,13 @@ document.addEventListener('DOMContentLoaded', () => {
           number: document.getElementById('p2-target-tooth')?.value || '',
           condition: document.getElementById('p2-tooth-condition')?.value || '',
           inspection: document.getElementById('p2-inspection')?.value || '',
+          ttp: document.getElementById('p2-ttp')?.value || '',
           ttpVert: document.getElementById('p2-ttp-vert')?.value || '',
           ttpHoriz: document.getElementById('p2-ttp-horiz')?.value || '',
           palpation: document.getElementById('p2-palpation')?.value || '',
           mobility: document.getElementById('p2-mobility')?.value || '',
-          vitalityThermal: document.getElementById('p2-vitality-thermal')?.value || '',
-          vitalityEpt: document.getElementById('p2-vitality-ept')?.value || '',
+          vitality: document.getElementById('p2-vitality')?.value || document.getElementById('p2-vitality-thermal')?.value || '',
+          vitalityVal: document.getElementById('p2-vitality-val')?.value || document.getElementById('p2-vitality-ept')?.value || '',
           occlusion: document.getElementById('p2-occlusion')?.value || '',
           radType: document.getElementById('p2-rad-type')?.value || '',
           radFindings: document.getElementById('p2-rad-findings')?.value || ''
@@ -1008,6 +1045,7 @@ document.addEventListener('DOMContentLoaded', () => {
         differentialDiagnosis: document.getElementById('p2-diff-text')?.value || '',
         diagnosis: document.getElementById('p2-diag-text')?.value || '',
         treatmentPlan: {
+          plan: document.getElementById('p2-treatment-plan')?.value || 'Simple Extraction',
           simple: document.getElementById('p2-tp-simple')?.checked || false,
           surgical: document.getElementById('p2-tp-surgical')?.checked || false,
           drainage: document.getElementById('p2-tp-drainage')?.checked || false,
