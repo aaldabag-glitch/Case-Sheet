@@ -32,15 +32,15 @@ const DENTAL_DEPARTMENTS = [
       {
         id: "perio-surg-02",
         code: "PERIO-SURG-02",
-        titleAr: "شعبة أمراض وجراحة اللثة",
-        titleEn: "Periodontics & Gum Surgery",
-        stageAr: "المرحلة الخامسة",
-        stageEn: "5th Year BDS",
-        requirement: "6 حالات تقليح وجراحة لثوية",
+        titleAr: "شعبة أمراض وجراحة اللثة (التقليح والوقاية - صف رابع)",
+        titleEn: "Periodontics & Preventive Scaling (4th Year BDS)",
+        stageAr: "المرحلة الرابعة والخامسة",
+        stageEn: "4th & 5th Year BDS",
+        requirement: "6 حالات تقليح وتلميع وفحص اللثة (Scaling & Polishing)",
         icon: "shield-alert",
-        keywords: ["لثة", "تقليح", "تلميع", "scaling", "root planing", "gingivitis", "periodontitis", "pocket"],
-        summaryAr: "مخطط الجيوب اللثوية (Periodontal Charting)، قياس مؤشر اللويحة والتكلس، والتسوية الجذرية.",
-        clinicalFocus: ["Gingival Index (GI)", "Probing Depth (PD)", "Clinical Attachment Loss (CAL)", "Furcation & Mobility"]
+        keywords: ["لثة", "تقليح", "تلميع", "scaling", "polishing", "gingivitis", "periodontitis", "pocket", "صف رابع", "رابع"],
+        summaryAr: "استمارة الفحص اللثوي السريري، فحص الترسبات واللويحة (Plaque & Calculus)، التقليح والتلميع وتوجيهات العناية الفموية (OHI) لطلاب المرحلة الرابعة.",
+        clinicalFocus: ["Plaque & Calculus Index", "Gingival Bleeding on Probing (BOP)", "Basic Periodontal Examination (BPE 0-4)", "Ultrasonic Scaling & Prophy Polishing Protocol"]
       },
       {
         id: "impl-03",

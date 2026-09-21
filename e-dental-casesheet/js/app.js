@@ -527,10 +527,20 @@ document.addEventListener('DOMContentLoaded', () => {
       setElemVal('patient-phone', '0770XXXXXXX');
       setElemVal('patient-cc', 'ألم متقطع في الفك السفلي يزداد مع المشروبات الباردة والساخنة');
 
+      // If Periodontics & Scaling (4th Year BDS) selected, open dedicated case sheet
+      if (sheetId === 'perio-surg-02') {
+        const opened = window.open('periodontics-page4.html', '_blank');
+        if (!opened) {
+          window.location.href = 'periodontics-page4.html';
+        }
+        showToast('تم فتح طبلة عيادة أمراض وجراحة اللثة لطلاب المرحلة الرابعة (4th Year BDS) 🌿', 'success');
+        return;
+      }
+
       // Switch view based on sheetId / department
       const alqabasView = document.getElementById('modal-alqabas-view');
       const standardView = document.getElementById('modal-standard-view');
-      if (sheetId === 'omfs-ext-01' || deptId === 'omfs') {
+      if (sheetId === 'omfs-ext-01') {
         if (alqabasView) alqabasView.classList.remove('hidden');
         if (standardView) standardView.classList.add('hidden');
         calculateTotalScore();
@@ -546,7 +556,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderOdontogram();
 
       // Default to Tooth #46 for Al-Qabas Oral Surgery
-      if (sheetId === 'omfs-ext-01' || deptId === 'omfs') {
+      if (sheetId === 'omfs-ext-01') {
         selectOdontogramTooth('46');
         suggestDifferentialDiagnosis();
       }

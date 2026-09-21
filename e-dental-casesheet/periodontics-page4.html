@@ -1,0 +1,1182 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Periodontics & Preventive Dentistry • Case Data Form (4th Year BDS) - Al-Qabas Private College</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cairo & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+    .font-latin {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .sheet-table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .sheet-table th, .sheet-table td {
+      border: 1px solid #1e293b;
+      padding: 4px 6px;
+    }
+    .sheet-header-box {
+      background-color: #0d4a46;
+      color: #ffffff;
+      font-weight: 800;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+    .select-clean {
+      width: 100%;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #0f172a;
+      outline: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .select-clean:focus {
+      border-color: #0d9488;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+    }
+    .select-clean:hover {
+      background-color: #ffffff;
+    }
+    .input-clean {
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      color: #0f172a;
+      outline: none;
+    }
+    .input-clean:focus {
+      border-color: #0d9488;
+      box-shadow: 0 0 0 2px rgba(13, 148, 136, 0.15);
+    }
+
+    /* FDI Interactive Odontogram Styles */
+    .tooth-box {
+      width: 42px;
+      height: 60px;
+      border-radius: 0.5rem;
+      border: 1px solid #cbd5e1;
+      background-color: #ffffff;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 2px;
+      cursor: pointer;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      user-select: none;
+      position: relative;
+    }
+    .tooth-box:hover {
+      transform: translateY(-2px);
+      border-color: #0d9488;
+      box-shadow: 0 4px 12px rgba(13, 148, 136, 0.15);
+    }
+    .tooth-box.selected {
+      outline: 2px solid #0d9488;
+      outline-offset: 2px;
+      background-color: #f0fdfa;
+    }
+    .tooth-box[data-condition="calculus"] {
+      border-color: #f59e0b;
+      background-color: #fffbeb;
+    }
+    .tooth-box[data-condition="calculus"] .tooth-crown {
+      fill: #fde68a;
+      stroke: #d97706;
+    }
+    .tooth-box[data-condition="bop"] {
+      border-color: #ef4444;
+      background-color: #fef2f2;
+    }
+    .tooth-box[data-condition="bop"] .tooth-crown {
+      fill: #fca5a5;
+      stroke: #dc2626;
+    }
+    .tooth-box[data-condition="pocket"] {
+      border-color: #8b5cf6;
+      background-color: #f5f3ff;
+    }
+    .tooth-box[data-condition="pocket"] .tooth-crown {
+      fill: #ddd6fe;
+      stroke: #7c3aed;
+    }
+    .tooth-box[data-condition="missing"] {
+      border-color: #94a3b8;
+      background-color: #f1f5f9;
+      opacity: 0.45;
+      text-decoration: line-through;
+    }
+    .tooth-box[data-condition="sound"] {
+      border-color: #10b981;
+      background-color: #ecfdf5;
+    }
+    .tooth-box[data-condition="sound"] .tooth-crown {
+      fill: #a7f3d0;
+      stroke: #059669;
+    }
+
+    /* Print Formatting */
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-container {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .select-clean {
+        border: none !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background: transparent !important;
+        font-size: 0.75rem !important;
+        padding: 0 !important;
+      }
+      .input-clean {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .sheet-table th, .sheet-table td {
+        border-color: #000000 !important;
+      }
+      .sheet-header-box {
+        background-color: #0d4a46 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-6 flex flex-col items-center">
+
+  <!-- Top Action Bar (Navigation / Save / Print) -->
+  <div class="no-print max-w-[960px] w-full mb-4 flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200">
+    <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+      <a href="index.html" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+        <span>المنصة الرئيسية (Portal)</span>
+      </a>
+      <a href="oral-surgery-page2.html" class="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+        <i data-lucide="scissors" class="w-4 h-4 text-sky-600"></i>
+        <span>استمارة الجراحة (OMFS Page 2)</span>
+      </a>
+      <span class="text-xs text-slate-300">|</span>
+      <span class="text-xs font-bold text-teal-900 bg-teal-50 px-2.5 py-1 rounded-lg border border-teal-200 flex items-center gap-1.5">
+        <span class="w-2 h-2 rounded-full bg-teal-500 animate-pulse"></span>
+        <span>طبلة عيادة اللثة والتقليح • المرحلة الرابعة (4th Year BDS)</span>
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="savePerioData()" class="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
+        <i data-lucide="save" class="w-4 h-4"></i>
+        <span>حفظ الاستمارة (Save Data)</span>
+      </button>
+      <button onclick="window.print()" class="px-4 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all cursor-pointer">
+        <i data-lucide="printer" class="w-4 h-4"></i>
+        <span>طباعة A4 (Print Sheet)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Sheet Container (Official A4 Format) -->
+  <div class="page-container max-w-[960px] w-full bg-white border-2 border-slate-800 p-6 sm:p-8 rounded-lg shadow-xl text-slate-900 leading-tight">
+
+    <!-- ========================================================================
+         OFFICIAL HEADER (ترويسة كلية القبس - قسم طب الأسنان)
+         ======================================================================== -->
+    <div class="grid grid-cols-12 items-center border-b-2 border-slate-800 pb-3 mb-3 gap-2">
+      <div class="col-span-4 text-right">
+        <h3 class="text-xs font-black text-slate-900 font-latin uppercase tracking-wider">AL-QABAS PRIVATE COLLEGE</h3>
+        <p class="text-[11px] font-bold text-slate-700 font-latin">Department of Dentistry</p>
+        <p class="text-[10px] font-semibold text-teal-800 font-latin">Periodontics & Preventive Dentistry Branch</p>
+      </div>
+      <div class="col-span-5 text-center">
+        <h2 class="text-xs sm:text-sm font-black text-[#0d4a46] font-latin uppercase">
+          PERIODONTAL EXAMINATION & CLINICAL RECORD
+        </h2>
+        <p class="text-[10px] font-bold text-slate-600 font-latin">Non-Surgical Periodontal Therapy & Prophylaxis</p>
+        <span class="inline-block border-b-2 border-teal-600 px-3 py-0.5 text-xs font-black text-teal-800 font-latin tracking-wider uppercase mt-0.5">
+          CASE DATA FORM (4th YEAR BDS)
+        </span>
+      </div>
+      <div class="col-span-3 text-left font-latin text-[10px] space-y-1">
+        <div>
+          <span class="font-bold">Date:</span>
+          <input type="text" id="perio-date" class="w-24 p-0.5 border-b border-slate-400 bg-transparent text-center font-bold" value="22 / 09 / 2026">
+        </div>
+        <div>
+          <span class="font-bold">Student Group:</span>
+          <input type="text" id="perio-group" class="w-20 p-0.5 border-b border-slate-400 bg-transparent text-center font-bold text-teal-900" value="4th Year - B2">
+        </div>
+        <div>
+          <span class="font-bold">Chair No:</span>
+          <input type="text" id="perio-chair" class="w-14 p-0.5 border-b border-slate-400 bg-transparent text-center font-bold" value="08">
+        </div>
+        <div class="text-slate-500 text-[9px]">Academic Year 2026–2027</div>
+      </div>
+    </div>
+
+    <!-- ========================================================================
+         PATIENT BIOGRAPHY (بيانات المريض الديموغرافية)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>PATIENT BIOGRAPHY & CLINICAL ADMISSION</span>
+        <span class="text-[10px] font-normal text-slate-200">Personal Information</span>
+      </div>
+      <table class="sheet-table text-xs border border-slate-800">
+        <tbody>
+          <tr>
+            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Patient Name:</td>
+            <td class="w-3/6 p-1.5 border border-slate-800">
+              <input type="text" id="perio-pt-name" class="input-clean font-bold text-slate-900" value="حيدر سعدون جاسم الكرخي">
+            </td>
+            <td class="w-1/12 font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Age:</td>
+            <td class="w-1/12 p-1.5 border border-slate-800">
+              <input type="text" id="perio-pt-age" class="input-clean text-center font-bold font-latin" value="28">
+            </td>
+            <td class="w-1/12 font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Gender:</td>
+            <td class="w-2/12 p-1.5 border border-slate-800">
+              <select id="perio-pt-gender" class="select-clean">
+                <option value="Male" selected>Male (ذكر)</option>
+                <option value="Female">Female (أنثى)</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Occupation:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-pt-occupation" class="select-clean">
+                <option selected>موظف قطاع حكومي (Government Employee)</option>
+                <option>أعمال حرة / قطاع خاص (Private Sector)</option>
+                <option>طالب جامعي (Student)</option>
+                <option>ربّة منزل (Housewife)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Phone:</td>
+            <td colspan="3" class="p-1.5 border border-slate-800">
+              <input type="text" id="perio-pt-phone" class="input-clean font-latin font-semibold" value="07812345678">
+            </td>
+          </tr>
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Address:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-pt-address" class="select-clean">
+                <option selected>بغداد - الكرخ (Baghdad - Karkh)</option>
+                <option>بغداد - الرصافة (Baghdad - Rusafa)</option>
+                <option>النجف الأشرف (Najaf)</option>
+                <option>بابل - الحلة (Babylon)</option>
+                <option>محافظة أخرى (Other Governorate)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Smoking:</td>
+            <td colspan="3" class="p-1.5 border border-slate-800">
+              <select id="perio-pt-smoking" class="select-clean font-bold text-amber-900">
+                <option value="Non-smoker" selected>Non-smoker (غير مدخن)</option>
+                <option value="Light Smoker (<10 cig/day)">Light Smoker (< 10 سجائر/يوم)</option>
+                <option value="Heavy Smoker (>10 cig/day)">Heavy Smoker (> 10 سجائر/يوم - عامل خطورة)</option>
+                <option value="Hookah / Shisha">Hookah / Shisha (أركيلة)</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================================
+         1. PATIENT HISTORY (C.C & H.P.I)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>1. PATIENT DENTAL HISTORY & CHIEF COMPLAINT (C.C)</span>
+        <span class="text-[10px] font-normal text-slate-200">Patient Symptoms</span>
+      </div>
+      <div class="border border-slate-800 p-2 bg-slate-50/70 space-y-2 text-xs">
+        <div class="bg-white p-2 rounded border border-slate-300">
+          <div class="flex items-center gap-2 mb-1.5">
+            <span class="font-bold text-[#0d4a46] whitespace-nowrap">Chief Complaint (C.C):</span>
+            <select id="perio-cc-select" class="select-clean font-bold text-teal-950" onchange="document.getElementById('perio-cc-text').value = this.value;">
+              <option value="Bleeding gums during toothbrushing and eating hard food for 3 weeks" selected>نزف اللثة أثناء تفريش الأسنان وتناول الطعام القاسي (Bleeding gums on brushing)</option>
+              <option value="Heavy calculus & tartar accumulation with persistent bad breath (Halitosis)">تراكم تكلسات شديدة ورائحة فم غير مستحبة (Calculus accumulation & Halitosis)</option>
+              <option value="Generalized gum swelling, redness and mild tenderness">تورم واحمرار لثوي مع انزعاج عام في الفم (Gum swelling & tenderness)</option>
+              <option value="Desire for routine dental checkup, scaling and polishing">رغبة المريض في تنظيف وتقليح الأسنان الدوري (Routine Scaling & Polishing)</option>
+            </select>
+          </div>
+          <textarea id="perio-cc-text" rows="1" class="w-full p-1 border border-slate-300 rounded text-xs font-latin">Patient complains of bleeding gums during toothbrushing and eating hard food for 3 weeks with visible yellowish tartar behind lower anterior teeth.</textarea>
+        </div>
+
+        <div class="bg-white p-2 rounded border border-slate-300">
+          <span class="font-bold text-[#0d4a46] block pb-1 border-b border-slate-200 mb-1.5">History of Present Illness (H.P.I) & Oral Hygiene Habits:</span>
+          <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+            <div>
+              <span class="font-bold text-[10px] block text-slate-600">Brushing Frequency:</span>
+              <select id="perio-brush-freq" class="select-clean">
+                <option>Irregular / Rarely (نادراً وغير منتظم)</option>
+                <option selected>Once daily (مرة واحدة يومياً)</option>
+                <option>Twice daily (مرتان يومياً)</option>
+                <option>Never (لا يستخدم الفرشاة)</option>
+              </select>
+            </div>
+            <div>
+              <span class="font-bold text-[10px] block text-slate-600">Toothbrush Type:</span>
+              <select id="perio-brush-type" class="select-clean">
+                <option selected>Medium Bristles (متوسطة الصلابة)</option>
+                <option>Hard Bristles (صلبة - تسبب انحسار لثوي)</option>
+                <option>Soft Bristles (ناعمة موصى بها)</option>
+                <option>Powered / Electric (كهربائية)</option>
+              </select>
+            </div>
+            <div>
+              <span class="font-bold text-[10px] block text-slate-600">Dental Floss Use:</span>
+              <select id="perio-floss-use" class="select-clean">
+                <option selected>No / Never (لا يستخدم خيط الأسنان)</option>
+                <option>Occasional (أحياناً عند انحشار الطعام)</option>
+                <option>Regular daily (يومياً بانتظام)</option>
+              </select>
+            </div>
+            <div>
+              <span class="font-bold text-[10px] block text-slate-600">Last Dental Visit:</span>
+              <select id="perio-last-visit" class="select-clean">
+                <option selected>> 1 Year ago (منذ أكثر من سنة)</option>
+                <option>6 - 12 Months (منذ 6-12 شهراً)</option>
+                <option>< 6 Months (خلال الأشهر الأخيرة)</option>
+                <option>First dental visit (الزيارة الأولى لطبيب الأسنان)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================
+         2. MEDICAL HISTORY & SYSTEMIC EVALUATION (Periodontal Risk Factors)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>2. MEDICAL HISTORY & PERIODONTAL SYSTEMIC RISK FACTORS</span>
+        <span class="text-[10px] font-normal text-slate-200">Pre-treatment Safety</span>
+      </div>
+      <table class="sheet-table text-xs border border-slate-800">
+        <tbody>
+          <tr>
+            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Diabetes Mellitus:</td>
+            <td class="w-2/6 p-1.5 border border-slate-800">
+              <select id="perio-med-diabetes" class="select-clean">
+                <option value="No" selected>No (غير مصاب بسكري الدم)</option>
+                <option value="Controlled (HbA1c < 7%)">Controlled (مسكر منضبط HbA1c < 7%)</option>
+                <option value="Uncontrolled (HbA1c > 8%)">Uncontrolled (غير منضبط - تضخم وفقدان لثوي سريع)</option>
+              </select>
+            </td>
+            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Cardiovascular:</td>
+            <td class="w-2/6 p-1.5 border border-slate-800">
+              <select id="perio-med-cardio" class="select-clean">
+                <option value="Normal" selected>Normal (ضغط دم طبيعي وسليم)</option>
+                <option value="Hypertension Controlled">Hypertension Controlled (ضغط دم مراقب بالأدوية)</option>
+                <option value="Infective Endocarditis Risk">Risk of IE (يحتاج مضاد حيوي وقائي Prophylaxis)</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Bleeding Tendency:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-med-bleeding" class="select-clean">
+                <option value="Normal" selected>Normal (لا يعاني من نزف غير طبيعي)</option>
+                <option value="On Aspirin / Antiplatelet">On Aspirin / Plavix (يتناول أسبرين مسيل للدم)</option>
+                <option value="On Warfarin (INR Monitored)">On Warfarin (يتناول وارفارين مع فحص INR)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Gingival Hyperplasia Drugs:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-med-drugs" class="select-clean">
+                <option value="None" selected>None (لا يتناول أدوية تؤثر على اللثة)</option>
+                <option value="Calcium Channel Blockers (Amlodipine)">Amlodipine / Nifedipine (خافض ضغط يسبب تضخماً)</option>
+                <option value="Phenytoin (Anticonvulsant)">Phenytoin (مضاد صرع يسبب تضخماً لثوياً ليفياً)</option>
+                <option value="Cyclosporine (Immunosuppressant)">Cyclosporine (مثبط مناعة)</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================================
+         3. CLINICAL EXAMINATION: INTRAORAL SOFT TISSUES & GINGIVA
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>3. CLINICAL EXAMINATION: GINGIVA & PERIODONTIUM</span>
+        <span class="text-[10px] font-normal text-slate-200">Visual & Tactile Assessment</span>
+      </div>
+      <table class="sheet-table text-xs border border-slate-800">
+        <tbody>
+          <!-- Row 1: Color & Contour -->
+          <tr>
+            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Gingival Color:</td>
+            <td class="w-2/6 p-1.5 border border-slate-800">
+              <select id="perio-color" class="select-clean font-semibold">
+                <option value="Coral Pink">Coral Pink (وردي مرجاني طبيعي وسليم)</option>
+                <option value="Erythematous / Bright Red" selected>Erythematous / Bright Red (أحمر قاني ملتهب - التهاب حاد)</option>
+                <option value="Cyanotic / Bluish-Red">Cyanotic / Bluish-Red (أحمر مزرق محتقن - التهاب مزمن)</option>
+                <option value="Pale Pink (Fibrotic)">Pale Pink (وردي شاحب متليف متثخن)</option>
+              </select>
+            </td>
+            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Margin & Papillae:</td>
+            <td class="w-2/6 p-1.5 border border-slate-800">
+              <select id="perio-contour" class="select-clean font-semibold">
+                <option value="Knife-edged & Scalloped">Knife-edged & Scalloped (مستدقة ومسننة طبيعياً)</option>
+                <option value="Rolled Margin & Edematous" selected>Rolled Margin & Edematous (حواف مدورة ووذمة لثوية)</option>
+                <option value="Blunted / Bulbous Papillae">Blunted / Bulbous (حليمات بينية متضخمة ومنتفخة)</option>
+                <option value="Punched-out / Cratered">Punched-out / Cratered (حليمات متآكلة ومثقوبة كالفوهة - ANUG)</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row 2: Consistency & Texture -->
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Consistency:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-consistency" class="select-clean font-semibold">
+                <option value="Firm & Resilient">Firm & Resilient (متماسك ومرن طبيعياً)</option>
+                <option value="Soft & Spongy (Pitting on pressure)" selected>Soft & Spongy (طري إسفنجي ينضغط تحت المسبار)</option>
+                <option value="Hard & Fibrotic">Hard & Fibrotic (صلب ومتليف غير نضحي)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Surface Texture:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-texture" class="select-clean font-semibold">
+                <option value="Stippled (Orange peel)">Stippled (محبب كقشر البرتقال - طبيعي)</option>
+                <option value="Smooth & Glossy / Shiny" selected>Smooth & Glossy / Shiny (أملس لامع ناتج عن الوذمة)</option>
+                <option value="Leathery / Fibrotic">Leathery / Fibrotic (جلدي متثخن غير نضحي)</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row 3: Bleeding on Probing & Attached Gingiva -->
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-red-700">Bleeding on Probing (BOP):</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-bop" class="select-clean font-bold text-red-700">
+                <option value="Negative (No Bleeding)">Negative (سلبي [-] - لا يوجد نزف بالسبر)</option>
+                <option value="Delayed Point Bleeding">Delayed Point Bleeding (نقطة نزف متأخرة خفيفة)</option>
+                <option value="Immediate Line Bleeding" selected>Immediate Line Bleeding (نزف فوري على طول الميزاب [+])</option>
+                <option value="Profuse / Spontaneous Bleeding">Profuse / Spontaneous (نزف غزير تلقائي شديد)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Attached Gingiva Width:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-attached-width" class="select-clean font-semibold">
+                <option value="Adequate (>= 2mm)" selected>Adequate (كافية >= 2 مم)</option>
+                <option value="Narrow / Inadequate (< 1mm)">Narrow / Inadequate (ضيقة < 1 مم)</option>
+                <option value="Mucogingival Involvement">Mucogingival Involvement (امتداد مرضي للمخاطية الحرة)</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================================
+         4. PERIODONTAL INDICES & BASIC EXAMINATION (BPE / CPITN)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>4. PERIODONTAL SCREENING INDICES & BPE SCORE (4th YEAR LEVEL)</span>
+        <span class="text-[10px] font-normal text-slate-200">Objective Measurements</span>
+      </div>
+      <table class="sheet-table text-xs border border-slate-800">
+        <tbody>
+          <!-- Row 1: Plaque & Calculus Indices -->
+          <tr>
+            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800 text-teal-900">Plaque Index (Silness & Löe):</td>
+            <td class="w-2/6 p-1.5 border border-slate-800">
+              <select id="perio-plaque-index" class="select-clean font-semibold">
+                <option value="Score 0 - No plaque">Score 0 - Clean (نظيف - لا توجد لويحة)</option>
+                <option value="Score 1 - Film at margin (detected by probe)">Score 1 - Film at margin (غشاء رقيق يُكتشف بالمسبار)</option>
+                <option value="Score 2 - Moderate visible plaque accumulation" selected>Score 2 - Moderate visible (تراكم معتدل مرئي بالعين)</option>
+                <option value="Score 3 - Heavy abundance in pocket & interdental">Score 3 - Abundance (تراكم لويحة كثيف وممتد)</option>
+              </select>
+            </td>
+            <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800 text-amber-900">Calculus Index:</td>
+            <td class="w-2/6 p-1.5 border border-slate-800">
+              <select id="perio-calculus-index" class="select-clean font-semibold">
+                <option value="Score 0 - No calculus">Score 0 - None (خالٍ من التكلسات)</option>
+                <option value="Score 1 - Supragingival calculus only" selected>Score 1 - Supragingival only (قلح فوق لثوي فقط)</option>
+                <option value="Score 2 - Subgingival flecks or bands">Score 2 - Subgingival flecks (قلح تحت لثوي محدود)</option>
+                <option value="Score 3 - Heavy supra & subgingival calculus">Score 3 - Heavy Supra & Subgingival (تكلسات كثيفة)</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row 2: BPE / CPITN & Mobility -->
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-sky-950">Basic Perio Exam (BPE / CPITN):</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-bpe-score" class="select-clean font-bold text-teal-950">
+                <option value="Code 0: Pocket < 3.5mm, No BOP, No Calculus">Code 0: Pocket < 3.5mm, سليم لا نزف ولا قلح</option>
+                <option value="Code 1: Pocket < 3.5mm, BOP present, No Calculus">Code 1: Pocket < 3.5mm, نزف لثوي فقط بدون قلح</option>
+                <option value="Code 2: Pocket < 3.5mm, Calculus / Retentive factors" selected>Code 2: Pocket < 3.5mm, وجود قلح وتكلسات</option>
+                <option value="Code 3: Shallow Pocket 4.0 - 5.5mm (Black band partially hidden)">Code 3: جيوب لثوية متوسطة 4 - 5.5 مم</option>
+                <option value="Code 4: Deep Pocket >= 6.0mm (Black band completely hidden)">Code 4: جيوب لثوية عميقة >= 6.0 مم</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Tooth Mobility:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-mobility" class="select-clean font-semibold">
+                <option value="Grade 0 - Physiological (< 0.2mm)" selected>Grade 0 - Physiological (حركة طبيعية فسيولوجية)</option>
+                <option value="Grade I - Horizontal <= 1mm">Grade I - Horizontal <= 1mm (حركة أفقية طفيفة)</option>
+                <option value="Grade II - Horizontal > 1mm">Grade II - Horizontal > 1mm (حركة أفقية ملحوظة)</option>
+                <option value="Grade III - Vertical and horizontal">Grade III - Vertical & Horizontal (حركة رأسية وأفقية)</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row 3: Furcation & Gingival Recession -->
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Gingival Recession:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-recession" class="select-clean font-semibold">
+                <option value="None (Normal CEJ Coverage)" selected>None (لا يوجد انحسار لثوي - حواف طبيعية)</option>
+                <option value="Class I: Mild (< 3mm, not reaching MGJ)">Class I: انحسار طفيف < 3 مم</option>
+                <option value="Class II: Moderate (Reaching MGJ, intact papillae)">Class II: انحسار معتدل للخط المخاطي اللثوي</option>
+                <option value="Class III: Interdental bone loss present">Class III: انحسار مصحوب بفقدان عظم بيني</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Furcation Involvement:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select id="perio-furcation" class="select-clean font-semibold">
+                <option value="None (Normal interradicular bone)" selected>None (لا توجد إصابة لمفترق الجذور)</option>
+                <option value="Class I: Incipient (Probe catches depression)">Class I: إصابة مبكرة أولية عند المدخل</option>
+                <option value="Class II: Cul-de-sac (Probe enters partially)">Class II: دخول جزئي في مفترق الجذور</option>
+                <option value="Class III: Through-and-through">Class III: نفوذ المسبار بالكامل من الجهة الأخرى</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================================
+         INTERACTIVE FDI ODONTOGRAM (مخطط الأسنان التفاعلي للمرحلة الرابعة)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>FDI 2-DIGIT ODONTOGRAM & CLINICAL PERIODONTAL STATUS</span>
+        <span class="text-[10px] font-normal text-slate-200">Interactive Tooth Charting</span>
+      </div>
+
+      <div class="border border-slate-800 p-2.5 bg-slate-50/70 space-y-2">
+        <!-- Interactive Toolbar -->
+        <div class="flex flex-wrap items-center justify-between gap-2 p-2 bg-white rounded-lg border border-slate-200">
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-bold text-slate-700">السن المحدد:</span>
+            <span id="perio-active-tooth-display" class="px-2.5 py-0.5 rounded-md text-xs font-bold bg-teal-100 text-teal-900 border border-teal-300 font-latin">
+              Lower Anterior Teeth (#41, #42, #31, #32)
+            </span>
+          </div>
+          
+          <div class="flex items-center gap-1.5 flex-wrap">
+            <span class="text-[11px] font-bold text-slate-500">تعيين الحالة اللثوية:</span>
+            <button type="button" data-perio-condition="calculus" class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-50 hover:bg-amber-100 border border-amber-300 text-amber-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+              <span>تكلسات القلح (Calculus)</span>
+            </button>
+            <button type="button" data-perio-condition="bop" class="px-2 py-0.5 rounded text-[11px] font-bold bg-red-50 hover:bg-red-100 border border-red-300 text-red-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-red-500"></span>
+              <span>نزف سبر (BOP)</span>
+            </button>
+            <button type="button" data-perio-condition="pocket" class="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-50 hover:bg-purple-100 border border-purple-300 text-purple-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-purple-500"></span>
+              <span>جيب لثوي (Pocket)</span>
+            </button>
+            <button type="button" data-perio-condition="sound" class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-50 hover:bg-emerald-100 border border-emerald-300 text-emerald-700 flex items-center gap-1 cursor-pointer">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>سليم (Healthy)</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Odontogram FDI Grids (4 quadrants) -->
+        <div class="space-y-2 overflow-x-auto py-1">
+          <!-- Upper Jaw -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 px-2 font-latin">
+              <span>Upper Right (18 - 11)</span>
+              <span class="text-teal-800 font-extrabold">الفك العلوي (Maxilla)</span>
+              <span>Upper Left (21 - 28)</span>
+            </div>
+            <div class="flex items-center justify-center gap-2 p-2 bg-white rounded-lg border border-slate-200 min-w-[620px]">
+              <div class="flex items-center gap-1" id="perio-odont-ur"></div>
+              <div class="w-0.5 h-10 bg-slate-400 mx-1"></div>
+              <div class="flex items-center gap-1" id="perio-odont-ul"></div>
+            </div>
+          </div>
+
+          <!-- Lower Jaw -->
+          <div class="space-y-1">
+            <div class="flex items-center justify-center gap-2 p-2 bg-white rounded-lg border border-slate-200 min-w-[620px]">
+              <div class="flex items-center gap-1" id="perio-odont-lr"></div>
+              <div class="w-0.5 h-10 bg-slate-400 mx-1"></div>
+              <div class="flex items-center gap-1" id="perio-odont-ll"></div>
+            </div>
+            <div class="flex items-center justify-between text-[10px] font-bold text-slate-500 px-2 font-latin">
+              <span>Lower Right (48 - 41)</span>
+              <span class="text-teal-800 font-extrabold">الفك السفلي (Mandible)</span>
+              <span>Lower Left (31 - 38)</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ========================================================================
+         5. DIAGNOSIS & TREATMENT PLAN (Phase I Non-Surgical Therapy)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>5. CLINICAL DIAGNOSIS & PHASE I TREATMENT PLAN (4th YEAR LEVEL)</span>
+        <span class="text-[10px] font-normal text-slate-200">Management Strategy</span>
+      </div>
+
+      <table class="sheet-table text-xs border border-slate-800">
+        <tbody>
+          <!-- Differential Diagnosis -->
+          <tr>
+            <td class="w-1/5 font-bold bg-amber-50 p-1.5 border border-slate-800 text-amber-900">Differential Diagnosis:</td>
+            <td colspan="3" class="p-1.5 border border-slate-800">
+              <div class="flex flex-col sm:flex-row gap-2">
+                <select id="perio-diff-drop" class="select-clean sm:w-1/2 font-bold text-amber-950" onchange="if(this.value) document.getElementById('perio-diff-text').value = this.value;">
+                  <option value="Generalized Plaque-Induced Gingivitis vs Early Periodontitis Stage I" selected>Generalized Plaque-Induced Gingivitis vs Early Periodontitis Stage I</option>
+                  <option value="Localized Marginal Gingivitis vs Food Impaction Gingival Papillitis">Localized Marginal Gingivitis vs Food Impaction Gingival Papillitis</option>
+                  <option value="Drug-Influenced Gingival Enlargement vs Chronic Hyperplastic Gingivitis">Drug-Influenced Gingival Enlargement vs Chronic Hyperplastic Gingivitis</option>
+                  <option value="Pregnancy-Associated Gingivitis vs Plaque-Induced Gingivitis">Pregnancy-Associated Gingivitis vs Plaque-Induced Gingivitis</option>
+                  <option value="Acute Necrotizing Ulcerative Gingivitis (ANUG) vs Herpetic Gingivostomatitis">Acute Necrotizing Gingivitis (ANUG) vs Herpetic Gingivostomatitis</option>
+                </select>
+                <input type="text" id="perio-diff-text" class="input-clean sm:w-1/2 font-semibold font-latin text-xs" value="Generalized Plaque-Induced Gingivitis vs Early Periodontitis Stage I">
+              </div>
+            </td>
+          </tr>
+
+          <!-- Definitive Diagnosis -->
+          <tr>
+            <td class="w-1/5 font-bold bg-slate-100 p-1.5 border border-slate-800 text-teal-900">Definitive Diagnosis:</td>
+            <td colspan="3" class="p-1.5 border border-slate-800">
+              <div class="flex flex-col sm:flex-row gap-2">
+                <select id="perio-diag-drop" class="select-clean sm:w-1/2 font-bold text-[#0d4a46]" onchange="if(this.value) document.getElementById('perio-diag-text').value = this.value;">
+                  <option value="Generalized Plaque-Induced Gingivitis on an Intact Periodontium" selected>Generalized Plaque-Induced Gingivitis (التهاب لثة شامل مرتبط باللويحة)</option>
+                  <option value="Localized Plaque-Induced Gingivitis (Lower Anterior Sextant)">Localized Plaque-Induced Gingivitis (التهاب لثة موضعي بالقواطع السفلية)</option>
+                  <option value="Stage I Periodontitis, Grade A (Mild Horizontal Bone Loss)">Stage I Periodontitis, Grade A (التهاب نسج داعمة مبكر درجة خفيفة)</option>
+                  <option value="Calculus-Induced Chronic Marginal Gingivitis">Calculus-Induced Chronic Marginal Gingivitis (التهاب لثة حفافي تكلسي مزمن)</option>
+                  <option value="Gingival Papillitis secondary to Interdental Food Impaction">Gingival Papillitis (التهاب حليمي ناتج عن انحشار الطعام البيني)</option>
+                </select>
+                <input type="text" id="perio-diag-text" class="input-clean sm:w-1/2 font-bold font-latin" value="Generalized Plaque-Induced Gingivitis on an Intact Periodontium">
+              </div>
+            </td>
+          </tr>
+
+          <!-- Phase I Treatment Plan (Checklist & Protocol) -->
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-emerald-800">Phase I Treatment Plan:</td>
+            <td colspan="3" class="p-1.5 border border-slate-800 space-y-1.5">
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 font-latin text-[11px]">
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="perio-tp-ultrasonic" class="rounded text-teal-600" checked>
+                  <span class="font-bold text-teal-950">Ultrasonic Scaling (Full Mouth)</span>
+                </label>
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="perio-tp-hand" class="rounded text-teal-600" checked>
+                  <span class="font-bold text-teal-950">Hand Scaling (Sickle & Curettes)</span>
+                </label>
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="perio-tp-polishing" class="rounded text-teal-600" checked>
+                  <span class="font-bold text-teal-950">Prophy Polishing with Fluoride Paste</span>
+                </label>
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="perio-tp-ohi" class="rounded text-teal-600" checked>
+                  <span class="font-bold text-teal-950">Oral Hygiene Instructions (OHI)</span>
+                </label>
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="perio-tp-mouthwash" class="rounded text-teal-600" checked>
+                  <span class="font-bold text-teal-950">Chlorhexidine 0.12% Rinse (10 Days)</span>
+                </label>
+                <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                  <input type="checkbox" id="perio-tp-recall" class="rounded text-teal-600" checked>
+                  <span class="font-bold text-teal-950">2-Week Recall & Re-evaluation</span>
+                </label>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================================
+         6. NOTES & CLINICAL REMARKS (الملاحظات السريرية)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>6. NOTES & CLINICAL REMARKS</span>
+        <span class="text-[10px] font-normal text-slate-200">Observations & Patient Instructions</span>
+      </div>
+      <div class="border border-slate-800 p-2.5 bg-slate-50/70">
+        <textarea id="perio-notes" rows="3" class="w-full p-2 bg-white border border-slate-300 rounded text-xs font-latin leading-relaxed" placeholder="Clinical observations, calculus tenacity, patient sensitivity during scaling, and specific homecare recommendations...">- Complete full-mouth ultrasonic scaling completed thoroughly in both upper and lower arches.
+- Special attention given to lingual surfaces of lower anterior teeth (#43 to #33) and buccal surfaces of upper molars due to heavy salivary calculus deposits.
+- Interdental spaces cleaned and polished smoothly using fine prophylaxis paste and rubber cups; no soft tissue trauma induced.
+- Patient educated on Modified Bass brushing technique (soft brush at 45-degree angle toward gingival margin) and advised to use warm saline rinses.
+- Scheduled for periodontal re-evaluation and plaque scoring after 14 days.</textarea>
+      </div>
+    </div>
+
+    <!-- ========================================================================
+         7. STUDENT EVALUATION & MARKS ALLOCATION (TOTAL = 10 MARKS)
+         ======================================================================== -->
+    <div class="mb-3">
+      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+        <span>7. STUDENT CLINICAL EVALUATION & MARKS ALLOCATION (TOTAL = 10 MARKS)</span>
+        <span class="text-[10px] font-normal text-slate-200">Academic Assessment - 4th Year BDS</span>
+      </div>
+
+      <table class="sheet-table text-xs border border-slate-800 font-latin">
+        <thead>
+          <tr class="bg-slate-200 font-bold">
+            <th class="w-20 text-center p-1.5 border border-slate-800">Max Mark</th>
+            <th class="w-1/3 text-right p-1.5 border border-slate-800">Evaluation Item (Periodontics Clinic)</th>
+            <th class="text-right p-1.5 border border-slate-800">Specific Clinical Details</th>
+            <th class="w-24 text-center p-1.5 border border-slate-800">Gained Mark</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- Item 1: History & Diagnosis -->
+          <tr>
+            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+            <td class="font-bold p-1.5 border border-slate-800">Case Sheet, Indices & Diagnosis</td>
+            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Plaque/Calculus index recording & correct periodontal diagnosis</td>
+            <td class="text-center p-1.5 border border-slate-800">
+              <select id="eval-mark-1" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
+                <option value="2.0" selected>2.0 / 2</option>
+                <option value="1.5">1.5 / 2</option>
+                <option value="1.0">1.0 / 2</option>
+                <option value="0.5">0.5 / 2</option>
+                <option value="0.0">0.0 / 2</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Item 2: Ultrasonic Scaling Efficiency -->
+          <tr>
+            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+            <td class="font-bold p-1.5 border border-slate-800">Ultrasonic Scaling Technique & Thoroughness</td>
+            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Tip adaptation, power/water setting & supragingival calculus removal</td>
+            <td class="text-center p-1.5 border border-slate-800">
+              <select id="eval-mark-2" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
+                <option value="2.0" selected>2.0 / 2</option>
+                <option value="1.5">1.5 / 2</option>
+                <option value="1.0">1.0 / 2</option>
+                <option value="0.5">0.5 / 2</option>
+                <option value="0.0">0.0 / 2</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Item 3: Hand Instrumentation & Polishing -->
+          <tr>
+            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+            <td class="font-bold p-1.5 border border-slate-800">Hand Scaling, Interdental Care & Polishing</td>
+            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Sickle scaler grip, subgingival curettage, paste polishing & floss check</td>
+            <td class="text-center p-1.5 border border-slate-800">
+              <select id="eval-mark-3" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
+                <option value="2.0" selected>2.0 / 2</option>
+                <option value="1.5">1.5 / 2</option>
+                <option value="1.0">1.0 / 2</option>
+                <option value="0.5">0.5 / 2</option>
+                <option value="0.0">0.0 / 2</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Item 4: Sterilization & Aseptic Technique -->
+          <tr>
+            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+            <td class="font-bold p-1.5 border border-slate-800">Sterilization & Infection Control</td>
+            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">PPE, face shield/mask, suction control & aerosol management</td>
+            <td class="text-center p-1.5 border border-slate-800">
+              <select id="eval-mark-4" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
+                <option value="2.0" selected>2.0 / 2</option>
+                <option value="1.5">1.5 / 2</option>
+                <option value="1.0">1.0 / 2</option>
+                <option value="0.5">0.5 / 2</option>
+                <option value="0.0">0.0 / 2</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Item 5: Patient OHI Education -->
+          <tr>
+            <td class="text-center font-bold p-1.5 border border-slate-800">1 Mark</td>
+            <td class="font-bold p-1.5 border border-slate-800">Oral Hygiene Instructions (OHI)</td>
+            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Effective patient motivation, brushing demo & interdental aid instruction</td>
+            <td class="text-center p-1.5 border border-slate-800">
+              <select id="eval-mark-5" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
+                <option value="1.0" selected>1.0 / 1</option>
+                <option value="0.5">0.5 / 1</option>
+                <option value="0.0">0.0 / 1</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Item 6: Operator Ergonomics & Professional Ethics -->
+          <tr>
+            <td class="text-center font-bold p-1.5 border border-slate-800">1 Mark</td>
+            <td class="font-bold p-1.5 border border-slate-800">Operator Position & Professional Ethics</td>
+            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Chair position (clock positions), patient comfort & communication</td>
+            <td class="text-center p-1.5 border border-slate-800">
+              <select id="eval-mark-6" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
+                <option value="1.0" selected>1.0 / 1</option>
+                <option value="0.5">0.5 / 1</option>
+                <option value="0.0">0.0 / 1</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Total Score Row -->
+          <tr class="bg-teal-50 border-t-2 border-slate-800">
+            <td class="text-center font-black text-teal-950 p-2 text-xs">10 Marks</td>
+            <td colspan="2" class="font-black text-teal-950 p-2 text-xs uppercase text-left">
+              TOTAL CLINICAL SCORE / التقييم السريري الإجمالي (4th YEAR BDS):
+            </td>
+            <td class="text-center p-2">
+              <span id="eval-total-display" class="font-black text-teal-700 text-sm bg-white px-2 py-0.5 rounded border border-teal-300">
+                10.0 / 10
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ========================================================================
+         SIGNATURES & INSTITUTIONAL ACCREDITATION FOOTER
+         ======================================================================== -->
+    <div class="border border-slate-800 p-2.5 rounded bg-slate-50/70 mb-2 font-latin text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+        <div>
+          <span class="font-bold">Student Name:</span>
+          <input type="text" id="perio-student-name" class="p-1 border-b border-slate-400 bg-transparent w-3/4 font-semibold text-teal-950" value="طالب المرحلة الرابعة (4th Year BDS Student)">
+        </div>
+        <div>
+          <span class="font-bold">Senior Supervisor:</span>
+          <input type="text" id="perio-supervisor-name" class="p-1 border-b border-slate-400 bg-transparent w-2/3 font-semibold" value="Dr. Abdallah Al-Salihi">
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+        <div>
+          <span class="font-bold">Class / Group:</span>
+          <span class="text-slate-700">4th Year BDS | Group: B2 | Chair: 08</span>
+        </div>
+        <div>
+          <span class="font-bold">Signature & Status:</span>
+          <span class="font-semibold text-emerald-800 bg-emerald-100 px-2.5 py-0.5 rounded border border-emerald-300">
+            CLINICALLY VERIFIED & APPROVED 22/09/2026
+          </span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Official Document Bottom Line -->
+    <div class="pt-2 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-500 font-latin">
+      <span>Al-Qabas Private College - Department of Periodontics & Preventive Dentistry</span>
+      <span class="font-bold text-slate-800">Official 4th Year BDS Clinical Record</span>
+      <span>Accredited Academic Case Sheet</span>
+    </div>
+
+  </div>
+
+  <!-- Supabase JS Client & Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <script>
+    // Initialize Lucide Icons
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+
+    // State for Periodontics Odontogram
+    const perioState = {
+      activeTooth: '41',
+      toothConditions: {}
+    };
+
+    const toothNames = {
+      '18': 'Upper Right 3rd Molar (18)', '17': 'Upper Right 2nd Molar (17)', '16': 'Upper Right 1st Molar (16)',
+      '15': 'Upper Right 2nd Premolar (15)', '14': 'Upper Right 1st Premolar (14)', '13': 'Upper Right Canine (13)',
+      '12': 'Upper Right Lateral Incisor (12)', '11': 'Upper Right Central Incisor (11)',
+      '21': 'Upper Left Central Incisor (21)', '22': 'Upper Left Lateral Incisor (22)', '23': 'Upper Left Canine (23)',
+      '24': 'Upper Left 1st Premolar (24)', '25': 'Upper Left 2nd Premolar (25)', '26': 'Upper Left 1st Molar (26)',
+      '27': 'Upper Left 2nd Molar (27)', '28': 'Upper Left 3rd Molar (28)',
+      '48': 'Lower Right 3rd Molar (48)', '47': 'Lower Right 2nd Molar (47)', '46': 'Lower Right 1st Molar (46)',
+      '45': 'Lower Right 2nd Premolar (45)', '44': 'Lower Right 1st Premolar (44)', '43': 'Lower Right Canine (43)',
+      '42': 'Lower Right Lateral Incisor (42)', '41': 'Lower Right Central Incisor (41)',
+      '31': 'Lower Left Central Incisor (31)', '32': 'Lower Left Lateral Incisor (32)', '33': 'Lower Left Canine (33)',
+      '34': 'Lower Left 1st Premolar (34)', '35': 'Lower Left 2nd Premolar (35)', '36': 'Lower Left 1st Molar (36)',
+      '37': 'Lower Left 2nd Molar (37)', '38': 'Lower Left 3rd Molar (38)'
+    };
+
+    // Render FDI Odontogram for Periodontics
+    function initPerioOdontogram() {
+      const upperRight = [18, 17, 16, 15, 14, 13, 12, 11];
+      const upperLeft = [21, 22, 23, 24, 25, 26, 27, 28];
+      const lowerRight = [48, 47, 46, 45, 44, 43, 42, 41];
+      const lowerLeft = [31, 32, 33, 34, 35, 36, 37, 38];
+
+      const renderQuad = (container, teeth) => {
+        if (!container) return;
+        container.innerHTML = teeth.map(tNum => `
+          <div class="tooth-box group" data-tooth-num="${tNum}" title="سن #${tNum}">
+            <span class="text-[10px] font-bold text-slate-600 font-latin">${tNum}</span>
+            <svg class="w-6 h-6 tooth-crown" viewBox="0 0 24 24" fill="#ffffff" stroke="#64748b" stroke-width="1.5">
+              <path d="M7 2h10c2 0 3 1.5 3 3.5 0 2-1 4.5-2 9.5-1 4.5-3 7-6 7s-5-2.5-6-7C5 10 4 5.5 4 3.5 4 1.5 5 2 7 2z"/>
+            </svg>
+            <span class="text-[8px] tooth-status-lbl text-slate-400 font-latin">Sound</span>
+          </div>
+        `).join('');
+      };
+
+      renderQuad(document.getElementById('perio-odont-ur'), upperRight);
+      renderQuad(document.getElementById('perio-odont-ul'), upperLeft);
+      renderQuad(document.getElementById('perio-odont-lr'), lowerRight);
+      renderQuad(document.getElementById('perio-odont-ll'), lowerLeft);
+
+      // Tooth click listeners
+      document.querySelectorAll('.tooth-box').forEach(box => {
+        box.addEventListener('click', () => {
+          const tNum = box.dataset.toothNum;
+          selectPerioTooth(tNum);
+        });
+      });
+
+      // Condition buttons listener
+      document.querySelectorAll('button[data-perio-condition]').forEach(btn => {
+        btn.addEventListener('click', () => {
+          applyPerioCondition(btn.dataset.perioCondition);
+        });
+      });
+
+      // Default highlight anterior teeth with calculus
+      ['41', '42', '31', '32'].forEach(t => {
+        const b = document.querySelector(`.tooth-box[data-tooth-num="${t}"]`);
+        if (b) {
+          b.setAttribute('data-condition', 'calculus');
+          const lbl = b.querySelector('.tooth-status-lbl');
+          if (lbl) lbl.textContent = 'Calculus';
+          perioState.toothConditions[t] = 'calculus';
+        }
+      });
+
+      selectPerioTooth('41');
+    }
+
+    function selectPerioTooth(tNum) {
+      perioState.activeTooth = tNum;
+      document.querySelectorAll('.tooth-box').forEach(b => {
+        if (b.dataset.toothNum === tNum) {
+          b.classList.add('selected');
+        } else {
+          b.classList.remove('selected');
+        }
+      });
+
+      const display = document.getElementById('perio-active-tooth-display');
+      if (display) {
+        display.textContent = toothNames[tNum] || `Tooth #${tNum}`;
+      }
+    }
+
+    function applyPerioCondition(condition) {
+      if (!perioState.activeTooth) return;
+      const tNum = perioState.activeTooth;
+      const box = document.querySelector(`.tooth-box[data-tooth-num="${tNum}"]`);
+      if (!box) return;
+
+      const conditionLabels = {
+        'sound': 'Sound',
+        'calculus': 'Calculus',
+        'bop': 'BOP',
+        'pocket': 'Pocket'
+      };
+
+      box.setAttribute('data-condition', condition);
+      const lbl = box.querySelector('.tooth-status-lbl');
+      if (lbl) lbl.textContent = conditionLabels[condition] || 'Sound';
+      perioState.toothConditions[tNum] = condition;
+    }
+
+    // Calculate Total Evaluation Score for 4th Year BDS
+    function calculatePerioScore() {
+      let sum = 0;
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById(`eval-mark-${i}`);
+        if (el) sum += parseFloat(el.value || '0');
+      }
+      const display = document.getElementById('eval-total-display');
+      if (display) {
+        display.textContent = `${sum.toFixed(1)} / 10`;
+      }
+      return sum;
+    }
+
+    // Save 4th Year Periodontics Case Data to LocalStorage & Supabase
+    async function savePerioData() {
+      const totalScore = calculatePerioScore();
+      const perioData = {
+        id: 'CS-AQ-PERIO4-01',
+        sheetId: 'perio-surg-02',
+        deptId: 'omfs',
+        stage: '4th Year BDS',
+        date: document.getElementById('perio-date')?.value || '',
+        studentGroup: document.getElementById('perio-group')?.value || '',
+        chairNo: document.getElementById('perio-chair')?.value || '',
+        patient: {
+          name: document.getElementById('perio-pt-name')?.value || '',
+          age: document.getElementById('perio-pt-age')?.value || '',
+          gender: document.getElementById('perio-pt-gender')?.value || '',
+          occupation: document.getElementById('perio-pt-occupation')?.value || '',
+          phone: document.getElementById('perio-pt-phone')?.value || '',
+          address: document.getElementById('perio-pt-address')?.value || '',
+          smoking: document.getElementById('perio-pt-smoking')?.value || ''
+        },
+        chiefComplaint: document.getElementById('perio-cc-text')?.value || '',
+        habits: {
+          brushFreq: document.getElementById('perio-brush-freq')?.value || '',
+          brushType: document.getElementById('perio-brush-type')?.value || '',
+          flossUse: document.getElementById('perio-floss-use')?.value || '',
+          lastVisit: document.getElementById('perio-last-visit')?.value || ''
+        },
+        medical: {
+          diabetes: document.getElementById('perio-med-diabetes')?.value || '',
+          cardio: document.getElementById('perio-med-cardio')?.value || '',
+          bleeding: document.getElementById('perio-med-bleeding')?.value || '',
+          drugs: document.getElementById('perio-med-drugs')?.value || ''
+        },
+        clinicalGingiva: {
+          color: document.getElementById('perio-color')?.value || '',
+          contour: document.getElementById('perio-contour')?.value || '',
+          consistency: document.getElementById('perio-consistency')?.value || '',
+          texture: document.getElementById('perio-texture')?.value || '',
+          bop: document.getElementById('perio-bop')?.value || '',
+          attachedWidth: document.getElementById('perio-attached-width')?.value || ''
+        },
+        indices: {
+          plaqueIndex: document.getElementById('perio-plaque-index')?.value || '',
+          calculusIndex: document.getElementById('perio-calculus-index')?.value || '',
+          bpeScore: document.getElementById('perio-bpe-score')?.value || '',
+          mobility: document.getElementById('perio-mobility')?.value || '',
+          recession: document.getElementById('perio-recession')?.value || '',
+          furcation: document.getElementById('perio-furcation')?.value || ''
+        },
+        odontogram: perioState.toothConditions,
+        diffDiagnosis: document.getElementById('perio-diff-text')?.value || '',
+        diagnosis: document.getElementById('perio-diag-text')?.value || '',
+        treatmentPlan: {
+          ultrasonic: document.getElementById('perio-tp-ultrasonic')?.checked || false,
+          hand: document.getElementById('perio-tp-hand')?.checked || false,
+          polishing: document.getElementById('perio-tp-polishing')?.checked || false,
+          ohi: document.getElementById('perio-tp-ohi')?.checked || false,
+          mouthwash: document.getElementById('perio-tp-mouthwash')?.checked || false,
+          recall: document.getElementById('perio-tp-recall')?.checked || false
+        },
+        notes: document.getElementById('perio-notes')?.value || '',
+        evaluation: {
+          totalScore: totalScore
+        },
+        savedAt: new Date().toISOString()
+      };
+
+      // Save locally
+      localStorage.setItem('al_qabas_perio_4th_year', JSON.stringify(perioData));
+
+      // Sync with Supabase if configured
+      if (window.EDentalSupabase && window.EDentalSupabase.isConfigured()) {
+        const payload = {
+          id: 'CS-AQ-PERIO4-01',
+          sheetId: 'perio-surg-02',
+          deptId: 'omfs',
+          sheetTitle: 'طبلة أمراض اللثة والتقليح (كلية القبس - المرحلة الرابعة 4th Year BDS)',
+          patientName: perioData.patient.name,
+          chiefComplaint: perioData.chiefComplaint,
+          supervisorScore: `${totalScore} / 10`,
+          supervisorNotes: perioData.notes,
+          status: 'approved',
+          extraoralExam: perioData.clinicalGingiva,
+          odontogramData: perioData.indices
+        };
+
+        const res = await window.EDentalSupabase.saveCase(payload);
+        if (res.source === 'supabase') {
+          alert('تم حفظ استمارة المرحلة الرابعة بنجاح محلياً وسحابياً في سوبابيس! 🟢☁️ (الدرجة: ' + totalScore + ' / 10)');
+          return;
+        }
+      }
+
+      alert('تم حفظ استمارة عيادة اللثة (المرحلة الرابعة) بنجاح محلياً! (الدرجة: ' + totalScore + ' / 10)');
+    }
+
+    // Auto-load previously saved draft
+    window.addEventListener('load', () => {
+      initPerioOdontogram();
+      try {
+        const saved = JSON.parse(localStorage.getItem('al_qabas_perio_4th_year') || '{}');
+        if (saved.patient?.name && document.getElementById('perio-pt-name')) {
+          document.getElementById('perio-pt-name').value = saved.patient.name;
+        }
+        if (saved.diagnosis && document.getElementById('perio-diag-text')) {
+          document.getElementById('perio-diag-text').value = saved.diagnosis;
+        }
+        if (saved.notes && document.getElementById('perio-notes')) {
+          document.getElementById('perio-notes').value = saved.notes;
+        }
+        calculatePerioScore();
+      } catch (e) {
+        console.error('Error loading saved perio draft:', e);
+      }
+    });
+  </script>
+</body>
+</html>
