@@ -275,15 +275,19 @@ document.addEventListener('DOMContentLoaded', () => {
   // Calculate Total Clinical Evaluation Score for Al-Qabas Page 2
   function calculateTotalScore() {
     let sum = 0;
+    let found = false;
     for (let i = 1; i <= 6; i++) {
       const el = document.getElementById(`eval-mark-${i}`);
-      if (el) sum += parseFloat(el.value || '0');
+      if (el) {
+        sum += parseFloat(el.value || '0');
+        found = true;
+      }
     }
     const display = document.getElementById('eval-total-display');
     if (display) {
       display.textContent = `${sum.toFixed(1)} / 10`;
     }
-    return parseFloat(sum.toFixed(1));
+    return found ? parseFloat(sum.toFixed(1)) : null;
   }
 
 
@@ -1105,7 +1109,7 @@ document.addEventListener('DOMContentLoaded', () => {
       page2Data,
       differentialDiagnosis: isAlqabas && page2Data ? page2Data.differentialDiagnosis : '',
       diagnosis: isAlqabas && page2Data ? page2Data.diagnosis : '',
-      supervisorScore: isAlqabas && page2Data ? `${page2Data.evaluation.totalScore} / 10` : '9/10',
+      supervisorScore: isAlqabas && page2Data ? (page2Data.evaluation.totalScore !== null ? `${page2Data.evaluation.totalScore} / 10` : 'قيد تقييم المشرف') : '9/10',
       supervisorNotes: isAlqabas && page2Data ? page2Data.notes : 'Clinical case approved by supervisor',
       odontogramData: state.odontogramData,
       status: 'draft',
@@ -1138,7 +1142,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const caseIdText = modalCaseId ? modalCaseId.textContent : '';
 
     const isAlqabas = state.currentOpenSheet.sheet.id === 'omfs-ext-01' || state.currentOpenSheet.dept.id === 'omfs';
-    const finalScore = isAlqabas ? `${calculateTotalScore()} / 10` : '9/10';
+    const scoreVal = calculateTotalScore();
+    const finalScore = isAlqabas ? (scoreVal !== null ? `${scoreVal} / 10` : 'قيد تقييم المشرف') : '9/10';
     const finalNotes = isAlqabas ? (document.getElementById('p2-notes')?.value || 'Oral Surgery Case submitted') : 'تم تقديم الكيس شيت للاعتماد السريري من قبل الطالب';
 
     state.stats.todayCases++;
