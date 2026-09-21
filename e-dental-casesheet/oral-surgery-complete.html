@@ -376,23 +376,70 @@
         </div>
         <table class="sheet-table text-xs border border-slate-800">
           <tbody>
+            <!-- Row 1: Lips & Buccal Mucosa -->
             <tr>
-              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Lips & Labial:</td>
-              <td class="w-2/6 p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي وسليم)</option><option>Lesion / Ulcer</option></select></td>
-              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Buccal Mucosa:</td>
-              <td class="w-2/6 p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي وسليم)</option><option>Obliterated / Swollen</option></select></td>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Lips & Labial Mucosa:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800">
+                <select id="p2-lips" class="select-clean">
+                  <option value="Normal" selected>Normal (طبيعي وسليم)</option>
+                  <option value="Lesion / Ulcer">Lesion / Ulcer (آفة تقرحية أو جرح موضعي)</option>
+                  <option value="Swelling / Mucocele">Swelling / Mucocele (تورم أو كيسة مخاطية موضعية)</option>
+                </select>
+              </td>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Buccal Mucosa & Sulcus:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800">
+                <select id="p2-buccal" class="select-clean">
+                  <option value="Normal" selected>Normal (طبيعي وسليم)</option>
+                  <option value="Obliterated Sulcus">Obliterated Sulcus (ميزاب دهليزي ممتلئ / ممحو)</option>
+                  <option value="Swollen / Abscess">Swollen / Abscess (تورم التهابي أو خراج موضعي)</option>
+                  <option value="Linea Alba">Linea Alba (خط إطباقي أبيض سليم)</option>
+                </select>
+              </td>
             </tr>
+
+            <!-- Row 2: Tongue & Floor of Mouth -->
             <tr>
               <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Tongue:</td>
-              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي وسليم)</option><option>Coated</option></select></td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-tongue" class="select-clean">
+                  <option value="Normal" selected>Normal (طبيعي وحركته سليمة)</option>
+                  <option value="Coated">Coated (لسان مكسو بطبقة بيضاء فطرية أو بقايا)</option>
+                  <option value="Lateral border lesion">Lateral border lesion (آفة أو تقرح بالحافة الجانبية)</option>
+                  <option value="Depapillated / Glossitis">Depapillated / Glossitis (فقدان الحليمات أو لسان ملتهب أملس)</option>
+                </select>
+              </td>
               <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Floor of Mouth:</td>
-              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (جس سليم بكلتا اليدين)</option><option>Swelling</option></select></td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-floor" class="select-clean">
+                  <option value="Normal" selected>Normal (طبيعي وسليم)</option>
+                  <option value="Bimanual: Soft / Non-tender">Bimanual: Soft / Non-tender (جس ثنائي: طري وغير مؤلم)</option>
+                  <option value="Bimanual: Firm / Tender / Sialolith">Bimanual: Firm / Tender / Sialolith (جس ثنائي: قاسي / مؤلم / حصاة لعابية)</option>
+                  <option value="Ranula">Ranula (ضفدعية قاع الفم)</option>
+                </select>
+              </td>
             </tr>
+
+            <!-- Row 3: Hard & Soft Palate & Gingiva -->
             <tr>
-              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Palate:</td>
-              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي)</option><option>Torus Palatinus</option></select></td>
-              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Gingiva & Perio:</td>
-              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (وردي متماسك)</option><option>BOP / Pocket</option></select></td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Hard & Soft Palate:</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-palate" class="select-clean">
+                  <option value="Normal" selected>Normal (قبة الحنك طبيعية)</option>
+                  <option value="Torus Palatinus">Torus Palatinus (عرن عظمي حنكي حميد)</option>
+                  <option value="Abscess">Abscess (خراج حنكي متجمع)</option>
+                  <option value="Ulceration / Erythema">Ulceration / Erythema (تقرح أو احمرار لثوي حنكي)</option>
+                </select>
+              </td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Gingiva & Periodontium:</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-gingiva" class="select-clean">
+                  <option value="Normal">Normal (لثة طبيعية وردية مشدودة)</option>
+                  <option value="BOP" selected>BOP (نزف عند السبر Bleeding on Probing)</option>
+                  <option value="Periodontal Pocket > 4mm">Periodontal Pocket > 4mm (جيوب لثوية عميقة)</option>
+                  <option value="Calculus & Plaque">Calculus & Plaque (تراكم قلح وتكلسات ولويحة)</option>
+                  <option value="ANUG">ANUG (التهاب لثة تقرحي نخري حاد)</option>
+                </select>
+              </td>
             </tr>
           </tbody>
         </table>
@@ -434,29 +481,168 @@
         </div>
         <table class="sheet-table text-xs border border-slate-800">
           <tbody>
+            <!-- Row 1: Target Tooth # & Tooth Condition -->
             <tr>
               <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800 text-red-700">Target Tooth #:</td>
-              <td class="w-2/6 p-1.5 border border-slate-800 font-bold font-latin">Tooth: #46 (Lower Right 1st Molar)</td>
-              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Condition:</td>
-              <td class="w-2/6 p-1.5 border border-slate-800"><select class="select-clean"><option selected>Broken / Grossly Carious</option><option>Retained Root</option></select></td>
+              <td class="w-2/6 p-1.5 border border-slate-800">
+                <select id="p2-target-tooth" class="select-clean font-bold text-[#0f2d59]">
+                  <optgroup label="Lower Right Quadrant (الفك السفلي يمين)">
+                    <option value="48">#48 - Lower Right 3rd Molar / Wisdom (ضرس العقل سفلي يمين)</option>
+                    <option value="47">#47 - Lower Right 2nd Molar (الرحى الثانية السفلية يمين)</option>
+                    <option value="46" selected>#46 - Lower Right 1st Molar (الرحى الأولى السفلية يمين)</option>
+                    <option value="45">#45 - Lower Right 2nd Premolar (الضاحك الثاني سفلي يمين)</option>
+                    <option value="44">#44 - Lower Right 1st Premolar (الضاحك الأول سفلي يمين)</option>
+                    <option value="43">#43 - Lower Right Canine (الناب سفلي يمين)</option>
+                    <option value="42">#42 - Lower Right Lateral Incisor (الرباعية السفلية يمين)</option>
+                    <option value="41">#41 - Lower Right Central Incisor (الثنية السفلية يمين)</option>
+                  </optgroup>
+                  <optgroup label="Lower Left Quadrant (الفك السفلي يسار)">
+                    <option value="31">#31 - Lower Left Central Incisor (الثنية السفلية يسار)</option>
+                    <option value="32">#32 - Lower Left Lateral Incisor (الرباعية السفلية يسار)</option>
+                    <option value="33">#33 - Lower Left Canine (الناب سفلي يسار)</option>
+                    <option value="34">#34 - Lower Left 1st Premolar (الضاحك الأول سفلي يسار)</option>
+                    <option value="35">#35 - Lower Left 2nd Premolar (الضاحك الثاني سفلي يسار)</option>
+                    <option value="36">#36 - Lower Left 1st Molar (الرحى الأولى السفلية يسار)</option>
+                    <option value="37">#37 - Lower Left 2nd Molar (الرحى الثانية السفلية يسار)</option>
+                    <option value="38">#38 - Lower Left 3rd Molar / Wisdom (ضرس العقل سفلي يسار)</option>
+                  </optgroup>
+                  <optgroup label="Upper Right Quadrant (الفك العلوي يمين)">
+                    <option value="18">#18 - Upper Right 3rd Molar / Wisdom (ضرس العقل علوي يمين)</option>
+                    <option value="17">#17 - Upper Right 2nd Molar (الرحى الثانية العلوية يمين)</option>
+                    <option value="16">#16 - Upper Right 1st Molar (الرحى الأولى العلوية يمين)</option>
+                    <option value="15">#15 - Upper Right 2nd Premolar (الضاحك الثاني علوي يمين)</option>
+                    <option value="14">#14 - Upper Right 1st Premolar (الضاحك الأول علوي يمين)</option>
+                    <option value="13">#13 - Upper Right Canine (الناب علوي يمين)</option>
+                    <option value="12">#12 - Upper Right Lateral Incisor (الرباعية العلوية يمين)</option>
+                    <option value="11">#11 - Upper Right Central Incisor (الثنية العلوية يمين)</option>
+                  </optgroup>
+                  <optgroup label="Upper Left Quadrant (الفك العلوي يسار)">
+                    <option value="21">#21 - Upper Left Central Incisor (الثنية العلوية يسار)</option>
+                    <option value="22">#22 - Upper Left Lateral Incisor (الرباعية العلوية يسار)</option>
+                    <option value="23">#23 - Upper Left Canine (الناب علوي يسار)</option>
+                    <option value="24">#24 - Upper Left 1st Premolar (الضاحك الأول علوي يسار)</option>
+                    <option value="25">#25 - Upper Left 2nd Premolar (الضاحك الثاني علوي يسار)</option>
+                    <option value="26">#26 - Upper Left 1st Molar (الرحى الأولى العلوية يسار)</option>
+                    <option value="27">#27 - Upper Left 2nd Molar (الرحى الثانية العلوية يسار)</option>
+                    <option value="28">#28 - Upper Left 3rd Molar / Wisdom (ضرس العقل علوي يسار)</option>
+                  </optgroup>
+                </select>
+              </td>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Tooth Condition:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800">
+                <select id="p2-tooth-condition" class="select-clean font-semibold">
+                  <option value="Crown Intact">Crown Intact (التاج سليم ومكتمل)</option>
+                  <option value="Carious / Broken Crown" selected>Carious / Broken Crown (مكسور / نخر متهدم)</option>
+                  <option value="Retained Root">Retained Root (جذر متبقي تحت مستوى اللثة)</option>
+                  <option value="Impacted">Impacted (سن مدفون / منطمر عظمياً أو لثوياً)</option>
+                </select>
+              </td>
             </tr>
+
+            <!-- Row 2: Inspection & Percussion -->
             <tr>
               <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Inspection:</td>
-              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Gross Caries (نخر سني عميق)</option></select></td>
-              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Percussion:</td>
-              <td class="p-1.5 border border-slate-800 font-latin text-[11px]"><span class="font-bold">Vertical:</span> Positive [+] | <span class="font-bold">Horizontal:</span> Negative [-]</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-inspection" class="select-clean font-semibold">
+                  <option value="Gross Caries" selected>Gross Caries (نخر سني عميق متقدم)</option>
+                  <option value="Defective Restoration">Defective Restoration (حشوة معيبة أو متسربة)</option>
+                  <option value="Food Impaction">Food Impaction (انحشار طعام مزمن)</option>
+                  <option value="Operculum / Pericoronitis">Operculum / Pericoronitis (قلنسوة لثوية ملتهبة حول التاج)</option>
+                  <option value="Crown Fracture">Crown Fracture (كسر في التاج السني)</option>
+                </select>
+              </td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Percussion (TTP):</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-ttp" class="select-clean font-semibold">
+                  <option value="Negative">Negative (سلبي [-] - لا يوجد ألم بالقرع)</option>
+                  <option value="Vertical Positive" selected>Vertical Positive (إيجابي عمودي [Vert +] - ألم ذروي)</option>
+                  <option value="Horizontal Positive">Horizontal Positive (إيجابي أفقي [Horiz +] - ألم رباطي/لثوي)</option>
+                  <option value="Both Positive">Both Positive (إيجابي عمودي وأفقي [Both +] - إصابة مختلطة)</option>
+                </select>
+              </td>
             </tr>
+
+            <!-- Row 3: Palpation & Mobility Grade -->
             <tr>
-              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Radiographic:</td>
-              <td colspan="3" class="p-1.5 border border-slate-800 font-latin text-xs">
-                <strong>IOPA:</strong> Periapical Radiolucency associated with distal root • Intact lamina dura on mesial root • Proximity to ID Canal verified.
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Palpation (Apical):</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-palpation" class="select-clean font-semibold">
+                  <option value="Non-tender">Non-tender (غير مؤلم عند الجس الذروي)</option>
+                  <option value="Tender" selected>Tender (ألم عند جس ذروة السن)</option>
+                  <option value="Bony Expansion">Bony Expansion (توسع وبروز في الصفيحة العظمية)</option>
+                  <option value="Fluctuant Swelling">Fluctuant Swelling (تموج وتورم قيحي متجمع)</option>
+                </select>
+              </td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Mobility Grade:</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-mobility" class="select-clean font-semibold">
+                  <option value="Grade 0" selected>Grade 0 (حركة فسيولوجية طبيعية < 0.2 مم)</option>
+                  <option value="Grade I">Grade I (حركة أفقية طفيفة 0.2 - 1 مم)</option>
+                  <option value="Grade II">Grade II (حركة أفقية ملحوظة > 1 مم)</option>
+                  <option value="Grade III" class="text-red-700 font-bold">Grade III (حركة أفقية وعمودية شديدة)</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 4: Pulp Vitality & Occlusion -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Pulp Vitality:</td>
+              <td class="p-1.5 border border-slate-800">
+                <div class="flex items-center gap-1.5">
+                  <select id="p2-vitality" class="select-clean font-semibold">
+                    <option value="Thermal: Vital">Thermal: Vital (حي يستجيب طبيعياً)</option>
+                    <option value="Hypersensitive">Hypersensitive (تحسس مفرط حاد ومستمر)</option>
+                    <option value="Non-vital / Necrotic" selected>Non-vital / Necrotic (متموت فاقد الحيوية)</option>
+                    <option value="EPT: Responded">EPT: Responded (استجابة إيجابية بالفحص الكهربائي)</option>
+                    <option value="EPT: No Response">EPT: No Response (لا استجابة بالفحص الكهربائي)</option>
+                  </select>
+                  <input type="text" id="p2-vitality-val" class="w-16 p-1 border border-slate-300 rounded text-[10px] text-center font-latin" placeholder="64" title="قراءة الفحص الكهربائي">
+                </div>
+              </td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Occlusion / Arch:</td>
+              <td class="p-1.5 border border-slate-800">
+                <select id="p2-occlusion" class="select-clean font-semibold">
+                  <option value="Normal Overlap" selected>Normal Overlap (إطباق وتراكب طبيعي Class I)</option>
+                  <option value="Open bite">Open bite (عضة مفتوحة موضعية)</option>
+                  <option value="Crossbite">Crossbite (عضة متصالبة دهليزية/لسانية)</option>
+                  <option value="Trauma from occlusion">Trauma from occlusion (رض إطباقي من الإطباق الزائد)</option>
+                </select>
+              </td>
+            </tr>
+
+            <!-- Row 5: Radiographic Finding -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-sky-900">Radiographic Finding:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800 space-y-1.5">
+                <div class="grid grid-cols-1 sm:grid-cols-12 gap-2 items-center">
+                  <div class="sm:col-span-4 flex items-center gap-1">
+                    <span class="text-[10px] font-bold text-slate-700 whitespace-nowrap">Image Type:</span>
+                    <select id="p2-rad-type" class="select-clean font-bold">
+                      <option value="IOPA" selected>IOPA (أشعة ذروية داخل الفم)</option>
+                      <option value="OPG">OPG (بانوراما فكية كاملة)</option>
+                      <option value="Bitewing">Bitewing (أشعة بينية تاجية)</option>
+                      <option value="CBCT">CBCT (أشعة مقطعية ثلاثية الأبعاد)</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-8 flex items-center gap-1">
+                    <span class="text-[10px] font-bold text-slate-700 whitespace-nowrap">Findings:</span>
+                    <select id="p2-rad-findings" class="select-clean font-semibold text-sky-950">
+                      <option value="Normal">Normal (مسافة رباط وصفيحة طبيعية)</option>
+                      <option value="Periapical Radiolucency" selected>Periapical Radiolucency (شفافية ذروية شعاعية)</option>
+                      <option value="Dilaceration">Dilaceration (انحناء وانعطاف حاد بالجذر)</option>
+                      <option value="Proximity to ID Canal">Proximity to ID Canal (ملاصقة لقناة العصب السنخي السفلي)</option>
+                      <option value="Maxillary Sinus proximity">Maxillary Sinus proximity (ملاصقة لجيب الفك العلوي)</option>
+                      <option value="Ankylosis">Ankylosis (التصاق سني عظمي وفقدان الرباط)</option>
+                    </select>
+                  </div>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- 4. Diagnosis & Treatment -->
+      <!-- 4. Diagnosis & Treatment Plan -->
       <div class="mb-3">
         <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
           <span>4. DIAGNOSIS & TREATMENT PLAN</span>
@@ -464,27 +650,163 @@
         </div>
         <table class="sheet-table text-xs border border-slate-800">
           <tbody>
+            <!-- Row 1: Differential Diagnosis -->
             <tr>
               <td class="w-1/5 font-bold bg-amber-50 p-1.5 border border-slate-800 text-amber-900">Differential Diagnosis:</td>
-              <td colspan="3" class="p-1.5 border border-slate-800 font-semibold font-latin text-slate-800">
-                Chronic Apical Periodontitis vs Periapical Granuloma / Cyst
+              <td colspan="3" class="p-1.5 border border-slate-800">
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <select id="p2-diff-dropdown" class="select-clean sm:w-1/2 font-bold text-amber-950" onchange="if(this.value) document.getElementById('p2-diff-text').value = this.value;">
+                    <option value="Chronic Apical Periodontitis vs Periapical Granuloma / Cyst" selected>Chronic Apical Periodontitis vs Periapical Granuloma / Cyst</option>
+                    <option value="Acute Dentoalveolar Abscess vs Infected Radicular Cyst">Acute Dentoalveolar Abscess vs Infected Radicular Cyst</option>
+                    <option value="Pericoronitis of 3rd Molar vs Distal Caries of 2nd Molar">Pericoronitis of 3rd Molar vs Distal Caries of 2nd Molar</option>
+                    <option value="Retained Root with Chronic Periodontitis vs Residual Cyst">Retained Root with Chronic Periodontitis vs Residual Cyst</option>
+                    <option value="Severe Periodontal Breakdown vs Combined Endo-Perio Lesion">Severe Periodontal Breakdown vs Combined Endo-Perio Lesion</option>
+                    <option value="Unrestorable Crown-Root Fracture vs Vertical Root Fracture">Unrestorable Crown-Root Fracture vs Vertical Root Fracture</option>
+                    <option value="Irreversible Pulpitis vs Reversible Pulpitis / Cracked Tooth">Irreversible Pulpitis vs Reversible Pulpitis / Cracked Tooth</option>
+                  </select>
+                  <input type="text" id="p2-diff-text" class="input-clean sm:w-1/2 font-semibold font-latin text-xs" value="Chronic Apical Periodontitis vs Periapical Granuloma / Cyst">
+                </div>
               </td>
             </tr>
+
+            <!-- Row 2: Definitive Diagnosis -->
             <tr>
               <td class="w-1/5 font-bold bg-slate-100 p-1.5 border border-slate-800 text-red-700">Definitive Diagnosis:</td>
-              <td colspan="3" class="p-1.5 border border-slate-800 font-bold font-latin text-sky-950">Chronic Apical Periodontitis with Periapical Granuloma</td>
+              <td colspan="3" class="p-1.5 border border-slate-800">
+                <div class="flex flex-col sm:flex-row gap-2">
+                  <select id="p2-diag-dropdown" class="select-clean sm:w-1/2 font-bold text-[#0f2d59]" onchange="if(this.value) document.getElementById('p2-diag-text').value = this.value;">
+                    <option value="Chronic Apical Periodontitis with Periapical Granuloma" selected>Chronic Apical Periodontitis with Granuloma (التهاب ذروي مزمن)</option>
+                    <option value="Acute Dentoalveolar Abscess">Acute Dentoalveolar Abscess (خراج سنخي حاد)</option>
+                    <option value="Retained Root with Chronic Periapical Pathology">Retained Root with Periapical Pathology (جذر متبقي ملتهب)</option>
+                    <option value="Irreversible Pulpitis with Partial Necrosis">Irreversible Pulpitis with Partial Necrosis (التهاب لب غير راجع)</option>
+                    <option value="Pericoronitis of Impacted Mandibular 3rd Molar">Pericoronitis of Impacted 3rd Molar (التهاب تاجي لسن عقل)</option>
+                    <option value="Severe Periodontal Breakdown (Grade III Mobility)">Severe Periodontal Breakdown / Mobility (تخلخل عظمي ولثوي شديد)</option>
+                    <option value="Orthodontic Extraction for Arch Crowding">Orthodontic Extraction for Arch Crowding (قلع لدواعي التقويم)</option>
+                    <option value="Unrestorable Crown-Root Fracture">Unrestorable Crown-Root Fracture (كسر تاجي جذري غير قابل للعلاج)</option>
+                  </select>
+                  <input type="text" id="p2-diag-text" class="input-clean sm:w-1/2 font-bold font-latin" value="Chronic Apical Periodontitis with Periapical Granuloma">
+                </div>
+              </td>
             </tr>
+
+            <!-- Row 3: Treatment Plan -->
             <tr>
-              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Treatment Plan:</td>
-              <td colspan="3" class="p-1.5 border border-slate-800 font-latin text-xs font-semibold">
-                [X] Simple Extraction • Technique: ID Block + Long Buccal (Lidocaine 2% with 1:80,000 Adrenaline)
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800 text-emerald-800">Treatment Plan:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800 space-y-1.5">
+                <div class="flex items-center gap-2">
+                  <select id="p2-treatment-plan" class="select-clean font-bold text-emerald-950" onchange="
+                    var val = this.value;
+                    if(document.getElementById('p2-tp-simple')) document.getElementById('p2-tp-simple').checked = (val==='Simple Extraction');
+                    if(document.getElementById('p2-tp-surgical')) document.getElementById('p2-tp-surgical').checked = (val==='Surgical Extraction');
+                    if(document.getElementById('p2-tp-drainage')) document.getElementById('p2-tp-drainage').checked = (val==='Incision & Drainage');
+                    if(document.getElementById('p2-tp-operculectomy')) document.getElementById('p2-tp-operculectomy').checked = (val==='Operculectomy');
+                    if(document.getElementById('p2-tp-referral')) document.getElementById('p2-tp-referral').checked = (val==='Referral / Endodontics');
+                  ">
+                    <option value="Simple Extraction" selected>Simple Extraction (قلع سن بسيط بالكلابات والروافع)</option>
+                    <option value="Surgical Extraction">Surgical Extraction (قلع جراحي مع شريحة وفصل جذور)</option>
+                    <option value="Incision & Drainage">Incision & Drainage (شق وتصريف جراحي للخراج)</option>
+                    <option value="Operculectomy">Operculectomy (استئصال القلنسوة اللثوية فوق التاج)</option>
+                    <option value="Referral / Endodontics">Referral / Endodontics (تحويل لمعالجة لبية تحفظية)</option>
+                  </select>
+                </div>
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-1.5 text-[11px] pt-1 border-t border-slate-200 font-latin">
+                  <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
+                    <input type="checkbox" id="p2-tp-simple" class="rounded text-sky-600 w-3.5 h-3.5" checked>
+                    <span>Simple Extraction</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
+                    <input type="checkbox" id="p2-tp-surgical" class="rounded text-sky-600 w-3.5 h-3.5">
+                    <span>Surgical Extraction</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
+                    <input type="checkbox" id="p2-tp-drainage" class="rounded text-sky-600 w-3.5 h-3.5">
+                    <span>Incision & Drainage</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
+                    <input type="checkbox" id="p2-tp-operculectomy" class="rounded text-sky-600 w-3.5 h-3.5">
+                    <span>Operculectomy</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer font-semibold">
+                    <input type="checkbox" id="p2-tp-referral" class="rounded text-sky-600 w-3.5 h-3.5">
+                    <span>Referral / Endodontics</span>
+                  </label>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 4: Local Anesthesia -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Local Anesthesia:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs font-latin">
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-slate-700 whitespace-nowrap">Technique:</span>
+                    <select id="p2-la-tech" class="select-clean font-semibold">
+                      <option value="Inferior Dental (ID) Block + Long Buccal" selected>Inferior Dental (ID) Block + Long Buccal (حصار العصب الفكي السفلي والشدقي)</option>
+                      <option value="Infiltration - Supraperiosteal">Infiltration - Supraperiosteal (حقن ارتشاحي فوق السمحاق)</option>
+                      <option value="Mental Nerve Block + Incisive">Mental Nerve Block + Incisive (حصار العصب الذقني والقاطعي)</option>
+                      <option value="Greater Palatine Nerve Block">Greater Palatine Nerve Block (حصار العصب الحنكي الكبير)</option>
+                      <option value="Nasopalatine Nerve Block">Nasopalatine Nerve Block (حصار العصب الحنفي الأنفي)</option>
+                      <option value="Intraligamentary">Intraligamentary (حقن ضمن الرباط السني)</option>
+                    </select>
+                  </div>
+                  <div class="flex items-center gap-1.5">
+                    <span class="font-bold text-slate-700 whitespace-nowrap">Agent & Vasoconstrictor:</span>
+                    <select id="p2-la-agent" class="select-clean font-semibold">
+                      <option value="Lidocaine 2% with 1:80,000 Adrenaline (1 Cartridge - 1.8ml)" selected>Lidocaine 2% with 1:80,000 Adrenaline (1 Cartridge - 1.8ml)</option>
+                      <option value="Lidocaine 2% with 1:80,000 Adrenaline (2 Cartridges - 3.6ml)">Lidocaine 2% with 1:80,000 Adrenaline (2 Cartridges - 3.6ml)</option>
+                      <option value="Articaine 4% with 1:100,000 Adrenaline (Septanest 1.7ml)">Articaine 4% with 1:100,000 Adrenaline (Septanest 1.7ml)</option>
+                      <option value="Mepivacaine 3% Plain (بدون مقبض وعائي)">Mepivacaine 3% Plain (بدون مقبض وعائي - لمرضى القلب والضغط)</option>
+                      <option value="Bupivacaine 0.5% with Adrenaline">Bupivacaine 0.5% with Adrenaline (تخدير ممتد المفعول)</option>
+                    </select>
+                  </div>
+                </div>
+              </td>
+            </tr>
+
+            <!-- Row 5: Medications / Post-Op -->
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Medications / Post-Op:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800">
+                <div class="grid grid-cols-1 sm:grid-cols-4 gap-2 text-xs font-latin">
+                  <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                    <input type="checkbox" id="p2-med-analgesics" class="rounded text-sky-600" checked>
+                    <span class="text-[11px] font-semibold">Analgesics (Ibuprofen / Paracetamol)</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                    <input type="checkbox" id="p2-med-antibiotics" class="rounded text-sky-600">
+                    <span class="text-[11px] font-semibold">Antibiotics (Amoxicillin / Clindamycin)</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                    <input type="checkbox" id="p2-med-mouthwash" class="rounded text-sky-600" checked>
+                    <span class="text-[11px] font-semibold">Antiseptic Mouthwash (CHX 0.12%)</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 p-1.5 bg-slate-50 rounded border border-slate-200 cursor-pointer">
+                    <input type="checkbox" id="p2-med-gauze" class="rounded text-sky-600" checked>
+                    <span class="text-[11px] font-semibold">Hemostatic Gauze & Strict Post-Op</span>
+                  </label>
+                </div>
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
-      <!-- 5. Evaluation Table (Total = 10 Marks) -->
+      <!-- 5. Notes & Clinical Remarks -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>5. NOTES & CLINICAL REMARKS</span>
+          <span class="text-[10px] font-normal text-slate-300">Observations & Special Instructions</span>
+        </div>
+        <div class="border border-slate-800 p-2.5 bg-slate-50/70">
+          <textarea id="p2-notes" rows="3" class="w-full p-2 bg-white border border-slate-300 rounded text-xs font-latin leading-relaxed" placeholder="Clinical observations, anatomical difficulty, root apex integrity inspection, socket debridement, and special patient instructions...">- Tooth #46 extracted completely and atraumatically using straight elevator and lower universal molar forceps.
+- Apex inspected and intact; socket curetted gently to remove periapical granulation tissue and irrigated with normal saline.
+- Hemostasis achieved under direct visual control. Sterile gauze pack placed over the socket; patient instructed to bite firmly for 45-60 min.
+- Written and verbal post-operative instructions given: No spitting, no rinsing, soft cold diet for 24 hours.</textarea>
+        </div>
+      </div>
+
+      <!-- 6. Evaluation Table (Total = 10 Marks) -->
       <div class="mb-3">
         <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
           <span>STUDENT EVALUATION & MARKS ALLOCATION (TOTAL = 10 MARKS)</span>
@@ -493,29 +815,131 @@
         <table class="sheet-table text-xs border border-slate-800 font-latin">
           <thead>
             <tr class="bg-slate-200 font-bold">
-              <th class="w-20 text-center p-1 border border-slate-800">Max Mark</th>
-              <th class="w-1/3 text-right p-1 border border-slate-800">Evaluation Item</th>
-              <th class="text-right p-1 border border-slate-800">Specific Clinical Details</th>
-              <th class="w-24 text-center p-1 border border-slate-800">Gained Mark</th>
+              <th class="w-20 text-center p-1.5 border border-slate-800">Max Mark</th>
+              <th class="w-1/3 text-right p-1.5 border border-slate-800">Evaluation Item</th>
+              <th class="text-right p-1.5 border border-slate-800">Specific Clinical Details</th>
+              <th class="w-24 text-center p-1.5 border border-slate-800">Gained Mark</th>
             </tr>
           </thead>
           <tbody>
-            <tr><td class="text-center font-bold">2 Marks</td><td>Case Sheet Evaluation</td><td>Data Collection (1M) + Correct Diagnosis (1M)</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
-            <tr><td class="text-center font-bold">1 Mark</td><td>Local Anesthesia Admin.</td><td>Anatomical landmarks, aspiration & technique</td><td class="text-center font-bold text-sky-900">1.0 / 1</td></tr>
-            <tr><td class="text-center font-bold">2 Marks</td><td>Extraction Procedure</td><td>Instrument selection, elevator/forceps grip & force</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
-            <tr><td class="text-center font-bold">2 Marks</td><td>Sterilization & Infection</td><td>PPE & aseptic chain maintained</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
-            <tr><td class="text-center font-bold">1 Mark</td><td>Wound Care & Post-Op</td><td>Hemostasis, socket compression & verbal instructions</td><td class="text-center font-bold text-sky-900">1.0 / 1</td></tr>
-            <tr><td class="text-center font-bold">2 Marks</td><td>Operator Position & Ethics</td><td>Ergonomics, patient comfort, consent & communication</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
-            <tr class="bg-emerald-50 font-black"><td class="text-center">10 Marks</td><td colspan="2" class="text-left">TOTAL CLINICAL SCORE:</td><td class="text-center text-emerald-800 text-sm font-black">10.0 / 10</td></tr>
+            <tr>
+              <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+              <td class="font-bold p-1.5 border border-slate-800">Case Sheet Evaluation</td>
+              <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Data Collection (1M) + Correct Diagnosis (1M)</td>
+              <td class="text-center p-1.5 border border-slate-800">
+                <select id="eval-mark-1" class="p-1 bg-sky-50 border border-sky-300 rounded text-xs font-bold text-sky-900" onchange="calculateTotalScore()">
+                  <option value="2.0" selected>2.0 / 2</option>
+                  <option value="1.5">1.5 / 2</option>
+                  <option value="1.0">1.0 / 2</option>
+                  <option value="0.5">0.5 / 2</option>
+                  <option value="0.0">0.0 / 2</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center font-bold p-1.5 border border-slate-800">1 Mark</td>
+              <td class="font-bold p-1.5 border border-slate-800">Local Anesthesia Admin.</td>
+              <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Anatomical landmarks, aspiration & technique</td>
+              <td class="text-center p-1.5 border border-slate-800">
+                <select id="eval-mark-2" class="p-1 bg-sky-50 border border-sky-300 rounded text-xs font-bold text-sky-900" onchange="calculateTotalScore()">
+                  <option value="1.0" selected>1.0 / 1</option>
+                  <option value="0.5">0.5 / 1</option>
+                  <option value="0.0">0.0 / 1</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+              <td class="font-bold p-1.5 border border-slate-800">Extraction Procedure</td>
+              <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Instrument selection, elevator/forceps grip & force</td>
+              <td class="text-center p-1.5 border border-slate-800">
+                <select id="eval-mark-3" class="p-1 bg-sky-50 border border-sky-300 rounded text-xs font-bold text-sky-900" onchange="calculateTotalScore()">
+                  <option value="2.0" selected>2.0 / 2</option>
+                  <option value="1.5">1.5 / 2</option>
+                  <option value="1.0">1.0 / 2</option>
+                  <option value="0.5">0.5 / 2</option>
+                  <option value="0.0">0.0 / 2</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+              <td class="font-bold p-1.5 border border-slate-800">Sterilization & Infection</td>
+              <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">PPE & aseptic chain maintained</td>
+              <td class="text-center p-1.5 border border-slate-800">
+                <select id="eval-mark-4" class="p-1 bg-sky-50 border border-sky-300 rounded text-xs font-bold text-sky-900" onchange="calculateTotalScore()">
+                  <option value="2.0" selected>2.0 / 2</option>
+                  <option value="1.5">1.5 / 2</option>
+                  <option value="1.0">1.0 / 2</option>
+                  <option value="0.5">0.5 / 2</option>
+                  <option value="0.0">0.0 / 2</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center font-bold p-1.5 border border-slate-800">1 Mark</td>
+              <td class="font-bold p-1.5 border border-slate-800">Wound Care & Post-Op</td>
+              <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Hemostasis, socket compression & verbal instructions</td>
+              <td class="text-center p-1.5 border border-slate-800">
+                <select id="eval-mark-5" class="p-1 bg-sky-50 border border-sky-300 rounded text-xs font-bold text-sky-900" onchange="calculateTotalScore()">
+                  <option value="1.0" selected>1.0 / 1</option>
+                  <option value="0.5">0.5 / 1</option>
+                  <option value="0.0">0.0 / 1</option>
+                </select>
+              </td>
+            </tr>
+            <tr>
+              <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
+              <td class="font-bold p-1.5 border border-slate-800">Operator Position & Ethics</td>
+              <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Ergonomics, patient comfort, consent & communication</td>
+              <td class="text-center p-1.5 border border-slate-800">
+                <select id="eval-mark-6" class="p-1 bg-sky-50 border border-sky-300 rounded text-xs font-bold text-sky-900" onchange="calculateTotalScore()">
+                  <option value="2.0" selected>2.0 / 2</option>
+                  <option value="1.5">1.5 / 2</option>
+                  <option value="1.0">1.0 / 2</option>
+                  <option value="0.5">0.5 / 2</option>
+                  <option value="0.0">0.0 / 2</option>
+                </select>
+              </td>
+            </tr>
+            <tr class="bg-emerald-50 border-t-2 border-slate-800">
+              <td class="text-center font-black text-emerald-900 p-2 text-xs">10 Marks</td>
+              <td colspan="2" class="font-black text-emerald-900 p-2 text-xs uppercase text-left">
+                TOTAL CLINICAL SCORE / التقييم السريري الإجمالي:
+              </td>
+              <td class="text-center p-2">
+                <span id="eval-total-display" class="font-black text-emerald-700 text-sm bg-white px-2 py-0.5 rounded border border-emerald-300">
+                  10.0 / 10
+                </span>
+              </td>
+            </tr>
           </tbody>
         </table>
       </div>
 
       <!-- Signatures Footer -->
-      <div class="border border-slate-800 p-2 rounded bg-slate-50/70 font-latin text-xs">
-        <div class="grid grid-cols-2 gap-2">
-          <div><span class="font-bold">Student Name:</span> Ali Haider Al-Mousawi (5th Year)</div>
-          <div><span class="font-bold">Senior Supervisor:</span> Dr. Abdallah Al-Salihi (Verified & Approved)</div>
+      <div class="border border-slate-800 p-2.5 rounded bg-slate-50/70 mb-2 font-latin text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mb-2">
+          <div>
+            <span class="font-bold">Student Name:</span>
+            <input type="text" class="p-1 border-b border-slate-400 bg-transparent w-3/4 font-semibold" value="Ali Haider Al-Mousawi">
+          </div>
+          <div>
+            <span class="font-bold">Senior / Supervisor Name:</span>
+            <input type="text" class="p-1 border-b border-slate-400 bg-transparent w-2/3 font-semibold" value="Dr. Abdallah Al-Salihi">
+          </div>
+        </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <span class="font-bold">Class / Group:</span>
+            <span class="text-slate-700">5th Year BDS | Group: B3 | Chair: 14</span>
+          </div>
+          <div>
+            <span class="font-bold">Signature & Date:</span>
+            <span class="font-semibold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded border border-emerald-300">
+              VERIFIED & SIGNED 21/09/2026
+            </span>
+          </div>
         </div>
       </div>
 
@@ -533,6 +957,19 @@
   <script>
     if (window.lucide) {
       window.lucide.createIcons();
+    }
+
+    function calculateTotalScore() {
+      let sum = 0;
+      for (let i = 1; i <= 6; i++) {
+        const el = document.getElementById(`eval-mark-${i}`);
+        if (el) sum += parseFloat(el.value || '0');
+      }
+      const display = document.getElementById('eval-total-display');
+      if (display) {
+        display.textContent = `${sum.toFixed(1)} / 10`;
+      }
+      return sum;
     }
   </script>
 </body>
