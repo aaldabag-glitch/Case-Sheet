@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oral & Maxillofacial Surgery Examination • Complete 2-Page Case Sheet - Al-Qabas Private College</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cairo & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+    .font-latin {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .sheet-table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .sheet-table th, .sheet-table td {
+      border: 1px solid #1e293b;
+      padding: 4px 6px;
+    }
+    .sheet-header-box {
+      background-color: #0f2d59;
+      color: #ffffff;
+      font-weight: 800;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+    .select-clean {
+      width: 100%;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #0f172a;
+      outline: none;
+      transition: all 0.2s;
+    }
+    .select-clean:focus {
+      border-color: #0284c7;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+    .input-clean {
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      color: #0f172a;
+      outline: none;
+    }
+
+    /* Cross Charting Box */
+    .cross-chart-container {
+      position: relative;
+      width: 100%;
+      height: 66px;
+      background-color: #ffffff;
+      border: 1px solid #94a3b8;
+      border-radius: 4px;
+    }
+    .cross-line-v {
+      position: absolute;
+      top: 0;
+      bottom: 0;
+      left: 50%;
+      width: 1.5px;
+      background-color: #1e293b;
+    }
+    .cross-line-h {
+      position: absolute;
+      left: 0;
+      right: 0;
+      top: 50%;
+      height: 1.5px;
+      background-color: #1e293b;
+    }
+    .cross-input {
+      width: 45%;
+      height: 42%;
+      border: none;
+      background: transparent;
+      font-size: 0.7rem;
+      font-weight: bold;
+      text-align: center;
+      outline: none;
+      font-family: 'Plus Jakarta Sans', monospace;
+    }
+
+    /* Print Page Break Formatting */
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-container {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .page-break {
+        page-break-after: always !important;
+        break-after: page !important;
+        height: 0 !important;
+      }
+      .select-clean {
+        border: none !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background: transparent !important;
+        font-size: 0.75rem !important;
+        padding: 0 !important;
+      }
+      .input-clean {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .sheet-table th, .sheet-table td {
+        border-color: #000000 !important;
+      }
+      .sheet-header-box {
+        background-color: #0f2d59 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-6 flex flex-col items-center">
+
+  <!-- Top Action Bar (Print All / Save / Nav) -->
+  <div class="no-print max-w-[960px] w-full mb-4 flex flex-wrap items-center justify-between gap-3 bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200">
+    <div class="flex items-center gap-2 sm:gap-3 flex-wrap">
+      <a href="index.html" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+        <i data-lucide="layout-grid" class="w-4 h-4"></i>
+        <span>المنصة الرئيسية</span>
+      </a>
+      <a href="oral-surgery-page1.html" class="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+        <i data-lucide="file-text" class="w-4 h-4"></i>
+        <span>الصفحة 1 فقط</span>
+      </a>
+      <a href="oral-surgery-page2.html" class="px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 border border-slate-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+        <i data-lucide="file-check" class="w-4 h-4"></i>
+        <span>الصفحة 2 فقط</span>
+      </a>
+      <span class="text-xs text-slate-300">|</span>
+      <span class="text-xs font-bold text-sky-900 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">
+        الاستمارة الكاملة (الصفحتان 1 و 2 معاً A4)
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2">
+      <button onclick="window.print()" class="px-5 py-2.5 bg-gradient-to-r from-sky-600 via-teal-600 to-emerald-600 hover:from-sky-700 hover:to-emerald-700 text-white rounded-xl text-xs font-black flex items-center gap-2 shadow-md shadow-sky-600/20 transition-all">
+        <i data-lucide="printer" class="w-4 h-4"></i>
+        <span>طباعة الاستمارة الكاملة (الصفحتين معاً)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Wrapper for Both Pages -->
+  <div class="max-w-[960px] w-full space-y-6">
+
+    <!-- ========================================================================
+         PAGE 1: AL-QABAS CASE DATA FORM (PAGE 1 OF 2)
+         ======================================================================== -->
+    <div class="page-container bg-white border-2 border-slate-800 p-6 sm:p-8 rounded-lg shadow-xl text-slate-900 leading-tight">
+      
+      <!-- Header -->
+      <div class="grid grid-cols-12 items-center border-b-2 border-slate-800 pb-3 mb-3 gap-2">
+        <div class="col-span-4 text-right">
+          <h3 class="text-xs font-black text-slate-900 font-latin uppercase">AL-QABAS PRIVATE COLLEGE</h3>
+          <p class="text-[11px] font-bold text-slate-700 font-latin">Department of Dentistry</p>
+          <p class="text-[10px] font-semibold text-slate-500 font-latin">Oral & Maxillofacial Surgery Branch</p>
+        </div>
+        <div class="col-span-5 text-center">
+          <h2 class="text-xs sm:text-sm font-black text-[#0f2d59] font-latin uppercase">ORAL SURGERY DEPARTMENT</h2>
+          <p class="text-[10px] font-bold text-slate-600 font-latin">Undergraduate Clinical Training (4th & 5th Year)</p>
+          <span class="inline-block border-b-2 border-red-600 px-2 py-0.5 text-xs font-black text-red-600 font-latin tracking-wider uppercase">
+            CASE DATA FORM (PAGE 1 OF 2)
+          </span>
+        </div>
+        <div class="col-span-3 text-left font-latin text-[10px] space-y-0.5">
+          <div><span class="font-bold">Academic Year:</span> 2026–2027</div>
+          <div><span class="font-bold">Patient File:</span> <span class="font-bold text-sky-700">AQ-2026-841</span></div>
+          <div class="flex items-center gap-1">
+            <span class="font-bold">Clinic No:</span>
+            <select class="p-0.5 bg-slate-100 border border-slate-300 rounded text-[10px] font-bold">
+              <option>Clinic 01</option>
+              <option selected>Clinic 02 (Chair 14)</option>
+              <option>Clinic 03</option>
+            </select>
+          </div>
+        </div>
+      </div>
+
+      <!-- Patient Bio -->
+      <table class="sheet-table mb-3 text-xs w-full border border-slate-800">
+        <tbody>
+          <tr>
+            <td class="w-28 font-bold bg-slate-100 p-1.5 border border-slate-800">Patient Name:</td>
+            <td class="p-1.5 border border-slate-800">
+              <input type="text" class="w-full p-1 border border-slate-300 rounded text-xs font-bold" value="أحمد عبد الرحمن خليل">
+            </td>
+            <td class="w-16 font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Age:</td>
+            <td class="w-28 p-1.5 border border-slate-800">
+              <select class="w-full p-1 border border-slate-300 rounded text-xs font-bold">
+                <option selected>25 سنة (شاب)</option>
+                <option>35 سنة</option>
+                <option>45 سنة</option>
+                <option>55 سنة</option>
+              </select>
+            </td>
+            <td class="w-16 font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Sex:</td>
+            <td class="w-28 p-1.5 border border-slate-800">
+              <select class="w-full p-1 border border-slate-300 rounded text-xs font-bold">
+                <option selected>ذكر (Male [M])</option>
+                <option>أنثى (Female [F])</option>
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Occupation:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select class="w-full p-1 border border-slate-300 rounded text-xs">
+                <option selected>موظف حكومي (Government Employee)</option>
+                <option>قطاع خاص (Private Sector)</option>
+                <option>طالب (Student)</option>
+                <option>أعمال حرة (Self-Employed)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Phone No:</td>
+            <td colspan="3" class="p-1.5 border border-slate-800">
+              <input type="text" class="w-full p-1 border border-slate-300 rounded text-xs font-latin" value="07701234567">
+            </td>
+          </tr>
+          <tr>
+            <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Address:</td>
+            <td class="p-1.5 border border-slate-800">
+              <select class="w-full p-1 border border-slate-300 rounded text-xs">
+                <option selected>بغداد (Baghdad)</option>
+                <option>النجف الأشرف (Najaf)</option>
+                <option>البصرة (Basra)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 p-1.5 text-center border border-slate-800">Date:</td>
+            <td colspan="3" class="p-1.5 border border-slate-800 font-latin text-xs">
+              <input type="text" class="w-full p-1 border border-slate-300 rounded text-xs text-center font-bold" value="21 / 09 / 2026">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+
+      <!-- 1. Patient History -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>1. PATIENT HISTORY</span>
+          <span class="text-[10px] font-normal text-slate-300">Anamnesis</span>
+        </div>
+        <div class="border border-slate-800 p-2.5 bg-slate-50/70 space-y-2">
+          <!-- C.C -->
+          <div class="bg-white p-2 rounded border border-slate-300">
+            <div class="flex items-center gap-2 mb-1">
+              <span class="text-xs font-bold text-[#0f2d59]">Chief Complaint (C.C):</span>
+              <select class="flex-1 p-1 bg-sky-50 border border-sky-300 rounded text-xs font-bold text-sky-900">
+                <option selected>ألم سني حاد في الضرس السفلي يمنعه من النوم (Severe Toothache)</option>
+                <option>تورم وانتفاخ لثوي أو وجهي (Facial / Intraoral Swelling)</option>
+                <option>سن مكسور أو جذر متبقي (Broken Tooth / Retained Root)</option>
+                <option>ألم ضرس عقل مطمور (Impacted Wisdom)</option>
+              </select>
+            </div>
+            <textarea rows="1" class="w-full p-1 border border-slate-300 rounded text-xs font-latin">Patient complains of severe throbbing pain in lower right molar preventing sleep for 2 days.</textarea>
+          </div>
+
+          <!-- H.P.I Grid -->
+          <div class="bg-white p-2 rounded border border-slate-300">
+            <span class="text-xs font-bold text-[#0f2d59] block pb-1 border-b border-slate-200 mb-1">History of Present Illness (H.P.I):</span>
+            <div class="grid grid-cols-3 gap-2 text-xs">
+              <div><span class="font-bold text-[10px] block">Site & Radiation:</span><select class="select-clean"><option selected>Localized to Lower Right Quadrant</option></select></div>
+              <div><span class="font-bold text-[10px] block">Severity (1-10):</span><select class="select-clean font-bold text-red-700"><option selected>Score 8/10 (Severe Pain)</option></select></div>
+              <div><span class="font-bold text-[10px] block">Onset:</span><select class="select-clean"><option selected>Spontaneous (تلقائي)</option></select></div>
+              <div><span class="font-bold text-[10px] block">Aggravating:</span><select class="select-clean"><option selected>Hot Food & Mastication</option></select></div>
+              <div><span class="font-bold text-[10px] block">Duration:</span><select class="select-clean"><option selected>Constant / Hours</option></select></div>
+              <div><span class="font-bold text-[10px] block">Relieving:</span><select class="select-clean"><option selected>NSAIDs / Cold rinses</option></select></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 2. Medical History Summary -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>2. MEDICAL HISTORY & SYSTEMIC REVIEW</span>
+          <span class="text-[10px] font-normal text-slate-300">24 Systemic Conditions Verified</span>
+        </div>
+        <div class="border border-slate-800 p-2 bg-slate-50/70 text-xs">
+          <div class="grid grid-cols-4 gap-2">
+            <div class="bg-white p-1 rounded border border-slate-300"><span class="font-bold text-[10px] block">Bleeding:</span><select class="select-clean"><option selected>No (سليم)</option></select></div>
+            <div class="bg-white p-1 rounded border border-slate-300"><span class="font-bold text-[10px] block">Diabetes:</span><select class="select-clean"><option selected>No (سليم)</option></select></div>
+            <div class="bg-white p-1 rounded border border-slate-300"><span class="font-bold text-[10px] block">Hypertension:</span><select class="select-clean"><option selected>No (سليم 120/80)</option></select></div>
+            <div class="bg-white p-1 rounded border border-slate-300"><span class="font-bold text-[10px] block">Allergy:</span><select class="select-clean"><option selected>No known allergy</option></select></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Footer of Page 1 -->
+      <div class="pt-2 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-500 font-latin">
+        <span>Al-Qabas Private College - Department of Oral & Maxillofacial Surgery</span>
+        <span class="font-bold text-slate-800">Page 1 of 2</span>
+        <span>Official Case Data Record</span>
+      </div>
+
+    </div>
+
+    <!-- Page Break for Printing -->
+    <div class="page-break my-6 border-b-2 border-dashed border-slate-400 no-print text-center text-xs text-slate-400 py-2">
+      --- فاصل الصفحات للطباعة (End of Page 1 • Start of Page 2) ---
+    </div>
+
+    <!-- ========================================================================
+         PAGE 2: DENTAL CHARTING & CLINICAL EXAMINATION (PAGE 2 OF 2)
+         ======================================================================== -->
+    <div class="page-container bg-white border-2 border-slate-800 p-6 sm:p-8 rounded-lg shadow-xl text-slate-900 leading-tight">
+      
+      <!-- Header -->
+      <div class="grid grid-cols-12 items-center border-b-2 border-slate-800 pb-3 mb-3 gap-2">
+        <div class="col-span-4 text-right">
+          <h3 class="text-xs font-black text-slate-900 font-latin uppercase">AL-QABAS PRIVATE COLLEGE</h3>
+          <p class="text-[11px] font-bold text-slate-700 font-latin">Department of Dentistry</p>
+          <p class="text-[10px] font-semibold text-slate-500 font-latin">Oral & Maxillofacial Surgery Branch</p>
+        </div>
+        <div class="col-span-5 text-center">
+          <h2 class="text-xs sm:text-sm font-black text-[#0f2d59] font-latin uppercase">ORAL & MAXILLOFACIAL SURGERY EXAMINATION</h2>
+          <p class="text-[10px] font-bold text-slate-600 font-latin">Dental Charting & Clinical Management</p>
+          <span class="inline-block border-b-2 border-red-600 px-2 py-0.5 text-xs font-black text-red-600 font-latin tracking-wider uppercase">
+            CASE DATA FORM (PAGE 2 OF 2)
+          </span>
+        </div>
+        <div class="col-span-3 text-left font-latin text-[10px] space-y-1">
+          <div><span class="font-bold">Date:</span> 21 / 09 / 2026</div>
+          <div><span class="font-bold">Student Group:</span> Group B3</div>
+          <div class="text-slate-500 text-[9px]">Academic Year 2026–2027</div>
+        </div>
+      </div>
+
+      <!-- 1. Soft Tissues -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>CLINICAL EXAMINATION (PART II: INTRAORAL SOFT TISSUES)</span>
+          <span class="text-[10px] font-normal text-slate-300">Mucosa & Periodontium</span>
+        </div>
+        <table class="sheet-table text-xs border border-slate-800">
+          <tbody>
+            <tr>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Lips & Labial:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي وسليم)</option><option>Lesion / Ulcer</option></select></td>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Buccal Mucosa:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي وسليم)</option><option>Obliterated / Swollen</option></select></td>
+            </tr>
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Tongue:</td>
+              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي وسليم)</option><option>Coated</option></select></td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Floor of Mouth:</td>
+              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (جس سليم بكلتا اليدين)</option><option>Swelling</option></select></td>
+            </tr>
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Palate:</td>
+              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (طبيعي)</option><option>Torus Palatinus</option></select></td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Gingiva & Perio:</td>
+              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Normal (وردي متماسك)</option><option>BOP / Pocket</option></select></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 2. Hard Tissue Charting (4 Crosses) -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>DENTAL HARD TISSUE CHARTING</span>
+          <span class="text-[10px] font-normal text-slate-300">Permanent Dentition Status</span>
+        </div>
+        <div class="border border-slate-800 p-2 bg-slate-50/70">
+          <div class="grid grid-cols-4 gap-2 text-xs">
+            <div class="bg-white p-1.5 rounded border border-slate-300 text-center font-latin">
+              <span class="font-bold block text-[#0f2d59] border-b pb-0.5 mb-1">Missing Teeth</span>
+              <div class="cross-chart-container"><div class="cross-line-v"></div><div class="cross-line-h"></div><input class="cross-input absolute top-0 right-0" value="18"><input class="cross-input absolute top-0 left-0" value="28"><input class="cross-input absolute bottom-0 right-0" value="48"><input class="cross-input absolute bottom-0 left-0" value="38"></div>
+            </div>
+            <div class="bg-white p-1.5 rounded border border-slate-300 text-center font-latin">
+              <span class="font-bold block text-[#0f2d59] border-b pb-0.5 mb-1">Caries / Restorations</span>
+              <div class="cross-chart-container"><div class="cross-line-v"></div><div class="cross-line-h"></div><input class="cross-input absolute top-0 right-0" value="16"><input class="cross-input absolute top-0 left-0" value="26"><input class="cross-input absolute bottom-0 right-0" value="46"><input class="cross-input absolute bottom-0 left-0" value=""></div>
+            </div>
+            <div class="bg-white p-1.5 rounded border border-slate-300 text-center font-latin">
+              <span class="font-bold block text-[#0f2d59] border-b pb-0.5 mb-1">Retained Roots</span>
+              <div class="cross-chart-container"><div class="cross-line-v"></div><div class="cross-line-h"></div><input class="cross-input absolute top-0 right-0"><input class="cross-input absolute top-0 left-0"><input class="cross-input absolute bottom-0 right-0" value="46"><input class="cross-input absolute bottom-0 left-0"></div>
+            </div>
+            <div class="bg-white p-1.5 rounded border border-slate-300 text-center font-latin">
+              <span class="font-bold block text-[#0f2d59] border-b pb-0.5 mb-1">Mobile Teeth</span>
+              <div class="cross-chart-container"><div class="cross-line-v"></div><div class="cross-line-h"></div><input class="cross-input absolute top-0 right-0"><input class="cross-input absolute top-0 left-0"><input class="cross-input absolute bottom-0 right-0"><input class="cross-input absolute bottom-0 left-0"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 3. Target Tooth -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>DETAILED EXAMINATION OF OFFENDING / TARGET TOOTH</span>
+          <span class="text-[10px] font-normal text-slate-300">Surgical Evaluation</span>
+        </div>
+        <table class="sheet-table text-xs border border-slate-800">
+          <tbody>
+            <tr>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800 text-red-700">Target Tooth #:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800 font-bold font-latin">Tooth: #46 (Lower Right 1st Molar)</td>
+              <td class="w-1/6 font-bold bg-slate-100 p-1.5 border border-slate-800">Condition:</td>
+              <td class="w-2/6 p-1.5 border border-slate-800"><select class="select-clean"><option selected>Broken / Grossly Carious</option><option>Retained Root</option></select></td>
+            </tr>
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Inspection:</td>
+              <td class="p-1.5 border border-slate-800"><select class="select-clean"><option selected>Gross Caries (نخر سني عميق)</option></select></td>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Percussion:</td>
+              <td class="p-1.5 border border-slate-800 font-latin text-[11px]"><span class="font-bold">Vertical:</span> Positive [+] | <span class="font-bold">Horizontal:</span> Negative [-]</td>
+            </tr>
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Radiographic:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800 font-latin text-xs">
+                <strong>IOPA:</strong> Periapical Radiolucency associated with distal root • Intact lamina dura on mesial root • Proximity to ID Canal verified.
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 4. Diagnosis & Treatment -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>4. DIAGNOSIS & TREATMENT PLAN</span>
+          <span class="text-[10px] font-normal text-slate-300">Clinical Decision</span>
+        </div>
+        <table class="sheet-table text-xs border border-slate-800">
+          <tbody>
+            <tr>
+              <td class="w-1/5 font-bold bg-amber-50 p-1.5 border border-slate-800 text-amber-900">Differential Diagnosis:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800 font-semibold font-latin text-slate-800">
+                Chronic Apical Periodontitis vs Periapical Granuloma / Cyst
+              </td>
+            </tr>
+            <tr>
+              <td class="w-1/5 font-bold bg-slate-100 p-1.5 border border-slate-800 text-red-700">Definitive Diagnosis:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800 font-bold font-latin text-sky-950">Chronic Apical Periodontitis with Periapical Granuloma</td>
+            </tr>
+            <tr>
+              <td class="font-bold bg-slate-100 p-1.5 border border-slate-800">Treatment Plan:</td>
+              <td colspan="3" class="p-1.5 border border-slate-800 font-latin text-xs font-semibold">
+                [X] Simple Extraction • Technique: ID Block + Long Buccal (Lidocaine 2% with 1:80,000 Adrenaline)
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- 5. Evaluation Table (Total = 10 Marks) -->
+      <div class="mb-3">
+        <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
+          <span>STUDENT EVALUATION & MARKS ALLOCATION (TOTAL = 10 MARKS)</span>
+          <span class="text-[10px] font-normal text-slate-300">Academic Assessment</span>
+        </div>
+        <table class="sheet-table text-xs border border-slate-800 font-latin">
+          <thead>
+            <tr class="bg-slate-200 font-bold">
+              <th class="w-20 text-center p-1 border border-slate-800">Max Mark</th>
+              <th class="w-1/3 text-right p-1 border border-slate-800">Evaluation Item</th>
+              <th class="text-right p-1 border border-slate-800">Specific Clinical Details</th>
+              <th class="w-24 text-center p-1 border border-slate-800">Gained Mark</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr><td class="text-center font-bold">2 Marks</td><td>Case Sheet Evaluation</td><td>Data Collection (1M) + Correct Diagnosis (1M)</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
+            <tr><td class="text-center font-bold">1 Mark</td><td>Local Anesthesia Admin.</td><td>Anatomical landmarks, aspiration & technique</td><td class="text-center font-bold text-sky-900">1.0 / 1</td></tr>
+            <tr><td class="text-center font-bold">2 Marks</td><td>Extraction Procedure</td><td>Instrument selection, elevator/forceps grip & force</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
+            <tr><td class="text-center font-bold">2 Marks</td><td>Sterilization & Infection</td><td>PPE & aseptic chain maintained</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
+            <tr><td class="text-center font-bold">1 Mark</td><td>Wound Care & Post-Op</td><td>Hemostasis, socket compression & verbal instructions</td><td class="text-center font-bold text-sky-900">1.0 / 1</td></tr>
+            <tr><td class="text-center font-bold">2 Marks</td><td>Operator Position & Ethics</td><td>Ergonomics, patient comfort, consent & communication</td><td class="text-center font-bold text-sky-900">2.0 / 2</td></tr>
+            <tr class="bg-emerald-50 font-black"><td class="text-center">10 Marks</td><td colspan="2" class="text-left">TOTAL CLINICAL SCORE:</td><td class="text-center text-emerald-800 text-sm font-black">10.0 / 10</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Signatures Footer -->
+      <div class="border border-slate-800 p-2 rounded bg-slate-50/70 font-latin text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <div><span class="font-bold">Student Name:</span> Ali Haider Al-Mousawi (5th Year)</div>
+          <div><span class="font-bold">Senior Supervisor:</span> Dr. Abdallah Al-Salihi (Verified & Approved)</div>
+        </div>
+      </div>
+
+      <!-- Bottom Line -->
+      <div class="pt-2 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-500 font-latin mt-2">
+        <span>Al-Qabas Private College - Department of Oral & Maxillofacial Surgery</span>
+        <span class="font-bold text-slate-800">Page 2 of 2</span>
+        <span>Official Clinical Examination Record</span>
+      </div>
+
+    </div>
+
+  </div>
+
+  <script>
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+  </script>
+</body>
+</html>

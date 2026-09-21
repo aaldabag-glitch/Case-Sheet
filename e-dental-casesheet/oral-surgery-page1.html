@@ -1,0 +1,1014 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Oral Surgery Department • Case Data Form (Page 1) - Al-Qabas Private College</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  
+  <!-- Google Fonts: Cairo & Plus Jakarta Sans -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+  
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+
+  <style>
+    body {
+      font-family: 'Cairo', 'Plus Jakarta Sans', system-ui, sans-serif;
+      background-color: #f1f5f9;
+      color: #0f172a;
+    }
+    .font-latin {
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .sheet-table {
+      border-collapse: collapse;
+      width: 100%;
+    }
+    .sheet-table th, .sheet-table td {
+      border: 1px solid #1e293b;
+      padding: 4px 6px;
+    }
+    .sheet-header-box {
+      background-color: #0f2d59;
+      color: #ffffff;
+      font-weight: 800;
+      padding: 4px 10px;
+      font-size: 0.8rem;
+      letter-spacing: 0.05em;
+    }
+    .select-clean {
+      width: 100%;
+      background-color: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      color: #0f172a;
+      outline: none;
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+    .select-clean:focus {
+      border-color: #0284c7;
+      background-color: #ffffff;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+    .select-clean:hover {
+      background-color: #ffffff;
+    }
+    .input-clean {
+      width: 100%;
+      background-color: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 4px;
+      padding: 3px 6px;
+      font-size: 0.75rem;
+      color: #0f172a;
+      outline: none;
+    }
+    .input-clean:focus {
+      border-color: #0284c7;
+      box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+    }
+
+    /* Print Formatting */
+    @media print {
+      body {
+        background: #ffffff !important;
+        padding: 0 !important;
+      }
+      .no-print {
+        display: none !important;
+      }
+      .page-container {
+        border: none !important;
+        box-shadow: none !important;
+        max-width: 100% !important;
+        padding: 0 !important;
+        margin: 0 !important;
+      }
+      .select-clean {
+        border: none !important;
+        appearance: none !important;
+        -webkit-appearance: none !important;
+        background: transparent !important;
+        font-size: 0.75rem !important;
+        padding: 0 !important;
+      }
+      .input-clean {
+        border: none !important;
+        background: transparent !important;
+        padding: 0 !important;
+      }
+      .sheet-table th, .sheet-table td {
+        border-color: #000000 !important;
+      }
+      .sheet-header-box {
+        background-color: #0f2d59 !important;
+        color: #ffffff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+    }
+  </style>
+</head>
+<body class="p-3 sm:p-6 flex flex-col items-center">
+
+  <!-- Top Action Bar (Save / Print / Return) -->
+  <div class="no-print max-w-[960px] w-full mb-4 flex items-center justify-between bg-white p-3.5 rounded-2xl shadow-sm border border-slate-200">
+    <div class="flex items-center gap-3">
+      <a href="index.html" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all">
+        <i data-lucide="arrow-right" class="w-4 h-4"></i>
+        <span>العودة للرئيسية (Back to Portal)</span>
+      </a>
+      <span class="text-xs text-slate-400">|</span>
+      <span class="text-xs font-bold text-sky-800 bg-sky-50 px-2.5 py-1 rounded-lg border border-sky-200">
+        شعبة جراحة الفم وقلع الأسنان [OMFS-EXT-01]
+      </span>
+    </div>
+
+    <div class="flex items-center gap-2 flex-wrap">
+      <a href="oral-surgery-page2.html" class="px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all shadow-xs">
+        <span>الانتقال إلى الصفحة الثانية (Page 2)</span>
+        <i data-lucide="arrow-left" class="w-4 h-4"></i>
+      </a>
+      <button onclick="saveFormData()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
+        <i data-lucide="save" class="w-4 h-4"></i>
+        <span>حفظ الاستمارة (Save Data)</span>
+      </button>
+      <button onclick="window.print()" class="px-4 py-2 bg-sky-600 hover:bg-sky-700 text-white rounded-xl text-xs font-bold flex items-center gap-1.5 shadow-sm transition-all">
+        <i data-lucide="printer" class="w-4 h-4"></i>
+        <span>طباعة الصفحة الأولى (Print A4)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Main Sheet Container (Al-Qabas Clinical Training Format - Page 1) -->
+  <div class="page-container max-w-[960px] w-full bg-white border-2 border-slate-800 p-6 sm:p-8 rounded-lg shadow-xl text-slate-900 leading-tight">
+    
+    <!-- ====================================================================
+         DOCUMENT HEADER
+         ==================================================================== -->
+    <div class="grid grid-cols-12 items-center border-b-2 border-slate-800 pb-3 mb-4 gap-2">
+      <!-- Left: College & Department -->
+      <div class="col-span-4 text-right">
+        <h2 class="text-xs sm:text-sm font-black text-slate-900 tracking-wide font-latin uppercase">AL-QABAS PRIVATE COLLEGE</h2>
+        <p class="text-[11px] font-bold text-slate-700 font-latin">Department of Dentistry</p>
+        <p class="text-[10px] font-semibold text-slate-500 font-latin">Oral & Maxillofacial Surgery Branch</p>
+      </div>
+
+      <!-- Center: Title -->
+      <div class="col-span-5 text-center">
+        <h1 class="text-sm sm:text-base font-black text-[#0f2d59] font-latin tracking-wider uppercase">ORAL SURGERY DEPARTMENT</h1>
+        <p class="text-[11px] font-bold text-slate-700 font-latin">Undergraduate Clinical Training (4th & 5th Year)</p>
+        <div class="inline-block border-b-2 border-red-600 px-3 py-0.5 mt-0.5">
+          <span class="text-xs sm:text-sm font-black text-red-600 font-latin tracking-widest uppercase">CASE DATA FORM</span>
+        </div>
+      </div>
+
+      <!-- Right: Academic Session & File -->
+      <div class="col-span-3 text-left font-latin text-[11px] space-y-0.5 text-slate-800">
+        <div><span class="font-bold">Academic Year:</span> 2026–2027</div>
+        <div class="flex items-center gap-1">
+          <span class="font-bold">Patient File No:</span>
+          <input type="text" id="file-no" class="input-clean !py-0 !px-1 w-24 text-[10px] text-center font-bold" value="AQ-2026-841">
+        </div>
+        <div class="flex items-center gap-1">
+          <span class="font-bold">Clinic No:</span>
+          <select id="clinic-no" class="select-clean !py-0 !px-1 w-24 text-[10px] font-bold">
+            <option>Clinic 01 (A)</option>
+            <option selected>Clinic 02 (B)</option>
+            <option>Clinic 03 (C)</option>
+            <option>Clinic 04 (D)</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         PATIENT BIOGRAPHY TABLE
+         ==================================================================== -->
+    <table class="sheet-table mb-4 text-xs">
+      <tbody>
+        <tr>
+          <td class="w-28 font-bold bg-slate-100">Patient Name:</td>
+          <td>
+            <input type="text" id="bio-name" class="input-clean font-bold" placeholder="اسم المريض الرباعي (Full Patient Name)">
+          </td>
+          <td class="w-16 font-bold bg-slate-100 text-center">Age:</td>
+          <td class="w-28">
+            <select id="bio-age" class="select-clean">
+              <option value="18">18 - 20 سنة</option>
+              <option value="25" selected>21 - 30 سنة (شاب)</option>
+              <option value="35">31 - 40 سنة</option>
+              <option value="45">41 - 50 سنة</option>
+              <option value="55">51 - 60 سنة</option>
+              <option value="65">> 60 سنة (مسن)</option>
+            </select>
+          </td>
+          <td class="w-16 font-bold bg-slate-100 text-center">Sex:</td>
+          <td class="w-28">
+            <select id="bio-sex" class="select-clean font-bold">
+              <option value="M" selected>ذكر (Male [M])</option>
+              <option value="F">أنثى (Female [F])</option>
+            </select>
+          </td>
+        </tr>
+        <tr>
+          <td class="font-bold bg-slate-100">Occupation:</td>
+          <td>
+            <select id="bio-occ" class="select-clean">
+              <option selected>موظف حكومي (Government Employee)</option>
+              <option>كاسب / قطاع خاص (Private Sector / Self-Employed)</option>
+              <option>طالب جامعي / مدرسي (Student)</option>
+              <option>ربة منزل (Housewife)</option>
+              <option>متقاعد (Retired)</option>
+              <option>أعمال حرة (Freelancer / Merchant)</option>
+              <option>أخرى (Other)</option>
+            </select>
+          </td>
+          <td class="font-bold bg-slate-100 text-center">Phone No:</td>
+          <td colspan="3">
+            <input type="text" id="bio-phone" class="input-clean font-latin" placeholder="0770XXXXXXX">
+          </td>
+        </tr>
+        <tr>
+          <td class="font-bold bg-slate-100">Address:</td>
+          <td>
+            <select id="bio-address" class="select-clean">
+              <option selected>بغداد (Baghdad)</option>
+              <option>النجف الأشرف (Najaf)</option>
+              <option>كربلاء المقدسة (Karbala)</option>
+              <option>البصرة (Basra)</option>
+              <option>بابل - الحلة (Babylon)</option>
+              <option>نينوى - الموصل (Nineveh)</option>
+              <option>أربيل (Erbil)</option>
+              <option>كركوك (Kirkuk)</option>
+              <option>الأنبار (Anbar)</option>
+              <option>ديالى (Diyala)</option>
+              <option>واسط - الكوت (Wasit)</option>
+              <option>ذي قار - الناصرية (Dhi Qar)</option>
+              <option>ميسان - العمارة (Maysan)</option>
+              <option>صلاح الدين (Saladin)</option>
+              <option>القادسية - الديوانية (Qadisiyyah)</option>
+              <option>المثنى - السماوة (Muthanna)</option>
+            </select>
+          </td>
+          <td class="font-bold bg-slate-100 text-center">Date:</td>
+          <td colspan="3">
+            <input type="text" id="bio-date" class="input-clean font-latin font-bold text-center" value="20 / 09 / 2026">
+          </td>
+        </tr>
+      </tbody>
+    </table>
+
+    <!-- ====================================================================
+         SECTION 1: PATIENT HISTORY (ANAMNESIS)
+         ==================================================================== -->
+    <div class="mb-4">
+      <div class="sheet-header-box flex items-center justify-between font-latin">
+        <span>1. PATIENT HISTORY</span>
+        <span class="text-[10px] font-normal tracking-normal text-slate-300">Anamnesis</span>
+      </div>
+
+      <table class="sheet-table text-xs">
+        <tbody>
+          <!-- Chief Complaint (C.C) -->
+          <tr>
+            <td class="w-32 font-bold bg-slate-100 align-top">
+              Chief Complaint<br>
+              <span class="font-latin text-[10px] font-normal text-slate-500">(C.C):</span>
+            </td>
+            <td>
+              <div class="space-y-1.5">
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-[11px] text-slate-600">التصنيف السريري للشكوى:</span>
+                  <select id="cc-dropdown" class="select-clean font-bold text-sky-900 max-w-md">
+                    <option selected>ألم سني حاد (Severe Toothache / Dental Pain)</option>
+                    <option>تورم وانتفاخ لثوي أو وجهي (Facial / Intraoral Swelling)</option>
+                    <option>سن مكسور أو جذر متبقي (Broken Tooth / Retained Root)</option>
+                    <option>طلب قلع سني اختياري (Elective Extraction Request)</option>
+                    <option>نزيف مستمر من اللثة أو موقع سن سابق (Persistent Bleeding)</option>
+                    <option>قلع موصى به لتقويم الأسنان (Orthodontic Extraction Recommendation)</option>
+                    <option>ألم ضرس عقل مطمور / التهاب تاجي (Pericoronitis / Impacted 3rd Molar)</option>
+                    <option>ألم أو طقطقة في مفصل الفك (TMJ Pain / Arthralgia)</option>
+                    <option>صعوبة وتحدد فتح الفم (Trismus / Limited Mouth Opening)</option>
+                    <option>قلع لتهيئة طقم تعويضي (Prosthetic Clearance for Denture)</option>
+                    <option>حركة سنية متقدمة وفقدان عظم (Severe Mobility / Periodontal Breakdown)</option>
+                  </select>
+                </div>
+                <div>
+                  <textarea id="cc-text" rows="1" class="input-clean text-xs leading-normal" placeholder="In patient's own words (اكتب شكوى المريض بكلماته الخاصة وتاريخ بدايتها)...">المريض يشكو من ألم متزايد في الضرس السفلي يمنعه من النوم والمضغ منذ يومين.</textarea>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <!-- History of Present Illness (H.P.I) Header -->
+          <tr>
+            <td colspan="2" class="bg-slate-200 font-bold text-[11px] text-[#0f2d59] font-latin">
+              History of Present Illness (H.P.I - Pain & Symptom Analysis)
+            </td>
+          </tr>
+
+          <!-- H.P.I Grid with Dropdowns -->
+          <tr>
+            <td colspan="2" class="p-0">
+              <table class="w-full text-xs">
+                <tbody>
+                  <!-- Row 1: Site & Radiation | Severity -->
+                  <tr class="border-b border-slate-300">
+                    <td class="w-36 font-bold bg-slate-50 p-1.5">Site & Radiation:</td>
+                    <td class="p-1.5 border-l border-slate-300">
+                      <select id="hpi-site" class="select-clean">
+                        <option selected>Localized to tooth/quadrant (موضعي في سن محدد بالفك السفلي)</option>
+                        <option>Radiating to Ear & TMJ (يمتد للأذن والمفصل الصدغي)</option>
+                        <option>Radiating to Temporal & Head (يمتد لمنطقة الصدغ والرأس)</option>
+                        <option>Radiating to Neck & Submandibular (يمتد للرقبة وتحت الفك)</option>
+                        <option>Radiating to Eye & Maxilla (يمتد للعين والفك العلوي)</option>
+                        <option>Non-radiating (موضعي غير ممتد)</option>
+                      </select>
+                    </td>
+                    <td class="w-32 font-bold bg-slate-50 p-1.5">Severity (1 - 10):</td>
+                    <td class="p-1.5">
+                      <select id="hpi-severity" class="select-clean font-bold text-red-700">
+                        <option>Score 1-2: Very Mild (خفيف جداً)</option>
+                        <option>Score 3-4: Mild to Moderate (خفيف إلى معتدل)</option>
+                        <option>Score 5-6: Moderate Pain (معتدل يؤثر على التركيز)</option>
+                        <option selected>Score 7-8: Severe Pain (شديد يمنع النوم والعمل)</option>
+                        <option>Score 9-10: Excruciating Emergency (ألم حاد لا يطاق / طارئ)</option>
+                      </select>
+                    </td>
+                  </tr>
+
+                  <!-- Row 2: Onset | Aggravating Factors -->
+                  <tr class="border-b border-slate-300">
+                    <td class="font-bold bg-slate-50 p-1.5">Onset:</td>
+                    <td class="p-1.5 border-l border-slate-300">
+                      <select id="hpi-onset" class="select-clean">
+                        <option selected>Spontaneous (تلقائي بدون محفز خارجي)</option>
+                        <option>Provoked (محفز باللمس أو درجات الحرارة)</option>
+                        <option>Sudden Acute (مفاجئ وحاد منذ ساعات)</option>
+                        <option>Gradual Insidious (تدريجي متزايد منذ أيام/أسابيع)</option>
+                      </select>
+                    </td>
+                    <td class="font-bold bg-slate-50 p-1.5">Aggravating Factors:</td>
+                    <td class="p-1.5">
+                      <select id="hpi-aggravating" class="select-clean">
+                        <option selected>Hot Foods & Drinks (المشروبات والأطعمة الساخنة)</option>
+                        <option>Cold Stimuli (المشروبات الباردة والمثلجة)</option>
+                        <option>Mastication / Biting (المضغ والعض المباشر على السن)</option>
+                        <option>Sweet / Sugary Items (الحلويات والسكريات)</option>
+                        <option>Lying Down at Night (الاستلقاء والنوم)</option>
+                        <option>None (لا يوجد محفز محدد - مستمر)</option>
+                      </select>
+                    </td>
+                  </tr>
+
+                  <!-- Row 3: Duration | Relieving Factors -->
+                  <tr class="border-b border-slate-300">
+                    <td class="font-bold bg-slate-50 p-1.5">Duration:</td>
+                    <td class="p-1.5 border-l border-slate-300">
+                      <select id="hpi-duration" class="select-clean">
+                        <option>Seconds (ثوانٍ معدودة يزول بسرعة)</option>
+                        <option>Minutes (عدة دقائق بعد زوال المؤثر)</option>
+                        <option selected>Hours (يستمر لساعات طويلة)</option>
+                        <option>Constant & Continuous (مستمر على مدار اليوم دون انقطاع)</option>
+                      </select>
+                    </td>
+                    <td class="font-bold bg-slate-50 p-1.5">Relieving Factors:</td>
+                    <td class="p-1.5">
+                      <select id="hpi-relieving" class="select-clean">
+                        <option selected>Analgesics / NSAIDs (مسكنات الألم - تسكين مؤقت)</option>
+                        <option>Cold Water Rinses (المضمضة بالماء البارد)</option>
+                        <option>Warm Saline Mouthwash (الماء الدافئ والملح)</option>
+                        <option>Rest & Elevation (الراحة والجلوس عمودياً)</option>
+                        <option>None (لا شيء يخفف الألم إطلاقاً)</option>
+                      </select>
+                    </td>
+                  </tr>
+
+                  <!-- Row 4: Character / Nature | Frequency / Timing -->
+                  <tr class="border-b border-slate-300">
+                    <td class="font-bold bg-slate-50 p-1.5">Character / Nature:</td>
+                    <td class="p-1.5 border-l border-slate-300">
+                      <select id="hpi-character" class="select-clean">
+                        <option selected>Throbbing & Pulsating (نابض متزامن مع النبض)</option>
+                        <option>Sharp & Lancinating (حاد وثاقب)</option>
+                        <option>Dull Ache (كليل ومبهم ومستمر)</option>
+                        <option>Burning Sensation (حارق)</option>
+                        <option>Pressure / Fullness (شعور بالضغط والامتلاء)</option>
+                      </select>
+                    </td>
+                    <td class="font-bold bg-slate-50 p-1.5">Frequency / Timing:</td>
+                    <td class="p-1.5">
+                      <select id="hpi-frequency" class="select-clean">
+                        <option selected>Night Pain (ألم ليلي شديد يوقظ من النوم)</option>
+                        <option>Intermittent (نوبات متقطعة خلال اليوم)</option>
+                        <option>Continuous (مستمر دائماً)</option>
+                        <option>Post-prandial (بعد الوجبات مباشرة)</option>
+                        <option>Morning (صباحي عند الاستيقاظ)</option>
+                      </select>
+                    </td>
+                  </tr>
+
+                  <!-- Row 5: Associated Symptoms -->
+                  <tr>
+                    <td class="font-bold bg-slate-50 p-1.5">Associated Symptoms:</td>
+                    <td colspan="3" class="p-1.5">
+                      <select id="hpi-associated" class="select-clean">
+                        <option selected>None (لا توجد أعراض جهازية مرافقة)</option>
+                        <option>Fever & General Malaise (حمى وارتفاع حرارة مع توعك)</option>
+                        <option>Trismus / Difficulty Opening Mouth (تشنج وصعوبة فتح الفم)</option>
+                        <option>Paresthesia / Lip Numbness (خدر وتنميل في الشفة السفلية والذقن)</option>
+                        <option>Tender Lymphadenopathy (تضخم العقد اللمفاوية مع ألم)</option>
+                        <option>Bad Taste & Foul Odor (طعم كريه ورائحة قيح)</option>
+                        <option>Extraoral Visible Swelling (انتفاخ وتورم ظاهر بالوجه)</option>
+                      </select>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Past Dental History -->
+          <tr>
+            <td class="font-bold bg-slate-100 align-top">
+              Past Dental History:
+            </td>
+            <td>
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 mb-1.5">
+                <div>
+                  <span class="text-[10px] font-bold text-slate-500 block">Previous Extractions:</span>
+                  <select id="pdh-prev-ext" class="select-clean font-semibold">
+                    <option selected>Yes - Previous Extractions (نعم - لديه تجارب قلع سابقة)</option>
+                    <option>No - First Extraction (كلا - هذه أول تجربة قلع للمريض)</option>
+                  </select>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold text-slate-500 block">Past Complications:</span>
+                  <select id="pdh-comp" class="select-clean font-semibold">
+                    <option selected>None (طبيعي بدون أي مضاعفات سابقة)</option>
+                    <option>Excessive Bleeding (نزيف مطول ما بعد القلع)</option>
+                    <option>Delayed Healing / Dry Socket (سنخ جاف وألم متأخر)</option>
+                    <option>Syncope / Fainting (إغماء وهبوط ضغط)</option>
+                    <option>Allergy to Local Anesthesia (تحسس من البنج الموضعي)</option>
+                    <option>Trismus (تشنج وصعوبة فتح الفم بعد الحقن)</option>
+                  </select>
+                </div>
+                <div>
+                  <span class="text-[10px] font-bold text-slate-500 block">Past Dental Treatments:</span>
+                  <select id="pdh-treatments" class="select-clean font-semibold">
+                    <option selected>Restorations / Fillings (حشوات ترميمية سابقة)</option>
+                    <option>Endodontic RCT (علاج جذور وأعصاب سابق)</option>
+                    <option>Scaling & Cleaning (تقليح وتنظيف دوري للثة)</option>
+                    <option>Fixed Crowns / Bridges (تيجان وجسور سابقة)</option>
+                    <option>No Previous Treatments (لم يتلقَ علاجات سابقة)</option>
+                  </select>
+                </div>
+              </div>
+              <input type="text" id="pdh-details" class="input-clean text-[11px]" placeholder="Details of Previous Treatments / Restorations (تفاصيل إضافية عن الزيارات السابقة)..." value="قلع سن طاحن سفلي سابق قبل سنتين بدون مضاعفات تذكر.">
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====================================================================
+         SECTION 2: MEDICAL HISTORY (SYSTEMIC REVIEW) - 24 DISEASE DROPDOWNS
+         ==================================================================== -->
+    <div class="mb-4">
+      <div class="sheet-header-box flex items-center justify-between font-latin">
+        <span>2. MEDICAL HISTORY (SYSTEMIC REVIEW)</span>
+        <span class="text-[10px] font-normal italic text-slate-300">"Have you ever had or currently have any of the following?"</span>
+      </div>
+
+      <!-- 24 Disease Grid (4 Columns x 6 Rows) -->
+      <div class="border border-slate-800 p-2 bg-slate-50/50">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 text-xs">
+          
+          <!-- Item 1: Anemia -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">1. Anemia / Iron Defic.:</span>
+            <select class="select-clean med-check mt-0.5" id="med-1">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-mild">Yes - Mild Anemia (نعم - فقر دم طفيف)</option>
+              <option value="yes-severe">Yes - Severe / Under Rx (نعم - شديد يتلقى علاجاً)</option>
+            </select>
+          </div>
+
+          <!-- Item 2: Bleeding Disorders -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-rose-700">2. Bleeding Disorders:</span>
+            <select class="select-clean med-check mt-0.5 font-bold" id="med-2">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-coag">Yes - Coagulopathy / Hemophilia (نعم - اضطراب تخثر)</option>
+              <option value="yes-aspirin">Yes - On Antiplatelet/Aspirin (نعم - يتناول مسيلات دم)</option>
+            </select>
+          </div>
+
+          <!-- Item 3: Kidney / Renal -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">3. Kidney / Renal Disease:</span>
+            <select class="select-clean med-check mt-0.5" id="med-3">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-impair">Yes - Renal Impairment (قصور كلوي)</option>
+              <option value="yes-dialysis">Yes - Hemodialysis (غسيل كلوي - حذر مع القلع)</option>
+            </select>
+          </div>
+
+          <!-- Item 4: Drug Intake / Steroids -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-amber-800">4. Drug Intake / Steroids:</span>
+            <select class="select-clean med-check mt-0.5" id="med-4">
+              <option selected value="no">No (لا يتناول كورتيزون)</option>
+              <option value="yes-corticosteroids">Yes - Long-term Steroids (كورتيزون طويل الأمد)</option>
+              <option value="yes-immunosuppressants">Yes - Immunosuppressants (مثبطات مناعية)</option>
+            </select>
+          </div>
+
+          <!-- Item 5: Artificial Valve / Joint -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-rose-700">5. Artificial Valve / Joint:</span>
+            <select class="select-clean med-check mt-0.5 font-bold" id="med-5">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-valve">Yes - Prosthetic Heart Valve (صمام قلب اصطناعي - وقاية حيوية)</option>
+              <option value="yes-joint">Yes - Artificial Joint Prosthesis (مفصل اصطناعي)</option>
+            </select>
+          </div>
+
+          <!-- Item 6: Diabetes Mellitus -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">6. Diabetes Mellitus:</span>
+            <select class="select-clean med-check mt-0.5 font-semibold" id="med-6">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-controlled">Yes - Controlled (HbA1c < 7%) (مسيطر عليه)</option>
+              <option value="yes-uncontrolled">Yes - Uncontrolled (HbA1c > 8.5%) (غير مسيطر عليه)</option>
+              <option value="yes-insulin">Yes - Type 1 Insulin Dependent (معتمد على الأنسولين)</option>
+            </select>
+          </div>
+
+          <!-- Item 7: Liver Disease / Hepatitis -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">7. Liver Disease / Hepatitis:</span>
+            <select class="select-clean med-check mt-0.5" id="med-7">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-hep-b">Yes - Hepatitis B/C Carrier (حامل لالتهاب الكبد B/C)</option>
+              <option value="yes-cirrhosis">Yes - Cirrhosis / Liver Impairment (تليف كبدي)</option>
+              <option value="yes-fatty">Yes - Fatty Liver (كبد دهني)</option>
+            </select>
+          </div>
+
+          <!-- Item 8: Past Hospitalization -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">8. Past Hospitalization:</span>
+            <select class="select-clean med-check mt-0.5" id="med-8">
+              <option selected value="no">No (لم يدخل مستشفى)</option>
+              <option value="yes-surgery">Yes - Major Surgery in Past (عملية جراحية كبرى سابقة)</option>
+              <option value="yes-icu">Yes - ICU Admission (عناية مركزة سابقة)</option>
+            </select>
+          </div>
+
+          <!-- Item 9: Bronchial Asthma -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">9. Bronchial Asthma:</span>
+            <select class="select-clean med-check mt-0.5" id="med-9">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-mild">Yes - Mild / Inhaler on Need (ربو خفيف مع بخاخ)</option>
+              <option value="yes-severe">Yes - Severe Chronic Asthma (ربو مزمن حاد)</option>
+            </select>
+          </div>
+
+          <!-- Item 10: Fainting / Syncope -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">10. Fainting / Syncope:</span>
+            <select class="select-clean med-check mt-0.5" id="med-10">
+              <option selected value="no">No (لا يعاني من إغماء)</option>
+              <option value="yes-vasovagal">Yes - Vasovagal Syncope at Dental (إغماء عصبي بالعيادة)</option>
+              <option value="yes-orthostatic">Yes - Orthostatic Hypotension (هبوط ضغط انتصابي)</option>
+            </select>
+          </div>
+
+          <!-- Item 11: Radiation / Chemo Rx -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-rose-700">11. Radiation / Chemo Rx:</span>
+            <select class="select-clean med-check mt-0.5 font-bold" id="med-11">
+              <option selected value="no">No (لم يتلقَ إشعاع/كيماوي)</option>
+              <option value="yes-head-neck">Yes - Head & Neck Radiotherapy (إشعاعي للرأس والعنق - خطر ORN)</option>
+              <option value="yes-chemo">Yes - Chemotherapy within 6 months (علاج كيميائي حديث)</option>
+            </select>
+          </div>
+
+          <!-- Item 12: Allergies (Penicillin/LA) -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-rose-700">12. Allergies (Penicillin/LA):</span>
+            <select class="select-clean med-check mt-0.5 font-bold text-red-700" id="med-12">
+              <option selected value="no">No Known Allergies (لا توجد حساسية)</option>
+              <option value="yes-penicillin">Yes - Penicillin Allergy (حساسية بنسلين مؤكدة)</option>
+              <option value="yes-la">Yes - Local Anesthesia / Sulfite (حساسية بنج أو كبريتات)</option>
+              <option value="yes-nsaids">Yes - Aspirin / NSAIDs Allergy (حساسية أسبرين ومسكنات)</option>
+            </select>
+          </div>
+
+          <!-- Item 13: Blood Diseases / Leukemia -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">13. Blood Diseases / Leukemia:</span>
+            <select class="select-clean med-check mt-0.5" id="med-13">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-leukemia">Yes - Leukemia / Lymphoma (لوكيميا / لمفوما)</option>
+              <option value="yes-thrombocytopenia">Yes - Thrombocytopenia (نقص صفائح دموية)</option>
+              <option value="yes-thalassemia">Yes - Thalassemia / Sickle Cell (ثلاسيميا / منجلي)</option>
+            </select>
+          </div>
+
+          <!-- Item 14: Heart Disease / Angina -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-rose-700">14. Heart Disease / Angina:</span>
+            <select class="select-clean med-check mt-0.5 font-bold" id="med-14">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-stable-angina">Yes - Stable Angina (ذبحة صدرية مستقرة)</option>
+              <option value="yes-unstable-angina">Yes - Unstable Angina (غير مستقرة - تأجيل فوري)</option>
+              <option value="yes-mi">Yes - Previous MI (> 6 months) (جلطة قلبية سابقة)</option>
+              <option value="yes-heart-failure">Yes - Heart Failure (قصور القلب)</option>
+            </select>
+          </div>
+
+          <!-- Item 15: Respiratory / COPD -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">15. Respiratory / COPD:</span>
+            <select class="select-clean med-check mt-0.5" id="med-15">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-copd">Yes - COPD / Chronic Bronchitis (انسداد رئوي مزمن)</option>
+              <option value="yes-apnea">Yes - Sleep Apnea (انقطاع التنفس النومي)</option>
+            </select>
+          </div>
+
+          <!-- Item 16: Pregnancy / Trimester -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-amber-800">16. Pregnancy / Trimester:</span>
+            <select class="select-clean med-check mt-0.5 font-semibold" id="med-16">
+              <option selected value="not-pregnant">Not Pregnant / Male (غير حامل / ذكر)</option>
+              <option value="second-trimester">Yes - 2nd Trimester (الثلث الثاني - الأنسب للقلع)</option>
+              <option value="first-trimester">Yes - 1st Trimester (الثلث الأول - للحالات الطارئة فقط)</option>
+              <option value="third-trimester">Yes - 3rd Trimester (الثلث الثالث - حذر واستشارة)</option>
+              <option value="lactating">Yes - Lactating / Nursing (مرضعة)</option>
+            </select>
+          </div>
+
+          <!-- Item 17: Cancer / Malignancy -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">17. Cancer / Malignancy:</span>
+            <select class="select-clean med-check mt-0.5" id="med-17">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-remission">Yes - In Remission (ورم معالج ومتعافى)</option>
+              <option value="yes-active">Yes - Active Cancer Under Treatment (ورم نشط يتلقى علاجاً)</option>
+            </select>
+          </div>
+
+          <!-- Item 18: Hypertension (BP) -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">18. Hypertension (BP):</span>
+            <select class="select-clean med-check mt-0.5 font-semibold" id="med-18">
+              <option selected value="no">No (طبيعي)</option>
+              <option value="yes-controlled">Yes - Controlled with Medication (مسيطر عليه بالأدوية)</option>
+              <option value="yes-uncontrolled">Yes - Uncontrolled (> 140/90) (غير مسيطر عليه)</option>
+            </select>
+          </div>
+
+          <!-- Item 19: Rheumatic Fever -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">19. Rheumatic Fever:</span>
+            <select class="select-clean med-check mt-0.5" id="med-19">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-valve-damage">Yes - With Valvular Involvement (مع اعتلال صمامات القلب)</option>
+              <option value="yes-no-damage">Yes - History Without Valvular Defect (تاريخ سابق بدون إصابة صمام)</option>
+            </select>
+          </div>
+
+          <!-- Item 20: Gastric Ulcer / GERD -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">20. Gastric Ulcer / GERD:</span>
+            <select class="select-clean med-check mt-0.5" id="med-20">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-ulcer">Yes - Active Peptic Ulcer (قرحة نشطة - تجنب الـ NSAIDs)</option>
+              <option value="yes-gerd">Yes - GERD / Reflux (ارتجاع مريئي)</option>
+            </select>
+          </div>
+
+          <!-- Item 21: Epilepsy / Convulsions -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">21. Epilepsy / Convulsions:</span>
+            <select class="select-clean med-check mt-0.5" id="med-21">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-controlled">Yes - Controlled with Anticonvulsants (مسيطر عليه بالعلاج)</option>
+              <option value="yes-frequent">Yes - Frequent Seizures (نوبات صرع متكررة)</option>
+            </select>
+          </div>
+
+          <!-- Item 22: Stroke / CVA / TIA -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-rose-700">22. Stroke / CVA / TIA:</span>
+            <select class="select-clean med-check mt-0.5 font-bold" id="med-22">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-past">Yes - Past CVA (> 6 months ago) (جلطة دماغية سابقة مستقرة)</option>
+              <option value="yes-recent">Yes - Recent Stroke (< 6 months) (جلطة حديثة - تأجيل واستشارة)</option>
+              <option value="yes-tia">Yes - Transient Ischemic Attack (نوبات نقص تروية مؤقتة)</option>
+            </select>
+          </div>
+
+          <!-- Item 23: Thyroid Disorder -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">23. Thyroid Disorder:</span>
+            <select class="select-clean med-check mt-0.5" id="med-23">
+              <option selected value="no">No (سليم)</option>
+              <option value="yes-hypo">Yes - Hypothyroidism Controlled (خمول الغدة الدرقية منتظم)</option>
+              <option value="yes-hyper">Yes - Hyperthyroidism (فرط نشاط الدرقية - حذر من الأدرينالين)</option>
+            </select>
+          </div>
+
+          <!-- Item 24: Smoking / Alcohol -->
+          <div class="bg-white p-1.5 rounded border border-slate-300">
+            <span class="font-bold text-[11px] block text-slate-800">24. Smoking / Alcohol:</span>
+            <select class="select-clean med-check mt-0.5" id="med-24">
+              <option selected value="no">No (غير مدخن / لا يشرب كحول)</option>
+              <option value="yes-smoker-mild">Yes - Cigarette Smoker (< 10 cig/day) (مدخن خفيف)</option>
+              <option value="yes-smoker-heavy">Yes - Heavy Smoker (> 20 cig/day) (مدخن شره)</option>
+              <option value="yes-hookah">Yes - Shisha / Hookah Smoker (مدخن أرجيلة)</option>
+              <option value="yes-alcohol">Yes - Alcohol Consumer (مستهلك للكحول)</option>
+            </select>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Additional Medical History: Medications, BP, Family, Social -->
+      <table class="sheet-table text-xs border-t-0">
+        <tbody>
+          <tr>
+            <td class="w-36 font-bold bg-slate-100">Current Medications:</td>
+            <td>
+              <select id="meds-dropdown" class="select-clean font-bold text-slate-800 mb-1">
+                <option selected>لا يتناول أي عقاقير حالياً (None - No Current Medications)</option>
+                <option>مسيلات الدم والوارفارين (Anticoagulants / Warfarin / Plavix / Aspirin)</option>
+                <option>أدوية خافضة لضغط الدم (Antihypertensives: Beta-Blockers / ACEi / Amlodipine)</option>
+                <option>أدوية السكري والأنسولين (Antidiabetics: Metformin / Glimepiride / Insulin)</option>
+                <option>الكورتيزون ومثبطات المناعة (Corticosteroids: Prednisolone)</option>
+                <option>أدوية هشاشة العظام (Bisphosphonates / Prolia - خطر نخر العظم الفكي MRONJ)</option>
+                <option>مضادات حيوية حالية (Current Antibiotic Course)</option>
+                <option>أدوية الصرع والتشنج (Antiepileptics: Carbamazepine / Sodium Valproate)</option>
+                <option>أدوية متعددة للأمراض المزمنة (Multiple Polypharmacy Regimen)</option>
+              </select>
+              <input type="text" id="meds-notes" class="input-clean text-[11px]" placeholder="Specific drug names, dosages, and frequency (مثال: Aspirin 81mg OD, Metformin 500mg BD)...">
+            </td>
+            <td class="w-28 font-bold bg-slate-100 text-center">Blood Pressure:</td>
+            <td class="w-64">
+              <div class="space-y-1">
+                <select id="bp-category" class="select-clean font-bold text-sky-900">
+                  <option selected>Normal (< 120 / < 80 mmHg) - طبيعي</option>
+                  <option>Elevated (120-129 / < 80 mmHg) - مرتفع طفيف</option>
+                  <option>Stage 1 Hypertension (130-139 / 80-89 mmHg) - مرحلة 1</option>
+                  <option>Stage 2 Hypertension (≥ 140 / ≥ 90 mmHg) - مرحلة 2</option>
+                  <option class="text-red-700 font-black">Hypertensive Crisis (> 180 / > 120 mmHg) - طارئ</option>
+                </select>
+                <div class="flex items-center gap-1.5 font-latin text-xs">
+                  <input type="number" id="bp-systolic" class="input-clean w-16 text-center font-bold" value="120">
+                  <span>/</span>
+                  <input type="number" id="bp-diastolic" class="input-clean w-16 text-center font-bold" value="80">
+                  <span class="text-[10px] text-slate-500 font-bold">mmHg</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+
+          <tr>
+            <td class="font-bold bg-slate-100">Family History:</td>
+            <td>
+              <select id="family-history" class="select-clean">
+                <option selected>Non-contributory (تاريخ عائلي سليم بدون أمراض وراثية بارزة)</option>
+                <option>Family History of Hypertension & Stroke (أمراض ضغط وجلطات دماغية عائلية)</option>
+                <option>Family History of Diabetes Mellitus (داء السكري وراثي)</option>
+                <option>Family History of Bleeding Disorders / Hemophilia (أمراض سيولة ونزف وراثية)</option>
+                <option>Family History of Premature Cardiac Disease (أمراض قلب مبكرة في العائلة)</option>
+                <option>Family History of Malignancy (أورام سرطانية في العائلة)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 text-center">Social History:</td>
+            <td>
+              <select id="social-history" class="select-clean">
+                <option selected>Non-smoker / No alcohol (غير مدخن ولا يتناول كحول)</option>
+                <option>Light Cigarette Smoker (مدخن خفيف أقل من 10 سجائر يومياً)</option>
+                <option>Moderate to Heavy Smoker (مدخن معتدل إلى شره > علبة يومياً)</option>
+                <option>Shisha / Hookah Smoker (مدخن أرجيلة منتظم)</option>
+                <option>Ex-smoker (Quit > 1 year) (مدخن سابق أقلع عن التدخين)</option>
+                <option>Occasional Alcohol Consumer (مستهلك للكحول في المناسبات)</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====================================================================
+         SECTION 3: CLINICAL EXAMINATION (PART I: EXTRAORAL)
+         ==================================================================== -->
+    <div class="mb-4">
+      <div class="sheet-header-box flex items-center justify-between font-latin">
+        <span>3. CLINICAL EXAMINATION (PART I: EXTRAORAL)</span>
+        <span class="text-[10px] font-normal tracking-normal text-slate-300">Head, Face, Neck, TMJ & Eyes</span>
+      </div>
+
+      <table class="sheet-table text-xs">
+        <tbody>
+          <!-- Row 1: Facial Symmetry | Facial Profile -->
+          <tr>
+            <td class="w-36 font-bold bg-slate-100">Facial Symmetry:</td>
+            <td class="w-1/2">
+              <select id="exam-symmetry" class="select-clean font-semibold">
+                <option selected>Normal & Symmetrical (وجه متناظر وطبيعي بدون تورم)</option>
+                <option>Asymmetry: Right Facial Swelling (عدم تناظر - انتفاخ وتورم في الخد/الفك الأيمن)</option>
+                <option>Asymmetry: Left Facial Swelling (عدم تناظر - انتفاخ وتورم في الخد/الفك الأيسر)</option>
+                <option>Asymmetry: Mandibular Deviation / Hemifacial (عدم تناظر فكي أو ضمور نصفي)</option>
+                <option>Facial Nerve Weakness / Palsy (ضعف أو شلل العصب الوجهي السابع)</option>
+              </select>
+            </td>
+            <td class="w-32 font-bold bg-slate-100 text-center">Facial Profile:</td>
+            <td>
+              <select id="exam-profile" class="select-clean font-semibold">
+                <option selected>Straight Profile - Class I (بروفايل مستقيم متناسق)</option>
+                <option>Convex Profile - Class II (بروفايل محدب - تراجع الفك السفلي)</option>
+                <option>Concave Profile - Class III (بروفايل مقعر - تقدم الفك السفلي)</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row 2: Lymph Nodes (LN) | TMJ Examination -->
+          <tr>
+            <td class="font-bold bg-slate-100">Lymph Nodes (LN):</td>
+            <td>
+              <select id="exam-ln" class="select-clean font-semibold">
+                <option selected>Non-palpable / Normal (عقد لمفاوية غير محسوسة وطبيعية)</option>
+                <option>Submandibular LN: Palpable & Tender (تحت الفك محسوسة ومؤلمة - التهاب حاد)</option>
+                <option>Submandibular LN: Palpable & Non-tender (تحت الفك محسوسة غير مؤلمة - مزمنة)</option>
+                <option>Submental LN: Palpable & Tender (تحت الذقن محسوسة ومتحسسة)</option>
+                <option>Deep Cervical LN: Palpable (العقد العنقية العميقة محسوسة ومتحجرة)</option>
+                <option>Generalized Lymphadenopathy (تضخم شامل في العقد اللمفاوية الرقبية)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 text-center">TMJ Examination:</td>
+            <td>
+              <select id="exam-tmj" class="select-clean font-semibold">
+                <option selected>Normal - No tenderness / No clicking (مفصل فكي سليم بحركة ناعمة)</option>
+                <option>Tenderness on Palpation (ألم عند جس المفصل الصدغي)</option>
+                <option>Clicking Sound - Right Joint (صوت طقطقة مفصلية في المفصل الأيمن)</option>
+                <option>Clicking Sound - Left Joint (صوت طقطقة مفصلية في المفصل الأيسر)</option>
+                <option>Bilateral Clicking (طقطقة ثنائية الجانب عند فتح الفم)</option>
+                <option>Crepitus Sound (صوت خشونة واحتكاك عظمي)</option>
+                <option>Mandibular Deviation on Opening (انحراف الفك السفلي عند الفتح)</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row 3: Mouth Opening | Skin & Salivary -->
+          <tr>
+            <td class="font-bold bg-slate-100">Mouth Opening:</td>
+            <td>
+              <select id="exam-opening" class="select-clean font-semibold">
+                <option selected>Normal (35 - 45 mm) (فتحة فم طبيعية بدون عوائق)</option>
+                <option>Mild Limitation (25 - 34 mm) (محدودية طفيفة في فتح الفم)</option>
+                <option>Moderate Trismus (15 - 24 mm) (تشنج وتحدد معتدل يعيق الرؤية)</option>
+                <option class="text-red-700 font-bold">Severe Trismus (< 15 mm) (تشنج فكي شديد - لا يمكن القلع حالياً)</option>
+              </select>
+            </td>
+            <td class="font-bold bg-slate-100 text-center">Skin & Salivary:</td>
+            <td>
+              <select id="exam-skin-salivary" class="select-clean font-semibold">
+                <option selected>Normal - Intact skin & Non-enlarged glands (طبيعي وسليم)</option>
+                <option>Sinus / Cutaneous Fistula (وجود ناسور جلدي خارجي)</option>
+                <option>Parotid Gland Enlargement (تضخم الغدة النكفية)</option>
+                <option>Submandibular Gland Swelling & Tender (تضخم وألم الغدة اللعابية تحت الفك)</option>
+                <option>Facial Erythema & Localized Warmth (احمرار وسخونة في جلد الوجه)</option>
+              </select>
+            </td>
+          </tr>
+
+          <!-- Row 4: Eyes & Conjunctiva -->
+          <tr>
+            <td class="font-bold bg-slate-100">Eyes & Conjunctiva:</td>
+            <td colspan="3">
+              <select id="exam-eyes" class="select-clean font-semibold">
+                <option selected>Normal - Healthy conjunctiva & reactive pupils (طبيعي وسليم)</option>
+                <option>Pallor (Anemia Sign) (شحوب الملتحمة - علامة فقر دم سريرية)</option>
+                <option>Jaundice / Icterus (Liver Disease) (يرقان واصفرار صلبة العين - علامة كبدية)</option>
+                <option>Conjunctival Redness / Infection (احمرار والتهاب الملتحمة)</option>
+                <option>Petechiae / Subconjunctival Hemorrhage (حبرات نزفية - اضطراب تخثر دامي)</option>
+                <option>Exophthalmos / Proptosis (جحوظ العينين - فرط نشاط الدرقية)</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- ====================================================================
+         SECTION 4: SUPERVISOR & STUDENT CLINICAL SIGN-OFF
+         ==================================================================== -->
+    <div class="border border-slate-800 p-3 bg-slate-50 rounded text-xs">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 items-center">
+        <div>
+          <span class="font-bold block text-slate-700">Undergraduate Clinical Student:</span>
+          <p class="font-bold text-slate-900 mt-0.5">د. علي حيدر الموسوي (Stage 5 BDS)</p>
+        </div>
+        <div>
+          <span class="font-bold block text-slate-700">Clinical Supervisor Approval:</span>
+          <select id="supervisor-decision" class="select-clean font-bold text-emerald-800 mt-0.5">
+            <option selected>Approved for Treatment Plan (معتمد للبدء بخطة القلع والتخدير)</option>
+            <option>Medical Consultation Required (يتطلب استشارة باطنية مسبقة)</option>
+            <option>Postponed due to Uncontrolled Systemic Condition (مؤجل لحين السيطرة)</option>
+          </select>
+        </div>
+        <div class="text-left font-latin">
+          <span class="font-bold block text-slate-700">Supervisor Signature & Stamp:</span>
+          <div class="border border-dashed border-slate-400 bg-white p-1.5 rounded text-center text-[10px] font-bold text-emerald-700 mt-0.5">
+            DR. ABDALLAH AL-SALIHI (Oral Surgeon)
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Document Footer -->
+    <div class="mt-4 pt-2 border-t border-slate-300 flex items-center justify-between text-[10px] text-slate-500 font-latin">
+      <span>Al-Qabas Private College - Faculty of Dentistry</span>
+      <span class="font-bold">Page 1 of 2</span>
+      <span>Oral Surgery Clinical Sheet • Academic Year 2026–2027</span>
+    </div>
+
+  </div>
+
+  <!-- Supabase JS Client & Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase-client.js"></script>
+
+  <script>
+    // Initialize Lucide Icons
+    if (window.lucide) {
+      window.lucide.createIcons();
+    }
+
+    // Save Data to localStorage and Supabase
+    async function saveFormData() {
+      const name = document.getElementById('bio-name')?.value || 'مريض جراحة الفم';
+      const formData = {
+        id: 'CS-AQ-PAGE1-01',
+        patientName: name,
+        patientAge: document.getElementById('bio-age')?.value || '',
+        patientSex: document.getElementById('bio-sex')?.value || '',
+        patientPhone: document.getElementById('bio-phone')?.value || '',
+        address: document.getElementById('bio-address')?.value || '',
+        chiefComplaint: document.getElementById('cc-dropdown')?.value || '',
+        chiefComplaintNotes: document.getElementById('cc-text')?.value || '',
+        deptId: 'omfs',
+        deptName: 'جراحة الفم والفكين',
+        sheetId: 'omfs-ext-01',
+        sheetCode: 'OMFS-EXT-01',
+        sheetTitle: 'استمارة جراحة الفم (كلية القبس - الصفحة الأولى)',
+        bloodPressure: {
+          category: document.getElementById('bp-category')?.value || '',
+          systolic: document.getElementById('bp-systolic')?.value || '',
+          diastolic: document.getElementById('bp-diastolic')?.value || ''
+        },
+        savedAt: new Date().toISOString()
+      };
+
+      localStorage.setItem('al_qabas_oral_surgery_page1', JSON.stringify(formData));
+
+      if (window.EDentalSupabase && window.EDentalSupabase.isConfigured()) {
+        const res = await window.EDentalSupabase.saveCase(formData);
+        if (res.source === 'supabase') {
+          alert('تم الحفظ بنجاح محلياً وسحابياً في سوبابيس! 🟢☁️');
+          return;
+        }
+      }
+      alert('تم حفظ بيانات استمارة جراحة الفم (Page 1) بنجاح محلياً!');
+    }
+
+    // Auto-load previously saved data if available
+    window.addEventListener('load', () => {
+      try {
+        const saved = JSON.parse(localStorage.getItem('al_qabas_oral_surgery_page1') || '{}');
+        if (saved.patientName && document.getElementById('bio-name')) document.getElementById('bio-name').value = saved.patientName;
+        if (saved.patientPhone && document.getElementById('bio-phone')) document.getElementById('bio-phone').value = saved.patientPhone;
+        if (saved.chiefComplaintNotes && document.getElementById('cc-text')) document.getElementById('cc-text').value = saved.chiefComplaintNotes;
+      } catch (e) {
+        console.error(e);
+      }
+    });
+  </script>
+</body>
+</html>

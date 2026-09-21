@@ -1,0 +1,370 @@
+/* ==========================================================================
+   E-Dental CaseSheet Platform - Stylesheet
+   Academic Year 2026–2027 • College of Dentistry Clinical Information System
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;800;900&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
+
+:root {
+  --font-arabic: 'Cairo', system-ui, -apple-system, sans-serif;
+  --font-latin: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+}
+
+body {
+  font-family: var(--font-arabic);
+  direction: rtl;
+  text-align: right;
+  background-color: #f8fafc;
+  color: #0f172a;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.font-latin {
+  font-family: var(--font-latin);
+  direction: ltr;
+  display: inline-block;
+}
+
+/* Glassmorphic Clinical Cards */
+.clinical-glass-card {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(226, 232, 240, 0.8);
+  box-shadow: 0 10px 25px -5px rgba(15, 23, 42, 0.04), 0 8px 10px -6px rgba(15, 23, 42, 0.02);
+}
+
+.clinical-glass-card:hover {
+  border-color: rgba(14, 165, 233, 0.35);
+}
+
+/* Dental Odontogram Quadrant Styling */
+.odontogram-container {
+  background: radial-gradient(circle at 50% 50%, #f0f9ff 0%, #ffffff 100%);
+  border: 1px dashed #cbd5e1;
+  border-radius: 1rem;
+}
+
+.tooth-box {
+  width: 42px;
+  height: 60px;
+  border-radius: 0.5rem;
+  border: 1px solid #cbd5e1;
+  background-color: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 4px 2px;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  user-select: none;
+  position: relative;
+}
+
+.tooth-box:hover {
+  transform: translateY(-2px);
+  border-color: #0284c7;
+  box-shadow: 0 4px 12px rgba(2, 132, 199, 0.15);
+}
+
+.tooth-box.selected {
+  outline: 2px solid #0284c7;
+  outline-offset: 2px;
+  background-color: #f0f9ff;
+}
+
+/* Condition Badges on Teeth */
+.tooth-box[data-condition="caries"] {
+  border-color: #ef4444;
+  background-color: #fef2f2;
+}
+.tooth-box[data-condition="caries"] .tooth-crown {
+  fill: #fca5a5;
+  stroke: #dc2626;
+}
+
+.tooth-box[data-condition="filled"] {
+  border-color: #0284c7;
+  background-color: #f0f9ff;
+}
+.tooth-box[data-condition="filled"] .tooth-crown {
+  fill: #bae6fd;
+  stroke: #0284c7;
+}
+
+.tooth-box[data-condition="endo"] {
+  border-color: #f59e0b;
+  background-color: #fffbeb;
+}
+.tooth-box[data-condition="endo"] .tooth-crown {
+  fill: #fde68a;
+  stroke: #d97706;
+}
+
+.tooth-box[data-condition="missing"] {
+  border-color: #94a3b8;
+  background-color: #f1f5f9;
+  opacity: 0.45;
+  text-decoration: line-through;
+}
+
+.tooth-box[data-condition="crowned"] {
+  border-color: #8b5cf6;
+  background-color: #f5f3ff;
+}
+.tooth-box[data-condition="crowned"] .tooth-crown {
+  fill: #ddd6fe;
+  stroke: #7c3aed;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+}
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Pulsing Badge Indicator */
+@keyframes pulse-ring {
+  0% { transform: scale(0.95); opacity: 0.8; }
+  50% { transform: scale(1.15); opacity: 0.4; }
+  100% { transform: scale(0.95); opacity: 0.8; }
+}
+
+.pulse-indicator {
+  animation: pulse-ring 2s infinite ease-in-out;
+}
+
+/* Custom Select Dropdown Styling */
+select {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%2364748b' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: left 0.75rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+  padding-left: 2.5rem;
+}
+
+/* Modal Display & Animations */
+#case-sheet-modal:not(.hidden) {
+  display: block !important;
+}
+#case-sheet-modal.hidden {
+  display: none !important;
+}
+
+.modal-backdrop {
+  transition: opacity 0.25s ease-out;
+}
+.modal-dialog {
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Toast Notifications */
+.clinical-toast {
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  animation: toast-in 0.3s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(16px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Print Media Stylesheet */
+@media print {
+  body {
+    background: #ffffff !important;
+    color: #000000 !important;
+    font-size: 11pt;
+  }
+
+  header, nav, .hero-section, .dashboard-stats, .mode-switcher, #dropdown-mode-section, #grid-mode-section, footer, #search-modal, .non-printable {
+    display: none !important;
+  }
+
+  #case-sheet-modal {
+    position: static !important;
+    display: block !important;
+    background: transparent !important;
+    padding: 0 !important;
+  }
+
+  #case-sheet-modal .modal-content {
+    border: none !important;
+    box-shadow: none !important;
+    max-width: 100% !important;
+  }
+
+  .print-header {
+    display: flex !important;
+    border-bottom: 2px solid #000;
+    padding-bottom: 12px;
+    margin-bottom: 16px;
+  }
+
+  .print-only {
+    display: block !important;
+  }
+}
+
+/* ==========================================================================
+   Mobile-First Optimizations (الهواتف الذكية والأجهزة اللوحية)
+   ========================================================================== */
+@media screen and (max-width: 640px) {
+  /* Prevent automatic iOS zoom when focusing inputs/selects */
+  input[type="text"],
+  input[type="number"],
+  input[type="password"],
+  select,
+  textarea {
+    font-size: 16px !important;
+  }
+
+  /* Touch Targets for clinical use with gloves / fingertips (min 44px) */
+  button, 
+  .tooth-box,
+  select {
+    touch-action: manipulation;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* Modals: bottom-sheet behavior on mobile */
+  #case-sheet-modal > div,
+  #supabase-config-modal > div {
+    padding: 0 !important;
+    align-items: flex-end !important;
+  }
+
+  .modal-dialog {
+    max-height: 94vh !important;
+    border-radius: 1.5rem 1.5rem 0 0 !important;
+    margin: 0 !important;
+    width: 100% !important;
+  }
+
+  /* Odontogram mobile swipe enhancement */
+  .odontogram-container {
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* Compact tooth boxes for mobile */
+  .tooth-box {
+    width: 36px;
+    height: 52px;
+    padding: 2px 1px;
+  }
+  .tooth-crown {
+    width: 1.1rem;
+    height: 1.1rem;
+  }
+}
+
+/* ==========================================================================
+   Al-Qabas Official Clinical Case Sheet & Cross-Charting Styles
+   ========================================================================== */
+.sheet-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+.sheet-table th, .sheet-table td {
+  border: 1px solid #1e293b;
+  padding: 4px 6px;
+}
+.sheet-header-box {
+  background-color: #0f2d59;
+  color: #ffffff;
+  font-weight: 800;
+  padding: 5px 10px;
+  font-size: 0.8rem;
+  letter-spacing: 0.05em;
+}
+.select-clean {
+  width: 100%;
+  background-color: #f8fafc;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #0f172a;
+  outline: none;
+  transition: all 0.2s;
+  cursor: pointer;
+}
+.select-clean:focus {
+  border-color: #0284c7;
+  background-color: #ffffff;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+.select-clean:hover {
+  background-color: #ffffff;
+}
+.input-clean {
+  width: 100%;
+  background-color: #ffffff;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 4px 6px;
+  font-size: 0.75rem;
+  color: #0f172a;
+  outline: none;
+}
+.input-clean:focus {
+  border-color: #0284c7;
+  box-shadow: 0 0 0 2px rgba(2, 132, 199, 0.15);
+}
+
+/* Palmer 4-Quadrants Cross Charting Box */
+.cross-chart-container {
+  position: relative;
+  width: 100%;
+  height: 68px;
+  background-color: #ffffff;
+  border: 1px solid #94a3b8;
+  border-radius: 6px;
+}
+.cross-line-v {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 50%;
+  width: 1.5px;
+  background-color: #1e293b;
+}
+.cross-line-h {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  height: 1.5px;
+  background-color: #1e293b;
+}
+.cross-input {
+  width: 46%;
+  height: 44%;
+  border: none;
+  background: transparent;
+  font-size: 0.7rem;
+  font-weight: bold;
+  text-align: center;
+  outline: none;
+  font-family: var(--font-latin);
+}
+
