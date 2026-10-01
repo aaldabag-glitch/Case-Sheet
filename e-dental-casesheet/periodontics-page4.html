@@ -765,133 +765,6 @@
     </div>
 
     <!-- ========================================================================
-         7. STUDENT EVALUATION & MARKS ALLOCATION (TOTAL = 10 MARKS)
-         ======================================================================== -->
-    <div class="mb-3">
-      <div class="sheet-header-box rounded-t flex items-center justify-between font-latin">
-        <span>7. STUDENT CLINICAL EVALUATION & MARKS ALLOCATION (TOTAL = 10 MARKS)</span>
-        <span class="text-[10px] font-normal text-slate-200">Academic Assessment - 4th Year BDS</span>
-      </div>
-
-      <table class="sheet-table text-xs border border-slate-800 font-latin">
-        <thead>
-          <tr class="bg-slate-200 font-bold">
-            <th class="w-20 text-center p-1.5 border border-slate-800">Max Mark</th>
-            <th class="w-1/3 text-right p-1.5 border border-slate-800">Evaluation Item (Periodontics Clinic)</th>
-            <th class="text-right p-1.5 border border-slate-800">Specific Clinical Details</th>
-            <th class="w-24 text-center p-1.5 border border-slate-800">Gained Mark</th>
-          </tr>
-        </thead>
-        <tbody>
-          <!-- Item 1: History & Diagnosis -->
-          <tr>
-            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
-            <td class="font-bold p-1.5 border border-slate-800">Case Sheet, Indices & Diagnosis</td>
-            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Plaque/Calculus index recording & correct periodontal diagnosis</td>
-            <td class="text-center p-1.5 border border-slate-800">
-              <select id="eval-mark-1" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
-                <option value="2.0" selected>2.0 / 2</option>
-                <option value="1.5">1.5 / 2</option>
-                <option value="1.0">1.0 / 2</option>
-                <option value="0.5">0.5 / 2</option>
-                <option value="0.0">0.0 / 2</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Item 2: Ultrasonic Scaling Efficiency -->
-          <tr>
-            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
-            <td class="font-bold p-1.5 border border-slate-800">Ultrasonic Scaling Technique & Thoroughness</td>
-            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Tip adaptation, power/water setting & supragingival calculus removal</td>
-            <td class="text-center p-1.5 border border-slate-800">
-              <select id="eval-mark-2" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
-                <option value="2.0" selected>2.0 / 2</option>
-                <option value="1.5">1.5 / 2</option>
-                <option value="1.0">1.0 / 2</option>
-                <option value="0.5">0.5 / 2</option>
-                <option value="0.0">0.0 / 2</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Item 3: Hand Instrumentation & Polishing -->
-          <tr>
-            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
-            <td class="font-bold p-1.5 border border-slate-800">Hand Scaling, Interdental Care & Polishing</td>
-            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Sickle scaler grip, subgingival curettage, paste polishing & floss check</td>
-            <td class="text-center p-1.5 border border-slate-800">
-              <select id="eval-mark-3" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
-                <option value="2.0" selected>2.0 / 2</option>
-                <option value="1.5">1.5 / 2</option>
-                <option value="1.0">1.0 / 2</option>
-                <option value="0.5">0.5 / 2</option>
-                <option value="0.0">0.0 / 2</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Item 4: Sterilization & Aseptic Technique -->
-          <tr>
-            <td class="text-center font-bold p-1.5 border border-slate-800">2 Marks</td>
-            <td class="font-bold p-1.5 border border-slate-800">Sterilization & Infection Control</td>
-            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">PPE, face shield/mask, suction control & aerosol management</td>
-            <td class="text-center p-1.5 border border-slate-800">
-              <select id="eval-mark-4" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
-                <option value="2.0" selected>2.0 / 2</option>
-                <option value="1.5">1.5 / 2</option>
-                <option value="1.0">1.0 / 2</option>
-                <option value="0.5">0.5 / 2</option>
-                <option value="0.0">0.0 / 2</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Item 5: Patient OHI Education -->
-          <tr>
-            <td class="text-center font-bold p-1.5 border border-slate-800">1 Mark</td>
-            <td class="font-bold p-1.5 border border-slate-800">Oral Hygiene Instructions (OHI)</td>
-            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Effective patient motivation, brushing demo & interdental aid instruction</td>
-            <td class="text-center p-1.5 border border-slate-800">
-              <select id="eval-mark-5" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
-                <option value="1.0" selected>1.0 / 1</option>
-                <option value="0.5">0.5 / 1</option>
-                <option value="0.0">0.0 / 1</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Item 6: Operator Ergonomics & Professional Ethics -->
-          <tr>
-            <td class="text-center font-bold p-1.5 border border-slate-800">1 Mark</td>
-            <td class="font-bold p-1.5 border border-slate-800">Operator Position & Professional Ethics</td>
-            <td class="text-slate-600 text-[11px] p-1.5 border border-slate-800">Chair position (clock positions), patient comfort & communication</td>
-            <td class="text-center p-1.5 border border-slate-800">
-              <select id="eval-mark-6" class="p-1 bg-teal-50 border border-teal-300 rounded text-xs font-bold text-teal-900" onchange="calculatePerioScore()">
-                <option value="1.0" selected>1.0 / 1</option>
-                <option value="0.5">0.5 / 1</option>
-                <option value="0.0">0.0 / 1</option>
-              </select>
-            </td>
-          </tr>
-
-          <!-- Total Score Row -->
-          <tr class="bg-teal-50 border-t-2 border-slate-800">
-            <td class="text-center font-black text-teal-950 p-2 text-xs">10 Marks</td>
-            <td colspan="2" class="font-black text-teal-950 p-2 text-xs uppercase text-left">
-              TOTAL CLINICAL SCORE / التقييم السريري الإجمالي (4th YEAR BDS):
-            </td>
-            <td class="text-center p-2">
-              <span id="eval-total-display" class="font-black text-teal-700 text-sm bg-white px-2 py-0.5 rounded border border-teal-300">
-                10.0 / 10
-              </span>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- ========================================================================
          SIGNATURES & INSTITUTIONAL ACCREDITATION FOOTER
          ======================================================================== -->
     <div class="border border-slate-800 p-2.5 rounded bg-slate-50/70 mb-2 font-latin text-xs">
@@ -1052,8 +925,8 @@
     function calculatePerioScore() {
       let sum = 0;
       for (let i = 1; i <= 6; i++) {
-        const el = document.getElementById(`eval-mark-${i}`);
-        if (el) sum += parseFloat(el.value || '0');
+        const val = parseFloat(document.getElementById(`eval-mark-${i}`)?.value || '0');
+        sum += val;
       }
       const display = document.getElementById('eval-total-display');
       if (display) {
