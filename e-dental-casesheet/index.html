@@ -5,6 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>E-Dental CaseSheet • الطبلة الإلكترونية السريرية</title>
   
+  <!-- Academic Session Guard: Case Sheet only accessible via portal -->
+  <script>
+    (function() {
+      try {
+        const raw = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+        const session = raw ? JSON.parse(raw) : null;
+        if (!session) {
+          window.location.replace('college-portal.html');
+        }
+      } catch(e) {
+        window.location.replace('college-portal.html');
+      }
+    })();
+  </script>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -107,16 +122,6 @@
             <span class="px-1.5 py-0.2 rounded text-[10px] bg-amber-400 text-slate-950 font-black">جديد</span>
           </a>
 
-          <!-- Supabase Connection Indicator & Button -->
-          <button 
-            id="supabase-status-btn" 
-            class="flex items-center gap-1.5 px-2.5 py-1.5 sm:px-3 sm:py-1.5 rounded-xl border text-xs font-bold transition-all shadow-xs bg-white hover:bg-slate-50 border-slate-200 text-slate-700 cursor-pointer active:scale-95 shrink-0" 
-            title="إعدادات الربط السحابي مع سوبابيس (Supabase)"
-          >
-            <span id="supabase-status-dot" class="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span>
-            <span id="supabase-status-text" class="hidden sm:inline">سوبابيس: متصل 🟢</span>
-            <i data-lucide="cloud" class="w-3.5 h-3.5 text-slate-500"></i>
-          </button>
 
           <div class="hidden xl:flex flex-col text-left pl-3 border-l border-slate-200">
             <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-slate-800">

@@ -5,6 +5,22 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Periodontics & Preventive Dentistry • Case Data Form (4th Year BDS) - Al-Qabas Private College</title>
   
+  <!-- Student / Academic Session Guard -->
+  <script>
+    (function() {
+      try {
+        const raw = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+        const session = raw ? JSON.parse(raw) : null;
+        if (!session) {
+          alert('هذه الطبلة السريرية مخصصة للطلبة والمشرفين المسجلين فقط. يرجى تسجيل الدخول أولاً.');
+          window.location.replace('college-portal.html');
+        }
+      } catch(e) {
+        window.location.replace('college-portal.html');
+      }
+    })();
+  </script>
+  
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   

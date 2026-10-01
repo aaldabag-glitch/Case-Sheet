@@ -4,11 +4,12 @@
  * Version 1.0 - 2026
  */
 
-const STORAGE_KEY = 'cosmo_dental_college_erp_v1';
+const STORAGE_KEY = 'cosmo_dental_college_erp_v3';
 const SESSION_KEY = 'cosmo_dental_college_session';
+const SAVED_USERS_KEY = 'cosmo_dental_saved_accounts';
 
 // ============================================================================
-// INITIAL SEED DATABASE
+// INITIAL SEED DATABASE (CLEAN SLATE: NO FAKE COLLEGES, DOCTORS, OR STUDENTS)
 // ============================================================================
 function getInitialSeedDatabase() {
   return {
@@ -20,189 +21,97 @@ function getInitialSeedDatabase() {
       name: 'مدير المنظومة العام (Super Admin)',
       role: 'SUPER_ADMIN'
     },
-    colleges: [
-      {
-        id: 'clg_101',
-        name: 'كلية طب الأسنان - جامعة بغداد',
-        code: 'DENT-BAGHDAD-01',
-        city: 'بغداد - باب المعظم',
-        deanName: 'أ.د. رغد الهاشمي (عميد الكلية)',
-        adminUsername: 'dean.baghdad',
-        adminPassword: 'dean123',
-        status: 'Active',
-        plan: 'ANNUAL_ACCREDITED',
-        createdAt: '2026-09-01T10:00:00.000Z'
-      },
-      {
-        id: 'clg_102',
-        name: 'كلية القبس لطب الأسنان',
-        code: 'DENT-ALQABAS-02',
-        city: 'بغداد - الكرخ',
-        deanName: 'أ.د. عبد الله الصالحي (المشرف العام)',
-        adminUsername: 'dean.qabas',
-        adminPassword: 'dean123',
-        status: 'Active',
-        plan: 'ANNUAL_ACCREDITED',
-        createdAt: '2026-09-10T12:00:00.000Z'
-      }
-    ],
-    instructors: [
-      {
-        id: 'inst_1',
-        collegeId: 'clg_101',
-        name: 'د. عبد الله الصالحي',
-        title: 'مدرس دكتور (Lecturer)',
-        department: 'أمراض وجراحة اللثة (Periodontics)',
-        username: 'dr.abdallah',
-        password: 'doc123',
-        email: 'dr.abdallah@college.edu',
-        role: 'INSTRUCTOR',
-        status: 'Active',
-        createdAt: '2026-09-15T08:00:00.000Z'
-      },
-      {
-        id: 'inst_2',
-        collegeId: 'clg_101',
-        name: 'د. علي حسين الخفاجي',
-        title: 'أستاذ مساعد (Asst. Prof.)',
-        department: 'جراحة الفم والوجه والفكين (OMFS)',
-        username: 'dr.ali.surgery',
-        password: 'doc123',
-        email: 'dr.ali@college.edu',
-        role: 'INSTRUCTOR',
-        status: 'Active',
-        createdAt: '2026-09-15T08:30:00.000Z'
-      },
-      {
-        id: 'inst_3',
-        collegeId: 'clg_102',
-        name: 'د. سارة كمال الجبوري',
-        title: 'مدرس دكتور (Lecturer)',
-        department: 'معالجة وترميم الأسنان (Conservative)',
-        username: 'dr.sara',
-        password: 'doc123',
-        email: 'dr.sara@college.edu',
-        role: 'INSTRUCTOR',
-        status: 'Active',
-        createdAt: '2026-09-18T09:00:00.000Z'
-      }
-    ],
-    students: [
-      {
-        id: 'std_401',
-        collegeId: 'clg_101',
-        name: 'أحمد حيدر فاضل الموسوي',
-        stage: '4th',
-        group: 'Group B2 / Chair 08',
-        username: 'std.ahmed',
-        password: 'pass123',
-        role: 'STUDENT',
-        status: 'Active',
-        createdAt: '2026-09-20T10:00:00.000Z'
-      },
-      {
-        id: 'std_402',
-        collegeId: 'clg_101',
-        name: 'زينب محمد جعفر التميمي',
-        stage: '4th',
-        group: 'Group B2 / Chair 09',
-        username: 'std.zainab',
-        password: 'pass123',
-        role: 'STUDENT',
-        status: 'Active',
-        createdAt: '2026-09-20T10:15:00.000Z'
-      },
-      {
-        id: 'std_501',
-        collegeId: 'clg_101',
-        name: 'مصطفى رائد كريم الجنابي',
-        stage: '5th',
-        group: 'Group A1 / Chair 14',
-        username: 'std.mustafa',
-        password: 'pass123',
-        role: 'STUDENT',
-        status: 'Active',
-        createdAt: '2026-09-20T11:00:00.000Z'
-      },
-      {
-        id: 'std_502',
-        collegeId: 'clg_101',
-        name: 'فاطمة إحسان علي العبيدي',
-        stage: '5th',
-        group: 'Group A1 / Chair 15',
-        username: 'std.fatima',
-        password: 'pass123',
-        role: 'STUDENT',
-        status: 'Active',
-        createdAt: '2026-09-20T11:30:00.000Z'
-      },
-      {
-        id: 'std_qabas_401',
-        collegeId: 'clg_102',
-        name: 'عمر خالد سلمان العاني',
-        stage: '4th',
-        group: 'Group C1 / Chair 02',
-        username: 'std.omar',
-        password: 'pass123',
-        role: 'STUDENT',
-        status: 'Active',
-        createdAt: '2026-09-21T09:00:00.000Z'
-      }
-    ],
-    cases: [
-      {
-        id: 'CASE-PERIO-901',
-        collegeId: 'clg_101',
-        studentId: 'std_401',
-        studentName: 'أحمد حيدر فاضل الموسوي',
-        stage: '4th',
-        type: 'أمراض اللثة (Periodontics BDS 4)',
-        patientName: 'محمد جاسم حسين',
-        chiefComplaint: 'Bleeding on brushing and severe subgingival calculus',
-        instructorId: 'inst_1',
-        instructorName: 'د. عبد الله الصالحي',
-        assignedMark: '9.5',
-        feedback: 'ممتاز! مهارة عالية في استخدام الألتراسونيك والتشخيص السريري دقيق.',
-        status: 'Approved',
-        sheetUrl: 'periodontics-page4.html',
-        createdAt: '2026-09-28T11:00:00.000Z'
-      },
-      {
-        id: 'CASE-SURG-902',
-        collegeId: 'clg_101',
-        studentId: 'std_501',
-        studentName: 'مصطفى رائد كريم الجنابي',
-        stage: '5th',
-        type: 'جراحة الفم والقلع (Oral Surgery BDS 5)',
-        patientName: 'سعد خليل إبراهيم',
-        chiefComplaint: 'Pain and retained root in lower right 1st molar (#46)',
-        instructorId: 'inst_2',
-        instructorName: 'د. علي حسين الخفاجي',
-        assignedMark: '9.0',
-        feedback: 'تخدير موضعي ممتاز، قلع سليم بدون رضوض لسنخ العظم، ومتابعة جيدة للإرقاء.',
-        status: 'Approved',
-        sheetUrl: 'oral-surgery-complete.html',
-        createdAt: '2026-09-29T10:30:00.000Z'
-      },
-      {
-        id: 'CASE-PERIO-903',
-        collegeId: 'clg_101',
-        studentId: 'std_402',
-        studentName: 'زينب محمد جعفر التميمي',
-        stage: '4th',
-        type: 'أمراض اللثة (Periodontics BDS 4)',
-        patientName: 'أزهار كريم شاكر',
-        chiefComplaint: 'Gingival inflammation and supragingival stains',
-        instructorId: 'inst_1',
-        instructorName: 'د. عبد الله الصالحي',
-        assignedMark: 'Pending',
-        feedback: '',
-        status: 'Pending',
-        sheetUrl: 'periodontics-page4.html',
-        createdAt: '2026-10-01T08:15:00.000Z'
-      }
-    ]
+    colleges: [],
+    instructors: [],
+    students: [],
+    cases: []
   };
+}
+
+// ============================================================================
+// SAVED ACCOUNTS ON THIS PC (حفظ الحسابات على هذا الجهاز)
+// ============================================================================
+function getSavedAccounts() {
+  try {
+    const raw = localStorage.getItem(SAVED_USERS_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveAccountToDevice(accountData) {
+  const list = getSavedAccounts();
+  const existingIdx = list.findIndex(a => a.username.toLowerCase() === accountData.username.toLowerCase());
+  if (existingIdx > -1) {
+    list[existingIdx] = accountData;
+  } else {
+    list.unshift(accountData);
+  }
+  localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
+  renderSavedAccountsList();
+}
+
+function removeSavedAccount(username) {
+  let list = getSavedAccounts();
+  list = list.filter(a => a.username.toLowerCase() !== username.toLowerCase());
+  localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
+  renderSavedAccountsList();
+}
+
+function clearAllSavedAccounts() {
+  localStorage.removeItem(SAVED_USERS_KEY);
+  renderSavedAccountsList();
+}
+
+function selectSavedAccount(username, password) {
+  const uInput = document.getElementById('login-username');
+  const pInput = document.getElementById('login-password');
+  if (uInput) uInput.value = username;
+  if (pInput) pInput.value = password;
+}
+
+function renderSavedAccountsList() {
+  const container = document.getElementById('saved-accounts-box');
+  const listEl = document.getElementById('saved-accounts-list');
+  if (!container || !listEl) return;
+
+  const accounts = getSavedAccounts();
+  if (!accounts || accounts.length === 0) {
+    container.classList.add('hidden');
+    listEl.innerHTML = '';
+    return;
+  }
+
+  container.classList.remove('hidden');
+  listEl.innerHTML = accounts.map(acc => {
+    let roleBadge = 'طالب';
+    let roleBg = 'bg-indigo-100 text-indigo-800';
+    if (acc.role === 'SUPER_ADMIN') { roleBadge = 'سوبر أدمن'; roleBg = 'bg-amber-100 text-amber-900'; }
+    else if (acc.role === 'COLLEGE_ADMIN') { roleBadge = 'عميد'; roleBg = 'bg-sky-100 text-sky-900'; }
+    else if (acc.role === 'INSTRUCTOR') { roleBadge = 'تدريسي'; roleBg = 'bg-teal-100 text-teal-900'; }
+
+    return `
+      <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 hover:border-teal-500 transition-all text-xs">
+        <button type="button" onclick="selectSavedAccount('${acc.username}', '${acc.password || ''}')" class="flex-1 flex items-center gap-2 text-right cursor-pointer">
+          <span class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold font-latin">
+            ${acc.username.charAt(0).toUpperCase()}
+          </span>
+          <div>
+            <div class="font-bold text-slate-800 flex items-center gap-1.5">
+              <span>${acc.name || acc.username}</span>
+              <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${roleBg}">${roleBadge}</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-latin">${acc.username}</div>
+          </div>
+        </button>
+        <button type="button" onclick="removeSavedAccount('${acc.username}')" class="text-slate-300 hover:text-rose-600 px-1 font-bold text-sm cursor-pointer" title="إزالة من هذا الجهاز">&times;</button>
+      </div>
+    `;
+  }).join('');
+  if (window.lucide && window.lucide.createIcons) {
+    window.lucide.createIcons();
+  }
 }
 
 // Read database
@@ -286,7 +195,7 @@ function handleLoginSubmit(event) {
       name: db.superAdmin.name,
       username: db.superAdmin.username,
       role: 'SUPER_ADMIN'
-    });
+    }, passwordInput);
     return;
   }
 
@@ -307,7 +216,7 @@ function handleLoginSubmit(event) {
       name: college.deanName,
       username: college.adminUsername,
       role: 'COLLEGE_ADMIN'
-    });
+    }, passwordInput);
     return;
   }
 
@@ -331,7 +240,7 @@ function handleLoginSubmit(event) {
       department: instructor.department,
       username: instructor.username,
       role: 'INSTRUCTOR'
-    });
+    }, passwordInput);
     return;
   }
 
@@ -354,7 +263,7 @@ function handleLoginSubmit(event) {
       group: student.group,
       username: student.username,
       role: 'STUDENT'
-    });
+    }, passwordInput);
     return;
   }
 
@@ -370,7 +279,17 @@ function showLoginError(msg) {
   }
 }
 
-function loginSuccess(user) {
+function loginSuccess(user, enteredPassword) {
+  const rememberCheck = document.getElementById('remember-device-check');
+  if (rememberCheck && rememberCheck.checked) {
+    saveAccountToDevice({
+      username: user.username,
+      password: enteredPassword || '',
+      name: user.name,
+      role: user.role,
+      collegeName: user.collegeName || ''
+    });
+  }
   setCurrentSession(user);
   renderApp();
 }
@@ -378,27 +297,6 @@ function loginSuccess(user) {
 function handleLogout() {
   setCurrentSession(null);
   renderApp();
-}
-
-// Quick demo filler
-function fillDemoAccount(type) {
-  const u = document.getElementById('login-username');
-  const p = document.getElementById('login-password');
-  if (!u || !p) return;
-
-  if (type === 'superadmin') {
-    u.value = 'superadmin';
-    p.value = 'admin123';
-  } else if (type === 'dean') {
-    u.value = 'dean.baghdad';
-    p.value = 'dean123';
-  } else if (type === 'instructor') {
-    u.value = 'dr.abdallah';
-    p.value = 'doc123';
-  } else if (type === 'student') {
-    u.value = 'std.ahmed';
-    p.value = 'pass123';
-  }
 }
 
 // ============================================================================
@@ -430,6 +328,7 @@ function renderApp() {
       roleBadge.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-teal-100 text-teal-800 border border-teal-200';
     }
     if (authBox) authBox.innerHTML = '';
+    renderSavedAccountsList();
     return;
   }
 
@@ -1238,10 +1137,14 @@ function renderStudentDashboard() {
 
 function launchStudentCaseSheet(type) {
   const user = getCurrentSession();
+  if (!user || user.role !== 'STUDENT') {
+    alert('طبلة الكيس شيت السريرية مخصصة للطلبة المسجلين فقط بعد تسجيل الدخول بحساب الطالب.');
+    return;
+  }
   if (type === 'perio') {
-    window.open('periodontics-page4.html', '_blank');
+    window.location.href = 'periodontics-page4.html';
   } else {
-    window.open('oral-surgery-complete.html', '_blank');
+    window.location.href = 'oral-surgery-complete.html';
   }
 }
 
