@@ -9,9 +9,10 @@ $listener.Start()
 $ip = (Get-NetIPAddress -AddressFamily IPv4 | Where-Object { $_.InterfaceAlias -notlike "*Loopback*" -and $_.IPAddress -notlike "169.254*" } | Select-Object -First 1).IPAddress
 
 Write-Host "==================================================" -ForegroundColor Cyan
-Write-Host " Dental Case Sheet Server is Running!" -ForegroundColor Green
-Write-Host " PC Local:    http://localhost:$Port/" -ForegroundColor Yellow
-Write-Host " Mobile/LAN:  http://$($ip):$Port/" -ForegroundColor Yellow
+Write-Host " Dental Case Sheet & College ERP Server Running!" -ForegroundColor Green
+Write-Host " PC Local:       http://localhost:$Port/" -ForegroundColor Yellow
+Write-Host " College ERP:    http://localhost:$Port/e-dental-casesheet/college-portal.html" -ForegroundColor Cyan
+Write-Host " Mobile/LAN:     http://$($ip):$Port/" -ForegroundColor Yellow
 Write-Host "==================================================" -ForegroundColor Cyan
 
 while ($true) {

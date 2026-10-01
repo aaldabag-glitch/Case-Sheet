@@ -65,6 +65,7 @@ server.listen(PORT, () => {
   console.log(`=======================================================`);
   console.log(`🚀 E-Dental CaseSheet Local Server Running!`);
   console.log(`🔗 Main Platform:             http://localhost:${PORT}/`);
+  console.log(`🎓 College ERP Academic Portal: http://localhost:${PORT}/college-portal.html`);
   console.log(`🔗 Oral Surgery Complete:     http://localhost:${PORT}/oral-surgery-complete.html`);
   console.log(`🔗 Oral Surgery Page 1:       http://localhost:${PORT}/oral-surgery-page1.html`);
   console.log(`🔗 Oral Surgery Page 2:       http://localhost:${PORT}/oral-surgery-page2.html`);
