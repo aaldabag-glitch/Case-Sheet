@@ -78,8 +78,8 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_student ON public.case_sheets(student
 CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
 `;
 
-  const DEFAULT_URL = 'https://nkshybnrzzxkqyusultb.supabase.co';
-  const DEFAULT_KEY = 'sb_publishable_FAbhaWvsEJI4sX_C83o6UA_bqeqcuek';
+  const DEFAULT_URL = 'https://hdejjtrgxzjviwyrgwkl.supabase.co';
+  const DEFAULT_KEY = 'sb_publishable_h4O11kxPMxgdPhW7IKvTVQ_dWA6Nyr7';
 
   let clientInstance = null;
 

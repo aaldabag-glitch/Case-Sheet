@@ -1022,12 +1022,18 @@
           </button>
         </div>
 
-        <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeSupabaseModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="button" onclick="saveSupabaseSettings()" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow flex items-center gap-1.5">
-            <i data-lucide="save" class="w-4 h-4"></i>
-            <span>حفظ واتصال بسوبابيس ☁️</span>
+        <div class="pt-3 border-t border-slate-200 flex flex-wrap items-center justify-between gap-2">
+          <button type="button" onclick="syncPushAllToSupabase()" class="px-3.5 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs flex items-center gap-1.5 shadow">
+            <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+            <span>رفع ومزامنة البيانات الحالية للسحابة ⬆️</span>
           </button>
+          <div class="flex items-center gap-2">
+            <button type="button" onclick="closeSupabaseModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">إلغاء</button>
+            <button type="button" onclick="saveSupabaseSettings()" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold text-xs shadow flex items-center gap-1.5">
+              <i data-lucide="save" class="w-4 h-4"></i>
+              <span>حفظ واتصال بسوبابيس ☁️</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>

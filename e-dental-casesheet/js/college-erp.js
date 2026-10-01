@@ -633,6 +633,7 @@ function handleCreateCollegeSubmit(event) {
 
   db.colleges.push(newCollege);
   writeErpDb(db);
+  syncPushCollege(newCollege);
 
   closeAddCollegeModal();
   renderSuperAdminDashboard();
@@ -914,6 +915,7 @@ function handleCreateInstructorSubmit(event) {
 
   db.instructors.push(newInst);
   writeErpDb(db);
+  syncPushInstructor(newInst);
 
   closeAddInstructorModal();
   renderCollegeAdminDashboard();
@@ -959,6 +961,7 @@ function handleCreateStudentSubmit(event) {
 
   db.students.push(newStudent);
   writeErpDb(db);
+  syncPushStudents([newStudent]);
 
   closeAddStudentModal();
   renderCollegeAdminDashboard();
@@ -1017,6 +1020,8 @@ function handleBulkStudentsSubmit(event) {
   }
 
   writeErpDb(db);
+  syncPushStudents(generatedList);
+
   closeBulkStudentsModal();
   renderCollegeAdminDashboard();
 
@@ -1028,6 +1033,7 @@ function deleteStudent(studentId) {
   const db = readErpDb();
   db.students = db.students.filter(s => s.id !== studentId);
   writeErpDb(db);
+  syncDeleteStudent(studentId);
   renderCollegeAdminDashboard();
 }
 
@@ -1036,6 +1042,7 @@ function deleteInstructor(instructorId) {
   const db = readErpDb();
   db.instructors = db.instructors.filter(i => i.id !== instructorId);
   writeErpDb(db);
+  syncDeleteInstructor(instructorId);
   renderCollegeAdminDashboard();
 }
 
@@ -1171,6 +1178,7 @@ function handleSaveEvaluationSubmit(event) {
   c.evaluatedAt = new Date().toISOString();
 
   writeErpDb(db);
+  syncPushCase(c);
   closeEvalCaseModal();
   renderInstructorDashboard();
   alert(`✅ تم اعتماد التقييم ورصد الدرجة (${mark} / 10) للطالب ${c.studentName} بنجاح!`);
@@ -1242,13 +1250,15 @@ function launchStudentCaseSheet(type) {
 // ============================================================================
 const SB_URL_KEY = 'cosmo_college_sb_url';
 const SB_KEY_KEY = 'cosmo_college_sb_key';
+const DEFAULT_SB_URL = 'https://hdejjtrgxzjviwyrgwkl.supabase.co';
+const DEFAULT_SB_KEY = 'sb_publishable_h4O11kxPMxgdPhW7IKvTVQ_dWA6Nyr7';
 
 let erpSupabaseClient = null;
 
 function getErpSupabaseClient() {
   if (erpSupabaseClient) return erpSupabaseClient;
-  const url = localStorage.getItem(SB_URL_KEY);
-  const key = localStorage.getItem(SB_KEY_KEY);
+  const url = localStorage.getItem(SB_URL_KEY) || DEFAULT_SB_URL;
+  const key = localStorage.getItem(SB_KEY_KEY) || DEFAULT_SB_KEY;
   if (url && key && window.supabase && window.supabase.createClient) {
     try {
       erpSupabaseClient = window.supabase.createClient(url.trim(), key.trim());
@@ -1285,8 +1295,8 @@ function updateSupabaseStatusUI() {
 function openSupabaseModal() {
   const urlInput = document.getElementById('sb-input-url');
   const keyInput = document.getElementById('sb-input-key');
-  if (urlInput) urlInput.value = localStorage.getItem(SB_URL_KEY) || '';
-  if (keyInput) keyInput.value = localStorage.getItem(SB_KEY_KEY) || '';
+  if (urlInput) urlInput.value = localStorage.getItem(SB_URL_KEY) || DEFAULT_SB_URL;
+  if (keyInput) keyInput.value = localStorage.getItem(SB_KEY_KEY) || DEFAULT_SB_KEY;
 
   document.getElementById('modal-supabase-setup')?.classList.remove('hidden');
 }
@@ -1329,6 +1339,203 @@ async function saveSupabaseSettings() {
     alert('تم حفظ الإعدادات بنجاح!');
     closeSupabaseModal();
     updateSupabaseStatusUI();
+  }
+}
+
+// Push mutations to Supabase Cloud
+async function syncPushCollege(college) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_colleges').upsert({
+      id: college.id,
+      name: college.name,
+      code: college.code,
+      city: college.city || '',
+      dean_name: college.deanName || '',
+      admin_username: college.adminUsername,
+      admin_password: college.adminPassword,
+      status: college.status || 'Active',
+      plan: college.plan || 'ANNUAL_ACCREDITED',
+      created_at: college.createdAt || new Date().toISOString()
+    });
+  } catch (e) {
+    console.warn('Supabase push college error:', e);
+  }
+}
+
+async function syncPushInstructor(inst) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_instructors').upsert({
+      id: inst.id,
+      college_id: inst.collegeId,
+      name: inst.name,
+      title: inst.title || '',
+      department: inst.department || '',
+      username: inst.username,
+      password: inst.password,
+      email: inst.email || '',
+      role: 'INSTRUCTOR',
+      status: inst.status || 'Active',
+      created_at: inst.createdAt || new Date().toISOString()
+    });
+  } catch (e) {
+    console.warn('Supabase push instructor error:', e);
+  }
+}
+
+async function syncPushStudents(studentsList) {
+  const client = getErpSupabaseClient();
+  if (!client || !studentsList || studentsList.length === 0) return;
+  try {
+    const rows = studentsList.map(s => ({
+      id: s.id,
+      college_id: s.collegeId,
+      name: s.name,
+      stage: s.stage,
+      student_group: s.group || '',
+      username: s.username,
+      password: s.password,
+      role: 'STUDENT',
+      status: s.status || 'Active',
+      created_at: s.createdAt || new Date().toISOString()
+    }));
+    await client.from('college_students').upsert(rows);
+  } catch (e) {
+    console.warn('Supabase push students error:', e);
+  }
+}
+
+async function syncPushCase(c) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_cases').upsert({
+      id: c.id,
+      college_id: c.collegeId,
+      student_id: c.studentId,
+      student_name: c.studentName,
+      stage: c.stage,
+      case_type: c.type,
+      patient_name: c.patientName,
+      chief_complaint: c.chiefComplaint,
+      instructor_id: c.instructorId,
+      instructor_name: c.instructorName,
+      assigned_mark: c.assignedMark,
+      feedback: c.feedback,
+      status: c.status,
+      sheet_url: c.sheetUrl || '',
+      created_at: c.createdAt || new Date().toISOString()
+    });
+  } catch (e) {
+    console.warn('Supabase push case error:', e);
+  }
+}
+
+async function syncDeleteStudent(studentId) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_students').delete().eq('id', studentId);
+  } catch (e) {
+    console.warn('Supabase delete student error:', e);
+  }
+}
+
+async function syncDeleteInstructor(instructorId) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_instructors').delete().eq('id', instructorId);
+  } catch (e) {
+    console.warn('Supabase delete instructor error:', e);
+  }
+}
+
+async function syncPushAllToSupabase() {
+  const client = getErpSupabaseClient();
+  if (!client) {
+    alert('يرجى التأكد من ضبط بيانات Supabase أولاً.');
+    return;
+  }
+  const db = readErpDb();
+  try {
+    if (db.colleges && db.colleges.length > 0) {
+      const cRows = db.colleges.map(c => ({
+        id: c.id,
+        name: c.name,
+        code: c.code,
+        city: c.city || '',
+        dean_name: c.deanName || '',
+        admin_username: c.adminUsername,
+        admin_password: c.adminPassword,
+        status: c.status || 'Active',
+        plan: c.plan || 'ANNUAL_ACCREDITED',
+        created_at: c.createdAt || new Date().toISOString()
+      }));
+      await client.from('college_colleges').upsert(cRows);
+    }
+
+    if (db.instructors && db.instructors.length > 0) {
+      const iRows = db.instructors.map(i => ({
+        id: i.id,
+        college_id: i.collegeId,
+        name: i.name,
+        title: i.title || '',
+        department: i.department || '',
+        username: i.username,
+        password: i.password,
+        email: i.email || '',
+        role: 'INSTRUCTOR',
+        status: i.status || 'Active',
+        created_at: i.createdAt || new Date().toISOString()
+      }));
+      await client.from('college_instructors').upsert(iRows);
+    }
+
+    if (db.students && db.students.length > 0) {
+      const sRows = db.students.map(s => ({
+        id: s.id,
+        college_id: s.collegeId,
+        name: s.name,
+        stage: s.stage,
+        student_group: s.group || '',
+        username: s.username,
+        password: s.password,
+        role: 'STUDENT',
+        status: s.status || 'Active',
+        created_at: s.createdAt || new Date().toISOString()
+      }));
+      await client.from('college_students').upsert(sRows);
+    }
+
+    if (db.cases && db.cases.length > 0) {
+      const kRows = db.cases.map(c => ({
+        id: c.id,
+        college_id: c.collegeId,
+        student_id: c.studentId,
+        student_name: c.studentName,
+        stage: c.stage,
+        case_type: c.type,
+        patient_name: c.patientName,
+        chief_complaint: c.chiefComplaint,
+        instructor_id: c.instructorId,
+        instructor_name: c.instructorName,
+        assigned_mark: c.assignedMark,
+        feedback: c.feedback,
+        status: c.status,
+        sheet_url: c.sheetUrl || '',
+        created_at: c.createdAt || new Date().toISOString()
+      }));
+      await client.from('college_cases').upsert(kRows);
+    }
+
+    alert('☁️ تم رفع ومزامنة كافة بيانات الكليات والتدريسيين والطلبة والتقييمات إلى قاعدة بيانات Supabase بنجاح!');
+  } catch (err) {
+    console.error('Push error:', err);
+    alert('حدث خطأ أثناء المزامنة: ' + (err.message || 'تأكد من تشغيل كود الـ SQL في Supabase أولاً'));
   }
 }
 
