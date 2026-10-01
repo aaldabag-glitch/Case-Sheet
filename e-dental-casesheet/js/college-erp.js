@@ -1237,7 +1237,337 @@ function launchStudentCaseSheet(type) {
   }
 }
 
+// ============================================================================
+// 5. SUPABASE CLOUD SYNC & SYSTEM RESET
+// ============================================================================
+const SB_URL_KEY = 'cosmo_college_sb_url';
+const SB_KEY_KEY = 'cosmo_college_sb_key';
+
+let erpSupabaseClient = null;
+
+function getErpSupabaseClient() {
+  if (erpSupabaseClient) return erpSupabaseClient;
+  const url = localStorage.getItem(SB_URL_KEY);
+  const key = localStorage.getItem(SB_KEY_KEY);
+  if (url && key && window.supabase && window.supabase.createClient) {
+    try {
+      erpSupabaseClient = window.supabase.createClient(url.trim(), key.trim());
+      return erpSupabaseClient;
+    } catch (e) {
+      console.warn('Supabase client init error:', e);
+    }
+  }
+  return null;
+}
+
+function updateSupabaseStatusUI() {
+  const dot = document.getElementById('erp-supabase-dot');
+  const txt = document.getElementById('erp-supabase-text');
+  const client = getErpSupabaseClient();
+
+  if (client) {
+    if (dot) {
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse';
+    }
+    if (txt) {
+      txt.textContent = 'سوبابيس: متصل سحابياً 🟢';
+    }
+  } else {
+    if (dot) {
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+    }
+    if (txt) {
+      txt.textContent = 'سوبابيس: محلي 🟡';
+    }
+  }
+}
+
+function openSupabaseModal() {
+  const urlInput = document.getElementById('sb-input-url');
+  const keyInput = document.getElementById('sb-input-key');
+  if (urlInput) urlInput.value = localStorage.getItem(SB_URL_KEY) || '';
+  if (keyInput) keyInput.value = localStorage.getItem(SB_KEY_KEY) || '';
+
+  document.getElementById('modal-supabase-setup')?.classList.remove('hidden');
+}
+
+function closeSupabaseModal() {
+  document.getElementById('modal-supabase-setup')?.classList.add('hidden');
+}
+
+async function saveSupabaseSettings() {
+  const url = (document.getElementById('sb-input-url')?.value || '').trim();
+  const key = (document.getElementById('sb-input-key')?.value || '').trim();
+
+  if (!url || !key) {
+    alert('يرجى إدخال رابط المشروع (Project URL) والمفتاح العام (anon key).');
+    return;
+  }
+
+  localStorage.setItem(SB_URL_KEY, url);
+  localStorage.setItem(SB_KEY_KEY, key);
+  erpSupabaseClient = null;
+
+  const client = getErpSupabaseClient();
+  if (client) {
+    try {
+      // Test select
+      const { data, error } = await client.from('college_colleges').select('id').limit(1);
+      if (error && error.code !== 'PGRST116') {
+        console.warn('Cloud query notice:', error.message);
+      }
+      updateSupabaseStatusUI();
+      closeSupabaseModal();
+      alert('🟢 تم الاتصال بسوبابيس (Supabase Cloud) بنجاح! المنظومة متصلة سحابياً الآن.');
+      syncPullFromSupabase();
+    } catch (err) {
+      alert('تم حفظ الإعدادات! تأكد من إنشاء الجداول عبر نسخ ولصق كود الـ SQL في Supabase SQL Editor.');
+      closeSupabaseModal();
+      updateSupabaseStatusUI();
+    }
+  } else {
+    alert('تم حفظ الإعدادات بنجاح!');
+    closeSupabaseModal();
+    updateSupabaseStatusUI();
+  }
+}
+
+function getSupabaseSqlSchema() {
+  return `-- ========================================================
+-- Dental College Academic ERP • Database Schema
+-- Multi-Tenant Schema for Supabase PostgreSQL
+-- ========================================================
+
+-- 1. Colleges Table
+CREATE TABLE IF NOT EXISTS public.college_colleges (
+    id TEXT PRIMARY KEY,
+    name TEXT NOT NULL,
+    code TEXT UNIQUE NOT NULL,
+    city TEXT,
+    dean_name TEXT,
+    admin_username TEXT,
+    admin_password TEXT,
+    status TEXT DEFAULT 'Active',
+    plan TEXT DEFAULT 'ANNUAL_ACCREDITED',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Instructors Table
+CREATE TABLE IF NOT EXISTS public.college_instructors (
+    id TEXT PRIMARY KEY,
+    college_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    title TEXT,
+    department TEXT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    email TEXT,
+    role TEXT DEFAULT 'INSTRUCTOR',
+    status TEXT DEFAULT 'Active',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 3. Students Table (4th & 5th Year BDS)
+CREATE TABLE IF NOT EXISTS public.college_students (
+    id TEXT PRIMARY KEY,
+    college_id TEXT NOT NULL,
+    name TEXT NOT NULL,
+    stage TEXT NOT NULL, -- '4th' or '5th'
+    student_group TEXT,
+    username TEXT NOT NULL,
+    password TEXT NOT NULL,
+    role TEXT DEFAULT 'STUDENT',
+    status TEXT DEFAULT 'Active',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 4. Clinical Cases & Evaluations Table
+CREATE TABLE IF NOT EXISTS public.college_cases (
+    id TEXT PRIMARY KEY,
+    college_id TEXT NOT NULL,
+    student_id TEXT NOT NULL,
+    student_name TEXT,
+    stage TEXT,
+    case_type TEXT,
+    patient_name TEXT,
+    chief_complaint TEXT,
+    instructor_id TEXT,
+    instructor_name TEXT,
+    assigned_mark TEXT,
+    feedback TEXT,
+    status TEXT DEFAULT 'Pending',
+    sheet_url TEXT,
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- Row Level Security (RLS)
+ALTER TABLE public.college_colleges ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.college_instructors ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.college_students ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.college_cases ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow all on college_colleges" ON public.college_colleges;
+CREATE POLICY "Allow all on college_colleges" ON public.college_colleges FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on college_instructors" ON public.college_instructors;
+CREATE POLICY "Allow all on college_instructors" ON public.college_instructors FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on college_students" ON public.college_students;
+CREATE POLICY "Allow all on college_students" ON public.college_students FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on college_cases" ON public.college_cases;
+CREATE POLICY "Allow all on college_cases" ON public.college_cases FOR ALL TO anon USING (true) WITH CHECK (true);
+`;
+}
+
+function copySupabaseSchemaSql() {
+  const sql = getSupabaseSqlSchema();
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(sql).then(() => {
+      alert('📋 تم نسخ كود الـ SQL بنجاح! الصقه في Supabase SQL Editor واضغط Run.');
+    }).catch(() => {
+      prompt('انسخ كود الـ SQL من هنا:', sql);
+    });
+  } else {
+    prompt('انسخ كود الـ SQL من هنا:', sql);
+  }
+}
+
+// Clear old local data ("شيل القديم")
+function clearOldErpData() {
+  if (!confirm('⚠️ هل أنت متأكد من تصفير وحذف البيانات المحلية القديمة والكاش؟ سيتم البدء بقاعدة بيانات نظيفة ومحدثة.')) {
+    return;
+  }
+
+  localStorage.removeItem(STORAGE_KEY);
+  localStorage.removeItem(SESSION_KEY);
+  sessionStorage.removeItem(SESSION_KEY);
+
+  // Re-seed clean state
+  const cleanDb = getInitialSeedDatabase();
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanDb));
+
+  alert('🧹 تم تصفير وحذف البيانات القديمة بنجاح!');
+  window.location.reload();
+}
+
+async function syncPullFromSupabase() {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+
+  try {
+    const [cRes, iRes, sRes, kRes] = await Promise.all([
+      client.from('college_colleges').select('*'),
+      client.from('college_instructors').select('*'),
+      client.from('college_students').select('*'),
+      client.from('college_cases').select('*')
+    ]);
+
+    const db = readErpDb();
+    let hasChanges = false;
+
+    if (cRes.data && cRes.data.length > 0) {
+      cRes.data.forEach(item => {
+        const idx = db.colleges.findIndex(x => x.id === item.id);
+        const mapped = {
+          id: item.id,
+          name: item.name,
+          code: item.code,
+          city: item.city,
+          deanName: item.dean_name,
+          adminUsername: item.admin_username,
+          adminPassword: item.admin_password,
+          status: item.status || 'Active',
+          plan: item.plan || 'ANNUAL_ACCREDITED',
+          createdAt: item.created_at
+        };
+        if (idx > -1) db.colleges[idx] = mapped;
+        else db.colleges.push(mapped);
+      });
+      hasChanges = true;
+    }
+
+    if (iRes.data && iRes.data.length > 0) {
+      iRes.data.forEach(item => {
+        const idx = db.instructors.findIndex(x => x.id === item.id);
+        const mapped = {
+          id: item.id,
+          collegeId: item.college_id,
+          name: item.name,
+          title: item.title,
+          department: item.department,
+          username: item.username,
+          password: item.password,
+          email: item.email,
+          role: 'INSTRUCTOR',
+          status: item.status || 'Active',
+          createdAt: item.created_at
+        };
+        if (idx > -1) db.instructors[idx] = mapped;
+        else db.instructors.push(mapped);
+      });
+      hasChanges = true;
+    }
+
+    if (sRes.data && sRes.data.length > 0) {
+      sRes.data.forEach(item => {
+        const idx = db.students.findIndex(x => x.id === item.id);
+        const mapped = {
+          id: item.id,
+          collegeId: item.college_id,
+          name: item.name,
+          stage: item.stage,
+          group: item.student_group,
+          username: item.username,
+          password: item.password,
+          role: 'STUDENT',
+          status: item.status || 'Active',
+          createdAt: item.created_at
+        };
+        if (idx > -1) db.students[idx] = mapped;
+        else db.students.push(mapped);
+      });
+      hasChanges = true;
+    }
+
+    if (kRes.data && kRes.data.length > 0) {
+      kRes.data.forEach(item => {
+        const idx = db.cases.findIndex(x => x.id === item.id);
+        const mapped = {
+          id: item.id,
+          collegeId: item.college_id,
+          studentId: item.student_id,
+          studentName: item.student_name,
+          stage: item.stage,
+          type: item.case_type,
+          patientName: item.patient_name,
+          chiefComplaint: item.chief_complaint,
+          instructorId: item.instructor_id,
+          instructorName: item.instructor_name,
+          assignedMark: item.assigned_mark,
+          feedback: item.feedback,
+          status: item.status,
+          sheetUrl: item.sheet_url,
+          createdAt: item.created_at
+        };
+        if (idx > -1) db.cases[idx] = mapped;
+        else db.cases.push(mapped);
+      });
+      hasChanges = true;
+    }
+
+    if (hasChanges) {
+      writeErpDb(db);
+      renderApp();
+    }
+  } catch (err) {
+    console.warn('Supabase sync pull notice:', err);
+  }
+}
+
 // Auto init on page load
 window.addEventListener('DOMContentLoaded', () => {
+  updateSupabaseStatusUI();
+  syncPullFromSupabase();
   renderApp();
 });
