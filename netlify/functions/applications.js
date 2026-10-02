@@ -107,82 +107,112 @@ exports.handler = async function (event, context) {
       } catch (e) {}
     }
 
-    const isStudent = queryType === 'student' || 
+    const isColleges = queryType === 'colleges' || 
+                       parsedBody.type === 'colleges' || 
+                       (event.path && event.path.includes('colleges'));
+    const isStudent = !isColleges && (queryType === 'student' || 
                       parsedBody.type === 'student' || 
-                      (event.path && event.path.includes('student'));
-    const blobKey = isStudent ? 'student_applications' : 'applications';
+                      (event.path && event.path.includes('student')));
+    const blobKey = isColleges ? 'registered_colleges' : (isStudent ? 'student_applications' : 'applications');
 
     if (event.httpMethod === 'GET') {
-      const apps = await getCloudApplications(blobKey);
+      const items = await getCloudApplications(blobKey);
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, type: blobKey, applications: apps || [] })
+        body: JSON.stringify({
+          success: true,
+          type: blobKey,
+          colleges: isColleges ? (items || []) : undefined,
+          applications: items || []
+        })
       };
     }
 
     if (event.httpMethod === 'POST') {
       const action = parsedBody.action || 'upsert';
-      let currentApps = await getCloudApplications(blobKey);
-      if (!Array.isArray(currentApps)) currentApps = [];
+      let currentItems = await getCloudApplications(blobKey);
+      if (!Array.isArray(currentItems)) currentItems = [];
 
       if (action === 'delete') {
-        const appId = parsedBody.id;
-        currentApps = currentApps.filter(a => a.id !== appId);
-        await setCloudApplications(currentApps, blobKey);
+        const itemId = parsedBody.id;
+        currentItems = currentItems.filter(a => a.id !== itemId);
+        await setCloudApplications(currentItems, blobKey);
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ success: true, type: blobKey, applications: currentApps })
+          body: JSON.stringify({ success: true, type: blobKey, colleges: currentItems, applications: currentItems })
         };
       }
 
-      // Upsert application
-      const app = parsedBody.application;
-      if (!app || !app.id) {
+      // Handle batch colleges upsert
+      if (isColleges && Array.isArray(parsedBody.colleges)) {
+        parsedBody.colleges.forEach(col => {
+          if (!col || !col.id) return;
+          const idx = currentItems.findIndex(c => c.id === col.id);
+          if (idx > -1) currentItems[idx] = { ...currentItems[idx], ...col };
+          else currentItems.push(col);
+        });
+        await setCloudApplications(currentItems, blobKey);
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ success: true, type: blobKey, colleges: currentItems, applications: currentItems })
+        };
+      }
+
+      // Upsert single item (college, student application, or college application)
+      const item = parsedBody.college || parsedBody.application;
+      if (!item || !item.id) {
         return {
           statusCode: 400,
           headers,
-          body: JSON.stringify({ success: false, error: 'بيانات الطلب غير مكتملة' })
+          body: JSON.stringify({ success: false, error: 'بيانات العنصر غير مكتملة' })
         };
       }
 
-      const idx = currentApps.findIndex(a => a.id === app.id);
+      const idx = currentItems.findIndex(a => a.id === item.id);
       const isNew = idx === -1;
 
       if (idx > -1) {
-        currentApps[idx] = { ...currentApps[idx], ...app };
+        currentItems[idx] = { ...currentItems[idx], ...item };
       } else {
-        currentApps.unshift(app);
+        currentItems.unshift(item);
       }
 
-      await setCloudApplications(currentApps, blobKey);
+      await setCloudApplications(currentItems, blobKey);
 
-      if (isNew && !isStudent) {
-        notifySuperAdminNewApp(app).catch(() => {});
+      if (isNew && !isStudent && !isColleges) {
+        notifySuperAdminNewApp(item).catch(() => {});
       }
 
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, type: blobKey, applications: currentApps, application: app })
+        body: JSON.stringify({
+          success: true,
+          type: blobKey,
+          colleges: isColleges ? currentItems : undefined,
+          applications: currentItems,
+          application: item
+        })
       };
     }
 
     if (event.httpMethod === 'DELETE') {
-      const appId = event.queryStringParameters?.id;
-      let currentApps = await getCloudApplications(blobKey);
-      if (!Array.isArray(currentApps)) currentApps = [];
+      const itemId = event.queryStringParameters?.id;
+      let currentItems = await getCloudApplications(blobKey);
+      if (!Array.isArray(currentItems)) currentItems = [];
 
-      if (appId) {
-        currentApps = currentApps.filter(a => a.id !== appId);
-        await setCloudApplications(currentApps, blobKey);
+      if (itemId) {
+        currentItems = currentItems.filter(a => a.id !== itemId);
+        await setCloudApplications(currentItems, blobKey);
       }
 
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, type: blobKey, applications: currentApps })
+        body: JSON.stringify({ success: true, type: blobKey, colleges: currentItems, applications: currentItems })
       };
     }
 

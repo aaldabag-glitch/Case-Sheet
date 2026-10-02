@@ -9,7 +9,100 @@ const SESSION_KEY = 'cosmo_dental_college_session';
 const SAVED_USERS_KEY = 'cosmo_dental_saved_accounts';
 
 // ============================================================================
-// INITIAL SEED DATABASE (CLEAN SLATE: NO FAKE COLLEGES, DOCTORS, OR STUDENTS)
+// DEFAULT ACCREDITED IRAQI DENTAL COLLEGES (قائمة الكليات والجامعات العراقية المعتمدة)
+// ============================================================================
+function getDefaultCollegesList() {
+  return [
+    {
+      id: 'clg_uob',
+      name: 'جامعة بغداد - كلية طب الأسنان',
+      code: 'UOB-DENT',
+      city: 'بغداد',
+      deanName: 'أ.د. رغد الهاشمي',
+      adminUsername: 'dean.baghdad',
+      adminPassword: 'Dean123#',
+      status: 'Active',
+      plan: 'ANNUAL_ACCREDITED',
+      subscriptionFee: 1500,
+      subscriptionEnd: '2027-10-01',
+      createdAt: '2026-01-01T00:00:00.000Z'
+    },
+    {
+      id: 'clg_uom',
+      name: 'جامعة الموصل - كلية طب الأسنان',
+      code: 'UOM-DENT',
+      city: 'الموصل',
+      deanName: 'أ.د. ريان سالم حامد',
+      adminUsername: 'dean.mosul',
+      adminPassword: 'Dean123#',
+      status: 'Active',
+      plan: 'ANNUAL_ACCREDITED',
+      subscriptionFee: 1500,
+      subscriptionEnd: '2027-10-01',
+      createdAt: '2026-01-01T00:00:00.000Z'
+    },
+    {
+      id: 'clg_mustansiriya',
+      name: 'الجامعة المستنصرية - كلية طب الأسنان',
+      code: 'UOMUST-DENT',
+      city: 'بغداد',
+      deanName: 'أ.د. مها جمال عباس',
+      adminUsername: 'dean.mustansiriya',
+      adminPassword: 'Dean123#',
+      status: 'Active',
+      plan: 'ANNUAL_ACCREDITED',
+      subscriptionFee: 1500,
+      subscriptionEnd: '2027-10-01',
+      createdAt: '2026-01-01T00:00:00.000Z'
+    },
+    {
+      id: 'clg_basrah',
+      name: 'جامعة البصرة - كلية طب الأسنان',
+      code: 'UOBAS-DENT',
+      city: 'البصرة',
+      deanName: 'أ.د. فاتح الخاقاني',
+      adminUsername: 'dean.basrah',
+      adminPassword: 'Dean123#',
+      status: 'Active',
+      plan: 'ANNUAL_ACCREDITED',
+      subscriptionFee: 1500,
+      subscriptionEnd: '2027-10-01',
+      createdAt: '2026-01-01T00:00:00.000Z'
+    },
+    {
+      id: 'clg_kufa',
+      name: 'جامعة الكوفة - كلية طب الأسنان',
+      code: 'UOKUF-DENT',
+      city: 'النجف',
+      deanName: 'أ.د. علي طارق خضير',
+      adminUsername: 'dean.kufa',
+      adminPassword: 'Dean123#',
+      status: 'Active',
+      plan: 'ANNUAL_ACCREDITED',
+      subscriptionFee: 1500,
+      subscriptionEnd: '2027-10-01',
+      createdAt: '2026-01-01T00:00:00.000Z'
+    },
+    {
+      id: 'clg_babylon',
+      name: 'جامعة بابل - كلية طب الأسنان',
+      code: 'UOBAB-DENT',
+      city: 'بابل',
+      deanName: 'أ.د. وسام وهاب صاحب',
+      adminUsername: 'dean.babylon',
+      adminPassword: 'Dean123#',
+      status: 'Active',
+      plan: 'ANNUAL_ACCREDITED',
+      subscriptionFee: 1500,
+      subscriptionEnd: '2027-10-01',
+      createdAt: '2026-01-01T00:00:00.000Z'
+    }
+  ];
+}
+window.getDefaultCollegesList = getDefaultCollegesList;
+
+// ============================================================================
+// INITIAL SEED DATABASE (CLEAN SLATE + ACCREDITED COLLEGES)
 // ============================================================================
 function getInitialSeedDatabase() {
   return {
@@ -21,11 +114,12 @@ function getInitialSeedDatabase() {
       name: 'مدير المنظومة العام (Super Admin)',
       role: 'SUPER_ADMIN'
     },
-    colleges: [],
+    colleges: getDefaultCollegesList(),
     instructors: [],
     students: [],
     cases: [],
-    applications: []
+    applications: [],
+    studentApplications: []
   };
 }
 
@@ -74,6 +168,20 @@ function initSavedAccountsIfEmpty() {
       name: 'مدير المنظومة (Super Admin)',
       role: 'SUPER_ADMIN',
       collegeName: 'الإدارة المركزية'
+    });
+    saveAccountToDevice({
+      username: 'dean.baghdad',
+      password: 'Dean123#',
+      name: 'أ.د. رغد الهاشمي (عميد جامعة بغداد)',
+      role: 'COLLEGE_ADMIN',
+      collegeName: 'جامعة بغداد - كلية طب الأسنان'
+    });
+    saveAccountToDevice({
+      username: 'dean.mosul',
+      password: 'Dean123#',
+      name: 'أ.د. ريان سالم حامد (عميد جامعة الموصل)',
+      role: 'COLLEGE_ADMIN',
+      collegeName: 'جامعة الموصل - كلية طب الأسنان'
     });
   }
 }
@@ -196,17 +304,28 @@ function renderSavedAccountsList() {
 function readErpDb() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
+    let data;
     if (!raw) {
-      const initial = getInitialSeedDatabase();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
-      return initial;
+      data = getInitialSeedDatabase();
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      return data;
     }
-    const data = JSON.parse(raw);
-    if (!data.colleges) data.colleges = [];
+    data = JSON.parse(raw);
+    if (!data.colleges || !Array.isArray(data.colleges) || data.colleges.length === 0) {
+      data.colleges = getDefaultCollegesList();
+    } else {
+      const defaults = getDefaultCollegesList();
+      defaults.forEach(def => {
+        if (!data.colleges.some(c => c.id === def.id || c.name === def.name)) {
+          data.colleges.push(def);
+        }
+      });
+    }
     if (!data.instructors) data.instructors = [];
     if (!data.students) data.students = [];
     if (!data.cases) data.cases = [];
     if (!data.applications) data.applications = [];
+    if (!data.studentApplications) data.studentApplications = [];
     return data;
   } catch (e) {
     const initial = getInitialSeedDatabase();
@@ -244,6 +363,19 @@ function setCurrentSession(user) {
     localStorage.removeItem(SESSION_KEY);
   }
 }
+
+function getCurrentUserCollege() {
+  const session = getCurrentSession();
+  if (!session) return null;
+  const db = readErpDb();
+  if (session.collegeId) {
+    const found = (db.colleges || []).find(c => c.id === session.collegeId);
+    if (found) return found;
+    return { id: session.collegeId, name: session.collegeName || 'كلية طب الأسنان' };
+  }
+  return null;
+}
+window.getCurrentUserCollege = getCurrentUserCollege;
 
 // ============================================================================
 // AUTHENTICATION & ROUTING
@@ -1582,6 +1714,11 @@ async function syncPushCollege(college) {
       console.warn('Supabase push college error:', err);
     }
   }
+
+  // Also push to Netlify Cloud Blobs
+  if (typeof syncPushCollegeToCloud === 'function') {
+    syncPushCollegeToCloud(college).catch(() => {});
+  }
 }
 
 async function syncPushInstructor(inst) {
@@ -1909,13 +2046,12 @@ async function syncPullFromSupabase() {
   if (!client) return;
 
   try {
-    const [cRes, iRes, sRes, kRes, aRes] = await Promise.all([
-      client.from('college_colleges').select('*'),
-      client.from('college_instructors').select('*'),
-      client.from('college_students').select('*'),
-      client.from('college_cases').select('*'),
-      client.from('college_applications').select('*').catch(() => ({ data: null }))
-    ]);
+    let cRes = { data: null }, iRes = { data: null }, sRes = { data: null }, kRes = { data: null }, aRes = { data: null };
+    try { cRes = await client.from('college_colleges').select('*'); } catch (e) {}
+    try { iRes = await client.from('college_instructors').select('*'); } catch (e) {}
+    try { sRes = await client.from('college_students').select('*'); } catch (e) {}
+    try { kRes = await client.from('college_cases').select('*'); } catch (e) {}
+    try { aRes = await client.from('college_applications').select('*'); } catch (e) {}
 
     const db = readErpDb();
     let hasChanges = false;
@@ -2880,14 +3016,87 @@ async function syncPullApplicationsFromCloud(showFeedback = false) {
 window.syncPullApplicationsFromCloud = syncPullApplicationsFromCloud;
 
 // ============================================================================
+// COLLEGES CLOUD SYNC (مزامنة بيانات الكليات المسجلة سحابياً)
+// ============================================================================
+async function syncPushCollegeToCloud(college) {
+  const candidateEndpoints = [
+    '/api/colleges',
+    '/.netlify/functions/applications?type=colleges',
+    'https://dental-casesheet-erp.netlify.app/api/colleges',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=colleges'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'upsert', type: 'colleges', college: college })
+      });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync push college failed:', ep, e);
+    }
+  }
+}
+window.syncPushCollegeToCloud = syncPushCollegeToCloud;
+
+async function syncPullCollegesFromCloud() {
+  const candidateEndpoints = [
+    '/api/colleges',
+    '/.netlify/functions/applications?type=colleges',
+    'https://dental-casesheet-erp.netlify.app/api/colleges',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=colleges'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep);
+      if (res.ok) {
+        const data = await res.json();
+        const cloudColleges = data.colleges || data.applications || [];
+        if (Array.isArray(cloudColleges) && cloudColleges.length > 0) {
+          const db = readErpDb();
+          let changed = false;
+          cloudColleges.forEach(col => {
+            const idx = db.colleges.findIndex(c => c.id === col.id || c.name === col.name);
+            if (idx > -1) {
+              db.colleges[idx] = { ...db.colleges[idx], ...col };
+            } else {
+              db.colleges.push(col);
+              changed = true;
+            }
+          });
+          if (changed) {
+            writeErpDb(db);
+            if (getCurrentSession()?.role === 'SUPER_ADMIN') {
+              renderSuperAdminDashboard();
+            }
+          }
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Sync pull colleges notice:', ep, e);
+    }
+  }
+  return false;
+}
+window.syncPullCollegesFromCloud = syncPullCollegesFromCloud;
+
+// ============================================================================
 // STUDENT APPLICATIONS MANAGEMENT (إدارة وتقديم طلبات انضمام الطلبة الجدد للعمادة)
 // ============================================================================
 function openStudentApplicationModal() {
   const db = readErpDb();
   const select = document.getElementById('sapp-college-id');
   if (select) {
+    const colleges = (db.colleges && db.colleges.length > 0) 
+      ? db.colleges 
+      : getDefaultCollegesList();
+
     select.innerHTML = '<option value="" disabled selected>-- اختر كليتك من القائمة --</option>' +
-      (db.colleges || []).map(c => `
+      colleges.map(c => `
         <option value="${c.id}">${c.name} (${c.city || 'العراق'})</option>
       `).join('');
   }
@@ -3088,10 +3297,14 @@ function renderCollegeStudentApplications() {
   const db = readErpDb();
   const allApps = db.studentApplications || [];
   
-  // Filter for current college if logged in as dean
+  // Filter strictly for current college when logged in as dean
   const apps = currentCollege 
-    ? allApps.filter(a => a.collegeId === currentCollege.id) 
-    : allApps;
+    ? allApps.filter(a => {
+        if (a.collegeId && a.collegeId === currentCollege.id) return true;
+        if (a.collegeName && currentCollege.name && (a.collegeName === currentCollege.name || a.collegeName.includes(currentCollege.name) || currentCollege.name.includes(a.collegeName))) return true;
+        return false;
+      }) 
+    : [];
 
   const tbody = document.getElementById('student-applications-table-body');
   const badge = document.getElementById('dean-tab-student-apps-count');
@@ -3298,12 +3511,14 @@ window.addEventListener('DOMContentLoaded', () => {
   checkImpersonation();
   updateSupabaseStatusUI();
   syncPullFromSupabase();
+  syncPullCollegesFromCloud();
   syncPullApplicationsFromCloud();
   syncPullStudentApplicationsFromCloud();
   renderApp();
 
-  // Periodic background check for new college and student applications every 10 seconds
+  // Periodic background check for new colleges, college apps, and student applications
   setInterval(() => {
+    syncPullCollegesFromCloud();
     syncPullApplicationsFromCloud();
     syncPullStudentApplicationsFromCloud();
   }, 10000);
