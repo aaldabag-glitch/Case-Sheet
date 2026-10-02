@@ -176,6 +176,7 @@ function initSavedAccountsIfEmpty() {
       password: 'Dean123#',
       name: 'أ.د. رغد الهاشمي (عميد جامعة بغداد)',
       role: 'COLLEGE_ADMIN',
+      collegeId: 'clg_uob',
       collegeName: 'جامعة بغداد - كلية طب الأسنان'
     },
     {
@@ -183,6 +184,7 @@ function initSavedAccountsIfEmpty() {
       password: 'Dean123#',
       name: 'أ.د. ريان سالم حامد (عميد جامعة الموصل)',
       role: 'COLLEGE_ADMIN',
+      collegeId: 'clg_mosul',
       collegeName: 'جامعة الموصل - كلية طب الأسنان'
     }
   ];
@@ -389,6 +391,15 @@ function getCurrentUserCollege() {
     const found = (db.colleges || []).find(c => c.id === session.collegeId);
     if (found) return found;
     return { id: session.collegeId, name: session.collegeName || 'كلية طب الأسنان' };
+  }
+  // Robust Fallback: find by collegeName or adminUsername
+  if (session.collegeName) {
+    const found = (db.colleges || []).find(c => c.name === session.collegeName || c.name.includes(session.collegeName) || session.collegeName.includes(c.name));
+    if (found) return found;
+  }
+  if (session.username) {
+    const found = (db.colleges || []).find(c => (c.adminUsername || '').toLowerCase() === session.username.toLowerCase());
+    if (found) return found;
   }
   return null;
 }
