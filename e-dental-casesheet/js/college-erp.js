@@ -55,119 +55,24 @@ function getInitialSeedDatabase() {
 }
 
 // ============================================================================
-// SAVED ACCOUNTS ON THIS PC (حفظ الحسابات على هذا الجهاز)
+// SAVED ACCOUNTS (REMOVED PER USER SPECIFICATION)
 // ============================================================================
-function getSavedAccounts() {
-  try {
-    const raw = localStorage.getItem(SAVED_USERS_KEY);
-    return raw ? JSON.parse(raw) : [];
-  } catch (e) {
-    return [];
-  }
-}
-
-function saveAccountToDevice(accountData) {
-  const list = getSavedAccounts();
-  const existingIdx = list.findIndex(a => a.username.toLowerCase() === accountData.username.toLowerCase());
-  if (existingIdx > -1) {
-    list[existingIdx] = accountData;
-  } else {
-    list.unshift(accountData);
-  }
-  localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
-  renderSavedAccountsList();
-}
-
-function removeSavedAccount(username) {
-  let list = getSavedAccounts();
-  list = list.filter(a => a.username.toLowerCase() !== username.toLowerCase());
-  localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
-  renderSavedAccountsList();
-}
-
+function getSavedAccounts() { return []; }
+function saveAccountToDevice() {}
+function removeSavedAccount() {}
 function clearAllSavedAccounts() {
-  localStorage.removeItem(SAVED_USERS_KEY);
-  renderSavedAccountsList();
+  try { localStorage.removeItem(SAVED_USERS_KEY); } catch (e) {}
 }
-
 function initSavedAccountsIfEmpty() {
-  const defaultAccounts = [
-    {
-      username: 'superadmin',
-      password: 'admin123',
-      name: 'مدير المنظومة العام (Super Admin)',
-      role: 'SUPER_ADMIN',
-      collegeName: 'الإدارة المركزية'
-    }
-  ];
-  try {
-    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(defaultAccounts));
-  } catch (e) {}
-  renderSavedAccountsList();
+  try { localStorage.removeItem(SAVED_USERS_KEY); } catch (e) {}
 }
+function selectSavedAccount() {}
+function renderSavedAccountsList() {}
 
-// Impersonation disabled per security specification
-function loginAsDeanNewTab(collegeId) {
-  return;
-}
+function loginAsDeanNewTab() {}
+function loginAsInstructorNewTab() {}
+function checkImpersonation() {}
 
-function loginAsInstructorNewTab(instructorId) {
-  return;
-}
-
-function checkImpersonation() {
-  return;
-}
-
-function selectSavedAccount(username, password) {
-  const uInput = document.getElementById('login-username');
-  const pInput = document.getElementById('login-password');
-  if (uInput) uInput.value = username;
-  if (pInput) pInput.value = password;
-}
-
-function renderSavedAccountsList() {
-  const container = document.getElementById('saved-accounts-box');
-  const listEl = document.getElementById('saved-accounts-list');
-  if (!container || !listEl) return;
-
-  const accounts = getSavedAccounts();
-  if (!accounts || accounts.length === 0) {
-    container.classList.add('hidden');
-    listEl.innerHTML = '';
-    return;
-  }
-
-  container.classList.remove('hidden');
-  listEl.innerHTML = accounts.map(acc => {
-    let roleBadge = 'طالب';
-    let roleBg = 'bg-indigo-100 text-indigo-800';
-    if (acc.role === 'SUPER_ADMIN') { roleBadge = 'سوبر أدمن'; roleBg = 'bg-amber-100 text-amber-900'; }
-    else if (acc.role === 'COLLEGE_ADMIN') { roleBadge = 'عميد'; roleBg = 'bg-sky-100 text-sky-900'; }
-    else if (acc.role === 'INSTRUCTOR') { roleBadge = 'تدريسي'; roleBg = 'bg-teal-100 text-teal-900'; }
-
-    return `
-      <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200/80 hover:border-teal-500 transition-all text-xs">
-        <button type="button" onclick="selectSavedAccount('${acc.username}', '${acc.password || ''}')" class="flex-1 flex items-center gap-2 text-right cursor-pointer">
-          <span class="w-6 h-6 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold font-latin">
-            ${acc.username.charAt(0).toUpperCase()}
-          </span>
-          <div>
-            <div class="font-bold text-slate-800 flex items-center gap-1.5">
-              <span>${acc.name || acc.username}</span>
-              <span class="px-1.5 py-0.2 rounded text-[10px] font-bold ${roleBg}">${roleBadge}</span>
-            </div>
-            <div class="text-[10px] text-slate-400 font-latin">${acc.username}</div>
-          </div>
-        </button>
-        <button type="button" onclick="removeSavedAccount('${acc.username}')" class="text-slate-300 hover:text-rose-600 px-1 font-bold text-sm cursor-pointer" title="إزالة من هذا الجهاز">&times;</button>
-      </div>
-    `;
-  }).join('');
-  if (window.lucide && window.lucide.createIcons) {
-    window.lucide.createIcons();
-  }
-}
 
 // Read database
 function readErpDb() {
@@ -392,18 +297,7 @@ function showLoginError(msg) {
   }
 }
 
-function loginSuccess(user, enteredPassword) {
-  const rememberCheck = document.getElementById('remember-device-check');
-  // حفظ الحساب على هذا الجهاز للسوبر أدمن والعمداء والتدريسيين فقط (استثناء الطلبة بناء على طلب المستخدم)
-  if (rememberCheck && rememberCheck.checked && user.role !== 'STUDENT') {
-    saveAccountToDevice({
-      username: user.username,
-      password: enteredPassword || '',
-      name: user.name,
-      role: user.role,
-      collegeName: user.collegeName || ''
-    });
-  }
+function loginSuccess(user) {
   setCurrentSession(user);
 
   // إذا كان المستخدم طالب، يتم توجيهه مباشرة إلى منصة الكيس شيت (واجهة الطالب)
