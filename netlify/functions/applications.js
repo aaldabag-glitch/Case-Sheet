@@ -29,9 +29,18 @@ function writeLocalApplications(apps) {
   }
 }
 
+function getAppStore() {
+  return getStore({
+    name: 'dental_data',
+    siteID: process.env.NETLIFY_SITE_ID || '8a4f11a2-8e8a-43d6-a0e4-8a6169dde16b',
+    token: process.env.NETLIFY_AUTH_TOKEN || 'nfc_YRgWico8i5hogE7F87r55rhU1ijyrivY084b',
+    consistency: 'strong'
+  });
+}
+
 async function getCloudApplications() {
   try {
-    const store = getStore({ name: 'dental_data', consistency: 'strong' });
+    const store = getAppStore();
     const data = await store.get('applications', { type: 'json' });
     if (Array.isArray(data)) {
       return data;
@@ -45,7 +54,7 @@ async function getCloudApplications() {
 async function setCloudApplications(apps) {
   writeLocalApplications(apps);
   try {
-    const store = getStore({ name: 'dental_data', consistency: 'strong' });
+    const store = getAppStore();
     await store.setJSON('applications', apps);
     return true;
   } catch (err) {
