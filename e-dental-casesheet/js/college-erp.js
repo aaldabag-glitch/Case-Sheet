@@ -3263,35 +3263,64 @@ window.syncPullCollegesFromCloud = syncPullCollegesFromCloud;
 // STUDENT APPLICATIONS MANAGEMENT (إدارة وتقديم طلبات انضمام الطلبة الجدد للعمادة)
 // ============================================================================
 function openStudentApplicationModal() {
-  const db = readErpDb();
-  const select = document.getElementById('sapp-college-id');
-  if (select) {
-    const colleges = (db.colleges && db.colleges.length > 0) 
-      ? db.colleges 
-      : getDefaultCollegesList();
+  try {
+    const modal = document.getElementById('modal-student-application');
+    if (!modal) {
+      console.error('modal-student-application not found');
+      return;
+    }
 
-    select.innerHTML = '<option value="" disabled selected>-- اختر كليتك من القائمة --</option>' +
-      colleges.map(c => `
-        <option value="${c.id}">${c.name} (${c.city || 'العراق'})</option>
-      `).join('');
+    const select = document.getElementById('sapp-college-id');
+    if (select) {
+      let colleges = [];
+      try {
+        const db = typeof readErpDb === 'function' ? readErpDb() : null;
+        if (db && Array.isArray(db.colleges) && db.colleges.length > 0) {
+          colleges = db.colleges;
+        }
+      } catch (e) {
+        console.warn('readErpDb error:', e);
+      }
+
+      if (!colleges || colleges.length === 0) {
+        colleges = typeof getDefaultCollegesList === 'function' ? getDefaultCollegesList() : [];
+      }
+
+      select.innerHTML = '<option value="" disabled selected>-- اختر كليتك من القائمة المعتمدة --</option>' +
+        colleges.map(c => `
+          <option value="${c.id}">${c.name} (${c.city || 'العراق'})</option>
+        `).join('');
+    }
+
+    // Clear form
+    ['sapp-student-name', 'sapp-university-id', 'sapp-group', 'sapp-phone', 'sapp-email', 'sapp-password', 'sapp-notes'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) el.value = '';
+    });
+
+    const stageEl = document.getElementById('sapp-stage');
+    if (stageEl) stageEl.value = '4th';
+
+    modal.classList.remove('hidden');
+    modal.style.display = 'flex';
+    modal.style.zIndex = '99999';
+
+    if (window.lucide && typeof window.lucide.createIcons === 'function') {
+      window.lucide.createIcons();
+    }
+  } catch (err) {
+    console.error('Error opening student application modal:', err);
+    alert('حدث خطأ أثناء فتح استمارة الطالب: ' + err.message);
   }
-
-  // Clear form
-  ['sapp-student-name', 'sapp-university-id', 'sapp-group', 'sapp-phone', 'sapp-email', 'sapp-password', 'sapp-notes'].forEach(id => {
-    const el = document.getElementById(id);
-    if (el) el.value = '';
-  });
-
-  const stageEl = document.getElementById('sapp-stage');
-  if (stageEl) stageEl.value = '4th';
-
-  document.getElementById('modal-student-application')?.classList.remove('hidden');
-  if (window.lucide) window.lucide.createIcons();
 }
 window.openStudentApplicationModal = openStudentApplicationModal;
 
 function closeStudentApplicationModal() {
-  document.getElementById('modal-student-application')?.classList.add('hidden');
+  const modal = document.getElementById('modal-student-application');
+  if (modal) {
+    modal.classList.add('hidden');
+    modal.style.display = 'none';
+  }
 }
 window.closeStudentApplicationModal = closeStudentApplicationModal;
 
