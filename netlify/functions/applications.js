@@ -44,8 +44,16 @@ function getAppStore() {
 async function getCloudApplications(blobKey = 'applications') {
   try {
     const store = getAppStore();
-    const data = await store.get(blobKey, { type: 'json' });
+    let data = await store.get(blobKey, { type: 'json' });
     if (Array.isArray(data)) {
+      if (blobKey === 'student_applications') {
+        data = data.filter(a => 
+          !a.id?.startsWith('sapp_179095') && 
+          !a.notes?.includes('تجريبي') && 
+          a.studentName !== 'ff' &&
+          a.email !== 'rrrr@gmail.com'
+        );
+      }
       return data;
     }
   } catch (err) {
@@ -178,6 +186,20 @@ exports.handler = async function (event, context) {
           statusCode: 400,
           headers,
           body: JSON.stringify({ success: false, error: 'بيانات العنصر غير مكتملة' })
+        };
+      }
+
+      // Permanently reject resurrection of old purged test applications
+      if (isStudent && (
+        item.id.startsWith('sapp_179095') || 
+        (item.notes && item.notes.includes('تجريبي')) ||
+        item.email === 'rrrr@gmail.com' ||
+        item.studentName === 'ff'
+      )) {
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ success: true, ignored: true, message: 'Purged test student ignored' })
         };
       }
 

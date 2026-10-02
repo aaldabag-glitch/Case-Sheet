@@ -345,6 +345,15 @@ function readErpDb() {
     if (!data.cases) data.cases = [];
     if (!data.applications) data.applications = [];
     if (!data.studentApplications) data.studentApplications = [];
+    else {
+      // Purge test student applications permanently
+      data.studentApplications = data.studentApplications.filter(a => 
+        !a.id?.startsWith('sapp_179095') && 
+        !a.notes?.includes('تجريبي') && 
+        a.studentName !== 'ff' &&
+        a.email !== 'rrrr@gmail.com'
+      );
+    }
     return data;
   } catch (e) {
     const initial = getInitialSeedDatabase();
