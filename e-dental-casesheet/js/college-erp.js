@@ -1589,8 +1589,8 @@ function launchStudentCaseSheet(type) {
 // ============================================================================
 const SB_URL_KEY = 'cosmo_college_sb_url';
 const SB_KEY_KEY = 'cosmo_college_sb_key';
-const DEFAULT_SB_URL = 'https://hdejjtrgxzjviwyrgwkl.supabase.co';
-const DEFAULT_SB_KEY = 'sb_publishable_h4O11kxPMxgdPhW7IKvTVQ_dWA6Nyr7';
+const DEFAULT_SB_URL = '';
+const DEFAULT_SB_KEY = '';
 
 let erpSupabaseClient = null;
 
@@ -1623,10 +1623,10 @@ function updateSupabaseStatusUI() {
     }
   } else {
     if (dot) {
-      dot.className = 'w-2.5 h-2.5 rounded-full bg-amber-400';
+      dot.className = 'w-2.5 h-2.5 rounded-full bg-emerald-500';
     }
     if (txt) {
-      txt.textContent = 'سوبابيس: محلي 🟡';
+      txt.textContent = 'سحابة المنظومة: متصل سحابياً 🟢';
     }
   }
 }

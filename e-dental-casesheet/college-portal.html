@@ -5,6 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>منظومة كليات طب الأسنان لإدارة العيادات التعليمية • Dental College ERP</title>
 
+  <!-- Suppress CDN dev warning in production -->
+  <script>
+    (function() {
+      const _origWarn = console.warn;
+      console.warn = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && args[0].includes('cdn.tailwindcss.com should not be used in production')) return;
+        _origWarn.apply(console, args);
+      };
+    })();
+  </script>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
