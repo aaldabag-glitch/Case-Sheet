@@ -54,10 +54,10 @@ exports.handler = async function (event, context) {
     const safePhone = phone || 'غير محدد';
 
     const mailOptions = {
-      from: `"منظومة كليات طب الأسنان العراقية" <${SMTP_USER}>`,
+      from: `"منظومة طب الأسنان" <${SMTP_USER}>`,
       to: email,
-      subject: `رمز التحقق الأمني [ ${otp} ] - طلب اعتماد كلية جديدة`,
-      text: `مرحباً ${safeDean}،\n\nرمز التحقق (OTP) الخاص بك لتقديم طلب تسجيل (${safeCollege}) هو: ${otp}\n\nيرجى كتابة هذا الرمز لتأكيد طلبك.\nرقم الهاتف المعتمد: ${safePhone}\n\nمنظومة كليات طب الأسنان العراقية لإدارة العيادات التعليمية.`,
+      subject: `كود التحقق لمنظومة كليات طب الأسنان: ${otp}`,
+      text: `مرحباً ${safeDean}،\n\nرمز التحقق (OTP) الخاص بك لتقديم طلب تسجيل (${safeCollege}) هو:\n\n${otp}\n\nرقم الهاتف: ${safePhone}\n\nإدارة منظومة كليات طب الأسنان العراقية.`,
       html: `
         <!DOCTYPE html>
         <html dir="rtl" lang="ar">

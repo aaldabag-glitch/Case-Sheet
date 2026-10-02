@@ -2330,6 +2330,9 @@ async function handleSendOtpCode() {
     }
   }
 
+  // Show instant fill button for seamless bypass/testing
+  document.getElementById('otp-instant-fill-box')?.classList.remove('hidden');
+
   // Auto-focus the OTP input field
   if (otpInput) {
     otpInput.value = '';
@@ -2353,19 +2356,22 @@ async function handleSendOtpCode() {
   if (window.lucide) window.lucide.createIcons();
 }
 
-function showOtpHelpDirect() {
+function autoFillCurrentOtp() {
   if (!currentGeneratedOtp) {
     alert('يرجى الضغط أولاً على زر "إرسال رمز التحقق OTP 📩".');
     return;
   }
-  const answer = confirm(`📬 تم إرسال الرمز الرسمي إلى بريدك الإلكتروني بنجاح.\n\nتأكد من مراجعة صندوق الوارد (Inbox) أو الرسائل غير المرغوب فيها (Spam / Junk) للمرسل: aaldabag@gmail.com.\n\nهل ترغب بنسخ رمز التحقق (${currentGeneratedOtp}) إلى الحقل الآن مباشرة؟`);
-  if (answer && currentGeneratedOtp) {
-    const input = document.getElementById('app-otp-input');
-    if (input) {
-      input.value = currentGeneratedOtp;
-      input.focus();
-    }
+  const input = document.getElementById('app-otp-input');
+  if (input) {
+    input.value = currentGeneratedOtp;
+    input.focus();
   }
+  handleVerifyOtpCode();
+}
+window.autoFillCurrentOtp = autoFillCurrentOtp;
+
+function showOtpHelpDirect() {
+  autoFillCurrentOtp();
 }
 window.showOtpHelpDirect = showOtpHelpDirect;
 
