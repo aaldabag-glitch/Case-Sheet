@@ -111,17 +111,6 @@
 
         <!-- Student Session Info & Clinical Status Badge -->
         <div class="flex items-center gap-2 sm:gap-3 shrink-0">
-          <!-- College & University Academic ERP Portal Button -->
-          <a 
-            href="college-portal.html" 
-            class="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs font-bold transition-all shadow-md bg-gradient-to-r from-teal-700 via-teal-600 to-emerald-600 hover:from-teal-800 hover:to-teal-700 text-white cursor-pointer active:scale-95 shrink-0" 
-            title="منظومة إدارة الكليات والجامعات (سوبر أدمن • عمداء • تدريسيين • طلاب)"
-          >
-            <i data-lucide="graduation-cap" class="w-4 h-4 text-amber-300"></i>
-            <span class="font-bold">بوابة الكليات (ERP)</span>
-            <span class="px-1.5 py-0.2 rounded text-[10px] bg-amber-400 text-slate-950 font-black">جديد</span>
-          </a>
-
 
           <div class="hidden xl:flex flex-col text-left pl-3 border-l border-slate-200">
             <div class="flex items-center justify-end gap-1.5 text-xs font-bold text-slate-800">
@@ -131,19 +120,20 @@
             <span class="text-[11px] text-slate-500 font-latin">Academic Year 2026–2027</span>
           </div>
 
-          <!-- Student Profile Avatar & Clinic Chair -->
+          <!-- Student Profile Avatar & Greeting -->
           <div class="flex items-center gap-2 bg-slate-100/80 p-1 sm:p-1.5 sm:pr-3 rounded-2xl border border-slate-200/70 shrink-0">
             <div class="hidden sm:block text-right">
-              <p class="text-xs font-bold text-slate-900 leading-tight" id="student-name-display">د. علي حيدر الموسوي</p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="text-[10px] font-semibold text-teal-700 bg-teal-50 px-1.5 py-0.2 rounded border border-teal-200/60" id="student-stage-badge">
+              <p class="text-xs font-black text-slate-900 leading-tight">
+                أهلاً بالطالب: <span id="student-name-display">علي حيدر الموسوي</span>
+              </p>
+              <div class="flex items-center gap-1.5 mt-0.5 justify-end">
+                <span class="text-[10px] font-bold text-teal-700 bg-teal-50 px-2 py-0.5 rounded border border-teal-200/60" id="student-stage-badge">
                   المرحلة الخامسة
                 </span>
-                <span class="text-[10px] text-slate-500 font-medium">الكرسي 14</span>
               </div>
             </div>
             <div class="w-8 h-8 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-sky-600 to-teal-600 flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-xs shrink-0">
-              ع.م
+              <i data-lucide="graduation-cap" class="w-5 h-5"></i>
             </div>
           </div>
 
@@ -1820,19 +1810,31 @@
 
             <!-- Section 4: Supervisor Clinical Sign-Off -->
             <div class="bg-emerald-50/50 p-4 rounded-2xl border border-emerald-200/80 space-y-3">
-              <h4 class="text-xs font-extrabold text-emerald-800 tracking-wider flex items-center gap-1.5">
-                <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
-                اعتماد وتقييم الأستاذ المشرف السريري (Clinical Supervisor Sign-off):
+              <h4 class="text-xs font-extrabold text-emerald-800 tracking-wider flex items-center justify-between">
+                <span class="flex items-center gap-1.5">
+                  <i data-lucide="award" class="w-4 h-4 text-emerald-600"></i>
+                  <span>اعتماد وتقييم الأستاذ المشرف السريري (Clinical Supervisor Sign-off):</span>
+                </span>
+                <span class="text-[10px] text-teal-800 bg-teal-100/80 px-2 py-0.5 rounded-full font-bold">عيادة التدريب السريري</span>
               </h4>
               
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
                 <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">اسم المشرف السريري:</label>
-                  <input type="text" readonly value="أ.د. عبد الله الصالحي" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs text-slate-700 font-bold">
+                  <label class="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1">
+                    <i data-lucide="user-check" class="w-3.5 h-3.5 text-teal-600"></i>
+                    <span>الأستاذ المشرف بالعيادة:</span>
+                  </label>
+                  <select id="case-selected-supervisor" class="w-full p-2 bg-white border border-teal-300 focus:border-teal-600 focus:ring-2 focus:ring-teal-500/20 rounded-lg text-xs text-slate-800 font-bold transition-all shadow-xs cursor-pointer">
+                    <option value="أ.د. عبد الله الصالحي" selected>أ.د. عبد الله الصالحي (مشرف العيادة الرئيسي)</option>
+                    <option value="د. وسام كاظم">د. وسام كاظم (أستاذ مساعد)</option>
+                    <option value="د. زينب الموسوي">د. زينب الموسوي (مدرس سريري)</option>
+                    <option value="د. حيدر الشمري">د. حيدر الشمري (مشرف سريري)</option>
+                    <option value="د. سارة خليل">د. سارة خليل (مشرفة تدريب)</option>
+                  </select>
                 </div>
                 <div>
-                  <label class="block text-[11px] font-bold text-slate-600 mb-1">التقييم السريري (من 10):</label>
-                  <select class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-emerald-700 font-latin">
+                  <label class="block text-[11px] font-bold text-slate-600 mb-1">التقييم السريري الممنوح (من 10):</label>
+                  <select id="case-assigned-score" class="w-full p-2 bg-white border border-slate-200 rounded-lg text-xs font-bold text-emerald-700 font-latin">
                     <option>10 / 10 (ممتاز - Excellent)</option>
                     <option selected>9 / 10 (جيد جداً - Very Good)</option>
                     <option>8 / 10 (جيد - Good)</option>
@@ -1866,11 +1868,24 @@
             </button>
           </div>
 
-          <div class="flex items-center gap-2 w-full sm:w-auto">
-            <button id="modal-cancel-btn" class="flex-1 sm:flex-initial px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all">
+          <!-- Supervisor Selection + Submit Action -->
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto justify-end">
+            <div class="flex items-center gap-1.5 bg-white border border-teal-300 px-3 py-1.5 rounded-xl shadow-xs">
+              <i data-lucide="user-check" class="w-3.5 h-3.5 text-teal-700 shrink-0"></i>
+              <span class="text-[11px] font-bold text-slate-700 shrink-0">التدريسي:</span>
+              <select id="footer-instructor-select" class="bg-transparent text-xs font-bold text-teal-900 border-none outline-none focus:ring-0 cursor-pointer">
+                <option value="أ.د. عبد الله الصالحي" selected>أ.د. عبد الله الصالحي</option>
+                <option value="د. وسام كاظم">د. وسام كاظم</option>
+                <option value="د. زينب الموسوي">د. زينب الموسوي</option>
+                <option value="د. حيدر الشمري">د. حيدر الشمري</option>
+                <option value="د. سارة خليل">د. سارة خليل</option>
+              </select>
+            </div>
+
+            <button id="modal-cancel-btn" class="px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 rounded-xl text-xs font-bold transition-all">
               إغلاق
             </button>
-            <button id="submit-supervisor-btn" class="flex-1 sm:flex-initial px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all">
+            <button id="submit-supervisor-btn" class="px-5 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-700 hover:to-teal-700 text-white rounded-xl text-xs font-extrabold flex items-center justify-center gap-1.5 shadow-md shadow-emerald-600/20 transition-all cursor-pointer">
               <i data-lucide="send" class="w-4 h-4"></i>
               <span>إرسال للاعتماد السريري</span>
             </button>

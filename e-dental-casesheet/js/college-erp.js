@@ -24,7 +24,8 @@ function getInitialSeedDatabase() {
     colleges: [],
     instructors: [],
     students: [],
-    cases: []
+    cases: [],
+    applications: []
   };
 }
 
@@ -205,6 +206,7 @@ function readErpDb() {
     if (!data.instructors) data.instructors = [];
     if (!data.students) data.students = [];
     if (!data.cases) data.cases = [];
+    if (!data.applications) data.applications = [];
     return data;
   } catch (e) {
     const initial = getInitialSeedDatabase();
@@ -397,9 +399,13 @@ function renderApp() {
   const authBox = document.getElementById('auth-actions-box');
   const roleBadge = document.getElementById('role-badge');
   const topCollegeName = document.getElementById('top-college-name');
+  const navbarBrandTitle = document.getElementById('navbar-brand-title');
 
   if (!user) {
     // Show login
+    if (navbarBrandTitle) {
+      navbarBrandTitle.textContent = 'منظومة كلية طب الأسنان لإدارة العيادات التعليمية للطلاب';
+    }
     viewLogin?.classList.remove('hidden');
     if (roleBadge) {
       roleBadge.textContent = 'بوابة الدخول';
@@ -420,6 +426,17 @@ function renderApp() {
         </button>
       </div>
     `;
+  }
+
+  // Update navbar title dynamically with the specific university/college
+  if (navbarBrandTitle) {
+    if (user.role === 'SUPER_ADMIN') {
+      navbarBrandTitle.textContent = 'منظومة كليات طب الأسنان لإدارة العيادات التعليمية للطلاب';
+    } else if (user.collegeName) {
+      navbarBrandTitle.textContent = `منظومة ${user.collegeName} لإدارة العيادات التعليمية للطلاب`;
+    } else {
+      navbarBrandTitle.textContent = 'منظومة كلية طب الأسنان لإدارة العيادات التعليمية للطلاب';
+    }
   }
 
   // Route to specific view
@@ -512,6 +529,7 @@ function renderSuperAdminDashboard() {
   if (statPending) statPending.textContent = pendingSubs;
 
   renderSuperAdminColleges();
+  renderSuperAdminApplications();
 }
 
 function renderSuperAdminColleges() {
@@ -1802,11 +1820,29 @@ CREATE TABLE IF NOT EXISTS public.college_cases (
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
 
+-- 5. College Registration Applications Table
+CREATE TABLE IF NOT EXISTS public.college_applications (
+    id TEXT PRIMARY KEY,
+    request_id TEXT,
+    college_name TEXT NOT NULL,
+    city TEXT,
+    dean_name TEXT,
+    phone TEXT,
+    email TEXT,
+    otp_code TEXT,
+    otp_verified BOOLEAN DEFAULT true,
+    proposed_password TEXT,
+    notes TEXT,
+    status TEXT DEFAULT 'Pending',
+    created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Row Level Security (RLS)
 ALTER TABLE public.college_colleges ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.college_instructors ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.college_students ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.college_cases ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.college_applications ENABLE ROW LEVEL SECURITY;
 
 DROP POLICY IF EXISTS "Allow all on college_colleges" ON public.college_colleges;
 CREATE POLICY "Allow all on college_colleges" ON public.college_colleges FOR ALL TO anon USING (true) WITH CHECK (true);
@@ -1819,6 +1855,9 @@ CREATE POLICY "Allow all on college_students" ON public.college_students FOR ALL
 
 DROP POLICY IF EXISTS "Allow all on college_cases" ON public.college_cases;
 CREATE POLICY "Allow all on college_cases" ON public.college_cases FOR ALL TO anon USING (true) WITH CHECK (true);
+
+DROP POLICY IF EXISTS "Allow all on college_applications" ON public.college_applications;
+CREATE POLICY "Allow all on college_applications" ON public.college_applications FOR ALL TO anon USING (true) WITH CHECK (true);
 `;
 }
 
@@ -1858,11 +1897,12 @@ async function syncPullFromSupabase() {
   if (!client) return;
 
   try {
-    const [cRes, iRes, sRes, kRes] = await Promise.all([
+    const [cRes, iRes, sRes, kRes, aRes] = await Promise.all([
       client.from('college_colleges').select('*'),
       client.from('college_instructors').select('*'),
       client.from('college_students').select('*'),
-      client.from('college_cases').select('*')
+      client.from('college_cases').select('*'),
+      client.from('college_applications').select('*').catch(() => ({ data: null }))
     ]);
 
     const db = readErpDb();
@@ -1956,6 +1996,31 @@ async function syncPullFromSupabase() {
         };
         if (idx > -1) db.cases[idx] = mapped;
         else db.cases.push(mapped);
+      });
+      hasChanges = true;
+    }
+
+    if (aRes && aRes.data && aRes.data.length > 0) {
+      if (!db.applications) db.applications = [];
+      aRes.data.forEach(item => {
+        const idx = db.applications.findIndex(x => x.id === item.id);
+        const mapped = {
+          id: item.id,
+          requestId: item.request_id || item.id,
+          collegeName: item.college_name,
+          city: item.city,
+          deanName: item.dean_name,
+          phone: item.phone,
+          email: item.email,
+          otpCode: item.otp_code,
+          otpVerified: item.otp_verified !== false,
+          proposedPassword: item.proposed_password,
+          notes: item.notes,
+          status: item.status || 'Pending',
+          createdAt: item.created_at
+        };
+        if (idx > -1) db.applications[idx] = { ...db.applications[idx], ...mapped };
+        else db.applications.push(mapped);
       });
       hasChanges = true;
     }
@@ -2071,6 +2136,470 @@ function handleRenewSubscriptionSubmit(event) {
 
   if (confirm(`✅ تم تجديد ترخيص ${clg.name} حتى ${newDate} بنجاح!\nهل ترغب في طباعة سند التجديد الآن؟`)) {
     openPrintReceiptModal(clg.id, false);
+  }
+}
+
+// ============================================================================
+// COLLEGE APPLICATION & OTP CONTROLLER (تقديم طلب لكلية جديدة مع رمز التحقق)
+// ============================================================================
+let currentGeneratedOtp = null;
+let otpCountdownTimer = null;
+let isOtpSuccessfullyVerified = false;
+
+function openCollegeApplicationModal() {
+  currentGeneratedOtp = null;
+  isOtpSuccessfullyVerified = false;
+  if (otpCountdownTimer) clearInterval(otpCountdownTimer);
+
+  const nameInput = document.getElementById('app-college-name');
+  const cityInput = document.getElementById('app-college-city');
+  const deanInput = document.getElementById('app-dean-name');
+  const phoneInput = document.getElementById('app-phone');
+  const emailInput = document.getElementById('app-email');
+  const otpInput = document.getElementById('app-otp-input');
+  const pwdInput = document.getElementById('app-proposed-password');
+  const notesInput = document.getElementById('app-notes');
+  const liveBanner = document.getElementById('otp-live-banner');
+  const badge = document.getElementById('otp-verified-badge');
+  const sendBtnText = document.getElementById('btn-send-otp-text');
+  const sendBtn = document.getElementById('btn-send-otp');
+
+  if (nameInput) nameInput.value = '';
+  if (cityInput) cityInput.value = '';
+  if (deanInput) deanInput.value = '';
+  if (phoneInput) phoneInput.value = '';
+  if (emailInput) emailInput.value = '';
+  if (otpInput) {
+    otpInput.value = '';
+    otpInput.disabled = false;
+    otpInput.classList.remove('border-emerald-500', 'bg-emerald-50');
+  }
+  if (pwdInput) pwdInput.value = 'Dean' + Math.floor(1000 + Math.random() * 9000) + '@#';
+  if (notesInput) notesInput.value = '';
+  if (liveBanner) liveBanner.classList.add('hidden');
+  if (badge) {
+    badge.textContent = 'لم يتم التحقق بعد';
+    badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-slate-200 text-slate-700';
+  }
+  if (sendBtnText) sendBtnText.textContent = 'إرسال رمز التحقق OTP 📩';
+  if (sendBtn) sendBtn.disabled = false;
+
+  document.getElementById('modal-college-application')?.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function closeCollegeApplicationModal() {
+  if (otpCountdownTimer) clearInterval(otpCountdownTimer);
+  document.getElementById('modal-college-application')?.classList.add('hidden');
+}
+
+function handleSendOtpCode() {
+  const phone = (document.getElementById('app-phone')?.value || '').trim();
+  const email = (document.getElementById('app-email')?.value || '').trim();
+
+  if (!phone || !email) {
+    alert('⚠️ يرجى إدخال رقم الهاتف والبريد الإلكتروني أولاً لاستلام رمز التحقق (OTP).');
+    return;
+  }
+
+  // Generate 6-digit OTP code
+  currentGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
+  isOtpSuccessfullyVerified = false;
+
+  const liveBanner = document.getElementById('otp-live-banner');
+  const bannerText = document.getElementById('otp-live-banner-text');
+  const otpInput = document.getElementById('app-otp-input');
+  const sendBtn = document.getElementById('btn-send-otp');
+  const sendBtnText = document.getElementById('btn-send-otp-text');
+
+  if (liveBanner && bannerText) {
+    liveBanner.classList.remove('hidden');
+    bannerText.innerHTML = `
+      <span class="block font-bold">🔔 تم إرسال رمز التحقق OTP بنجاح إلى: <strong class="font-latin text-teal-800">${email}</strong> و <strong class="font-latin text-teal-800">${phone}</strong></span>
+      <span class="block mt-1.5 bg-white p-2.5 rounded-xl border-2 border-teal-400 text-teal-950 font-black font-latin text-base tracking-widest text-center shadow-xs">
+        رمز التحقق الخاص بك هو: <span class="text-emerald-700 text-xl tracking-widest px-2">${currentGeneratedOtp}</span>
+      </span>
+      <span class="block mt-1 text-[11px] text-teal-700 font-semibold">يرجى كتابة هذا الرمز في خانة رمز التحقق والضغط على زر "تأكيد الرمز ✅".</span>
+    `;
+  }
+
+  // Auto-focus input
+  if (otpInput) {
+    otpInput.focus();
+  }
+
+  // 60-second cooldown timer
+  let secondsLeft = 60;
+  if (sendBtn) sendBtn.disabled = true;
+  if (otpCountdownTimer) clearInterval(otpCountdownTimer);
+
+  otpCountdownTimer = setInterval(() => {
+    secondsLeft--;
+    if (sendBtnText) sendBtnText.textContent = `إعادة الإرسال (${secondsLeft}s)`;
+    if (secondsLeft <= 0) {
+      clearInterval(otpCountdownTimer);
+      if (sendBtn) sendBtn.disabled = false;
+      if (sendBtnText) sendBtnText.textContent = 'إعادة إرسال رمز التحقق 🔄';
+    }
+  }, 1000);
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function handleVerifyOtpCode() {
+  const enteredCode = (document.getElementById('app-otp-input')?.value || '').trim();
+  const badge = document.getElementById('otp-verified-badge');
+  const otpInput = document.getElementById('app-otp-input');
+
+  if (!currentGeneratedOtp) {
+    alert('يرجى الضغط على زر "إرسال رمز التحقق OTP" أولاً.');
+    return;
+  }
+
+  if (!enteredCode) {
+    alert('يرجى إدخال الرمز المكون من 6 أرقام.');
+    return;
+  }
+
+  if (enteredCode === currentGeneratedOtp) {
+    isOtpSuccessfullyVerified = true;
+    if (badge) {
+      badge.textContent = 'تم التحقق بنجاح 🟢 (OTP Verified)';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
+    }
+    if (otpInput) {
+      otpInput.classList.add('border-emerald-500', 'bg-emerald-50');
+      otpInput.disabled = true;
+    }
+    alert(`✅ تم التحقق من رمز التحقق (${currentGeneratedOtp}) بنجاح!\nيمكنك الآن إكمال البيانات وتأكيد تقديم الطلب.`);
+  } else {
+    isOtpSuccessfullyVerified = false;
+    alert('❌ رمز التحقق غير صحيح! يرجى التأكد من الرمز وإعادة المحاولة.');
+    if (badge) {
+      badge.textContent = 'رمز غير صحيح ❌';
+      badge.className = 'px-2 py-0.5 rounded-full text-[10px] font-bold bg-rose-100 text-rose-800';
+    }
+  }
+}
+
+function handleCollegeApplicationSubmit(event) {
+  event.preventDefault();
+
+  if (!isOtpSuccessfullyVerified) {
+    alert('⚠️ يرجى إتمام التحقق من رمز الـ OTP أولاً بالضغط على زر "تأكيد الرمز ✅" قبل إرسال الطلب!');
+    return;
+  }
+
+  const collegeName = document.getElementById('app-college-name').value.trim();
+  const city = document.getElementById('app-college-city').value.trim();
+  const deanName = document.getElementById('app-dean-name').value.trim();
+  const phone = document.getElementById('app-phone').value.trim();
+  const email = document.getElementById('app-email').value.trim();
+  const proposedPassword = document.getElementById('app-proposed-password').value.trim();
+  const notes = document.getElementById('app-notes')?.value.trim() || '';
+
+  const db = readErpDb();
+  if (!db.applications) db.applications = [];
+
+  const requestId = 'REQ-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+
+  const application = {
+    id: 'app_' + Date.now(),
+    requestId,
+    collegeName,
+    city,
+    deanName,
+    phone,
+    email,
+    otpCode: currentGeneratedOtp,
+    otpVerified: true,
+    proposedPassword,
+    notes,
+    status: 'Pending',
+    createdAt: new Date().toISOString()
+  };
+
+  db.applications.unshift(application);
+  writeErpDb(db);
+  syncPushApplication(application);
+
+  closeCollegeApplicationModal();
+  renderSuperAdminApplications();
+
+  alert(`🎉 تم تقديم طلب تسجيل الكلية بنجاح تام!\n\nرقم حجز ومتابعة الطلب: ${requestId}\nاسم الكلية: ${collegeName}\nالبريد: ${email}\n\nسيقوم مدير المنظومة (Super Admin) بمراجعة الطلب واعتماده وتفعيل الكلية فوراً.`);
+}
+
+// ============================================================================
+// SUPER ADMIN APPLICATIONS MANAGEMENT (إدارة طلبات الكليات في لوحة السوبر أدمن)
+// ============================================================================
+function renderSuperAdminApplications() {
+  const db = readErpDb();
+  const applications = db.applications || [];
+  const tbody = document.getElementById('applications-table-body');
+  const badge = document.getElementById('stat-apps-badge');
+
+  const pendingApps = applications.filter(a => a.status === 'Pending');
+  if (badge) {
+    badge.textContent = `${pendingApps.length} طلبات جديدة`;
+    badge.className = pendingApps.length > 0 
+      ? 'px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-200 text-amber-950 border border-amber-400 animate-pulse'
+      : 'px-2.5 py-0.5 rounded-full text-xs font-black bg-slate-100 text-slate-600 border border-slate-200';
+  }
+
+  if (!tbody) return;
+
+  if (applications.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد طلبات تسجيل كليات واردة حالياً. يمكن تقديم طلب جديد من شاشة تسجيل الدخول.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = applications.map(app => {
+    const isPending = app.status === 'Pending';
+    const isApproved = app.status === 'Approved';
+    const isRejected = app.status === 'Rejected';
+
+    let statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">قيد المراجعة 🟡</span>';
+    if (isApproved) {
+      statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">معتمد ومقبول 🟢</span>';
+    } else if (isRejected) {
+      statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">مرفوض 🔴</span>';
+    }
+
+    return `
+      <tr class="hover:bg-amber-50/40 transition-colors">
+        <td class="p-3.5">
+          <span class="font-latin font-bold text-slate-900 block">${app.requestId || app.id}</span>
+          <span class="text-[10px] text-slate-400 font-latin">${new Date(app.createdAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
+        </td>
+        <td class="p-3.5">
+          <strong class="text-slate-900 block text-sm font-black">${app.collegeName}</strong>
+          <span class="text-[11px] text-slate-500 font-semibold">📍 ${app.city || 'العراق'}</span>
+          ${app.notes ? `<span class="block text-[10px] text-slate-400 mt-0.5 font-sans">${app.notes}</span>` : ''}
+        </td>
+        <td class="p-3.5">
+          <strong class="font-bold text-slate-800">${app.deanName}</strong>
+          <span class="block text-[11px] text-slate-500">الممثل المعتمد</span>
+        </td>
+        <td class="p-3.5">
+          <div class="text-[11px] space-y-0.5">
+            <span class="block font-latin font-bold text-teal-800" dir="ltr">${app.phone}</span>
+            <span class="block font-latin text-slate-600" dir="ltr">${app.email}</span>
+          </div>
+        </td>
+        <td class="p-3.5 text-center">
+          <span class="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
+            مؤكد بالـ OTP 🟢 (${app.otpCode || 'OK'})
+          </span>
+        </td>
+        <td class="p-3.5 text-center font-latin text-xs text-slate-600 font-semibold">
+          ${new Date(app.createdAt).toLocaleDateString('ar-EG')}
+        </td>
+        <td class="p-3.5 text-center">
+          ${statusHtml}
+        </td>
+        <td class="p-3.5 text-center">
+          <div class="flex items-center justify-center gap-1.5 flex-wrap">
+            ${isPending ? `
+              <button 
+                type="button"
+                onclick="openApproveApplicationModal('${app.id}')"
+                class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="قبول الطلب واعتماد الكلية فوراً"
+              >
+                <span>قبول واعتماد ✅</span>
+              </button>
+              <button 
+                type="button"
+                onclick="rejectApplication('${app.id}')"
+                class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer"
+                title="رفض هذا الطلب"
+              >
+                رفض ❌
+              </button>
+            ` : ''}
+            <button 
+              type="button"
+              onclick="deleteApplication('${app.id}')"
+              class="p-1 text-slate-400 hover:text-rose-600 rounded text-xs font-bold cursor-pointer"
+              title="حذف الطلب نهائياً"
+            >
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function openApproveApplicationModal(appId) {
+  const db = readErpDb();
+  const app = (db.applications || []).find(a => a.id === appId);
+  if (!app) return;
+
+  const idInput = document.getElementById('approve-app-id');
+  const nameEl = document.getElementById('approve-app-college-name');
+  const codeInput = document.getElementById('approve-college-code');
+  const userInput = document.getElementById('approve-dean-username');
+  const feeInput = document.getElementById('approve-subscription-fee');
+  const endInput = document.getElementById('approve-subscription-end');
+  const pwdInput = document.getElementById('approve-dean-password');
+
+  if (idInput) idInput.value = app.id;
+  if (nameEl) nameEl.textContent = `${app.collegeName} (${app.city})`;
+
+  // Generate unique code based on college name
+  const words = app.collegeName.replace(/[^a-zA-Zء-ي0-9]/g, ' ').split(/\s+/).filter(Boolean);
+  let prefix = 'DENT';
+  if (words.length > 1) {
+    prefix = 'DENT-' + (words[words.length - 1] || 'CLG').slice(0, 5).toUpperCase();
+  }
+  const autoCode = (prefix + '-' + Math.floor(10 + Math.random() * 90)).toUpperCase();
+  if (codeInput) codeInput.value = autoCode;
+
+  // Generate admin username (e.g. dean.city or email before @)
+  const userPrefix = app.email ? app.email.split('@')[0].toLowerCase() : ('dean.' + Math.floor(100 + Math.random() * 900));
+  if (userInput) userInput.value = userPrefix;
+
+  if (feeInput) feeInput.value = 1500;
+
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+  if (endInput) endInput.value = nextYear.toISOString().slice(0, 10);
+
+  if (pwdInput) pwdInput.value = app.proposedPassword || ('Dean' + Math.floor(1000 + Math.random() * 9000) + '@#');
+
+  document.getElementById('modal-approve-application')?.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function closeApproveApplicationModal() {
+  document.getElementById('modal-approve-application')?.classList.add('hidden');
+}
+
+function handleApproveApplicationSubmit(event) {
+  event.preventDefault();
+  const db = readErpDb();
+  const appId = document.getElementById('approve-app-id').value;
+  const app = (db.applications || []).find(a => a.id === appId);
+  if (!app) return;
+
+  const code = document.getElementById('approve-college-code').value.trim().toUpperCase();
+  const adminUsername = document.getElementById('approve-dean-username').value.trim().toLowerCase();
+  const subscriptionFee = parseFloat(document.getElementById('approve-subscription-fee')?.value || 1500);
+  const subscriptionEnd = document.getElementById('approve-subscription-end')?.value;
+  const adminPassword = document.getElementById('approve-dean-password').value.trim();
+
+  // Validate duplicate code or username
+  if (db.colleges.some(c => c.code === code)) {
+    alert('رمز الكلية (Code) مسجل مسبقاً! يرجى اختيار رمز آخر.');
+    return;
+  }
+  if (db.colleges.some(c => c.adminUsername.toLowerCase() === adminUsername)) {
+    alert('اسم المستخدم (Username) مسجل لعميد آخر! يرجى اختيار يوزر نيم آخر.');
+    return;
+  }
+
+  // Create official College
+  const newCollege = {
+    id: 'clg_' + Date.now(),
+    name: app.collegeName,
+    code,
+    city: app.city,
+    deanName: app.deanName,
+    adminUsername,
+    adminPassword,
+    subscriptionFee,
+    subscriptionStart: new Date().toISOString().slice(0, 10),
+    subscriptionEnd: subscriptionEnd || new Date(Date.now() + 365*24*60*60*1000).toISOString().slice(0, 10),
+    status: 'Active',
+    plan: 'ANNUAL_ACCREDITED',
+    createdAt: new Date().toISOString()
+  };
+
+  db.colleges.push(newCollege);
+
+  // Mark application as Approved
+  app.status = 'Approved';
+  app.approvedAt = new Date().toISOString();
+  app.collegeId = newCollege.id;
+
+  writeErpDb(db);
+  syncPushCollege(newCollege);
+  syncPushApplication(app);
+
+  // Save dean credentials to device
+  saveAccountToDevice({
+    username: adminUsername,
+    password: adminPassword,
+    name: app.deanName,
+    role: 'COLLEGE_ADMIN',
+    collegeName: app.collegeName
+  });
+
+  closeApproveApplicationModal();
+  renderSuperAdminDashboard();
+  renderSuperAdminApplications();
+
+  if (confirm(`🎉 تم اعتماد كلية ${app.collegeName} بنجاح تام!\nتم إنشاء حساب العميد (${adminUsername}).\n\nهل ترغب في طباعة سند ترخيص الكلية الآن؟`)) {
+    openPrintReceiptModal(newCollege.id, false);
+  }
+}
+
+function rejectApplication(appId) {
+  if (!confirm('هل أنت متأكد من رفض هذا الطلب؟')) return;
+  const db = readErpDb();
+  const app = (db.applications || []).find(a => a.id === appId);
+  if (!app) return;
+
+  app.status = 'Rejected';
+  writeErpDb(db);
+  syncPushApplication(app);
+  renderSuperAdminApplications();
+}
+
+function deleteApplication(appId) {
+  if (!confirm('هل أنت متأكد من حذف هذا الطلب من السجل؟')) return;
+  const db = readErpDb();
+  db.applications = (db.applications || []).filter(a => a.id !== appId);
+  writeErpDb(db);
+  syncDeleteApplication(appId);
+  renderSuperAdminApplications();
+}
+
+async function syncPushApplication(app) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_applications').upsert({
+      id: app.id,
+      request_id: app.requestId || app.id,
+      college_name: app.collegeName,
+      city: app.city || '',
+      dean_name: app.deanName || '',
+      phone: app.phone || '',
+      email: app.email || '',
+      otp_code: app.otpCode || '',
+      otp_verified: app.otpVerified !== false,
+      proposed_password: app.proposedPassword || '',
+      notes: app.notes || '',
+      status: app.status || 'Pending',
+      created_at: app.createdAt || new Date().toISOString()
+    });
+  } catch (e) {
+    console.warn('Supabase push application notice:', e);
+  }
+}
+
+async function syncDeleteApplication(appId) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_applications').delete().eq('id', appId);
+  } catch (e) {
+    console.warn('Supabase delete application notice:', e);
   }
 }
 

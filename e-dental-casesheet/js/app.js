@@ -54,7 +54,7 @@ document.addEventListener('DOMContentLoaded', () => {
     initIcons();
   }
 
-  // Render Session & Header Details
+  // Render Session & Header Details (Synchronized with College ERP if logged in)
   function renderSessionInfo() {
     const sessionDateElem = document.getElementById('session-date');
     if (sessionDateElem) {
@@ -62,11 +62,80 @@ document.addEventListener('DOMContentLoaded', () => {
       const today = new Date();
       sessionDateElem.textContent = today.toLocaleDateString('ar-IQ', options);
     }
+
+    // Try reading active student session from College ERP
+    let activeStudent = null;
+    let erpInstructors = [];
+    try {
+      const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+      if (rawSession) {
+        const parsed = JSON.parse(rawSession);
+        if (parsed && parsed.role === 'STUDENT') {
+          activeStudent = parsed;
+        }
+      }
+      const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+      if (rawDb) {
+        const parsedDb = JSON.parse(rawDb);
+        if (parsedDb && Array.isArray(parsedDb.instructors)) {
+          erpInstructors = parsedDb.instructors;
+        }
+      }
+    } catch (e) {}
+
     const studentNameElem = document.getElementById('student-name-display');
-    if (studentNameElem) studentNameElem.textContent = STUDENT_SESSION.name;
-    
     const stageElem = document.getElementById('student-stage-badge');
-    if (stageElem) stageElem.textContent = STUDENT_SESSION.stageAr;
+
+    if (activeStudent) {
+      if (studentNameElem) studentNameElem.textContent = activeStudent.name;
+      if (stageElem) {
+        stageElem.textContent = activeStudent.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)';
+      }
+    } else {
+      if (studentNameElem) studentNameElem.textContent = STUDENT_SESSION.name;
+      if (stageElem) stageElem.textContent = STUDENT_SESSION.stageAr;
+    }
+
+    // Populate instructor lists in case sheet modal
+    populateSupervisorsDropdown(activeStudent, erpInstructors);
+  }
+
+  function populateSupervisorsDropdown(activeStudent, erpInstructors) {
+    const footerSelect = document.getElementById('footer-instructor-select');
+    const caseSelect = document.getElementById('case-selected-supervisor');
+    if (!footerSelect && !caseSelect) return;
+
+    let instructorsList = [];
+    if (activeStudent && erpInstructors.length > 0) {
+      instructorsList = erpInstructors
+        .filter(inst => inst.collegeId === activeStudent.collegeId)
+        .map(inst => `${inst.title || 'د.'} ${inst.name} (${inst.department || 'العيادات التعليمية'})`);
+    }
+
+    if (instructorsList.length === 0) {
+      instructorsList = [
+        'أ.د. عبد الله الصالحي (مشرف العيادة الرئيسي)',
+        'د. وسام كاظم (أستاذ مساعد)',
+        'د. زينب الموسوي (مدرس سريري)',
+        'د. حيدر الشمري (مشرف سريري)',
+        'د. سارة خليل (مشرفة تدريب)'
+      ];
+    }
+
+    const htmlOptions = instructorsList.map(name => `<option value="${name}">${name}</option>`).join('');
+    if (footerSelect) {
+      footerSelect.innerHTML = htmlOptions;
+      // sync with caseSelect
+      footerSelect.addEventListener('change', () => {
+        if (caseSelect) caseSelect.value = footerSelect.value;
+      });
+    }
+    if (caseSelect) {
+      caseSelect.innerHTML = htmlOptions;
+      caseSelect.addEventListener('change', () => {
+        if (footerSelect) footerSelect.value = caseSelect.value;
+      });
+    }
   }
 
   // Populate Dropdown 1: Main Departments
@@ -1149,8 +1218,14 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!state.currentOpenSheet) return;
 
     const modalCaseId = document.getElementById('modal-case-id');
-    const caseIdText = modalCaseId ? modalCaseId.textContent : '';
+    const caseIdText = modalCaseId ? modalCaseId.textContent : ('CASE-' + Math.floor(1000 + Math.random() * 9000));
 
+    // Get selected instructor name
+    const footerSelect = document.getElementById('footer-instructor-select');
+    const caseSelect = document.getElementById('case-selected-supervisor');
+    const selectedSupervisor = (footerSelect && footerSelect.value) || (caseSelect && caseSelect.value) || 'أ.د. عبد الله الصالحي';
+
+    const patientName = document.getElementById('modal-patient-name')?.value.trim() || 'مريض تدريب سريري';
     const isAlqabas = state.currentOpenSheet.sheet.id === 'omfs-ext-01' || state.currentOpenSheet.dept.id === 'omfs';
     const scoreVal = calculateTotalScore();
     const finalScore = isAlqabas ? (scoreVal !== null ? `${scoreVal} / 10` : 'قيد تقييم المشرف') : '9/10';
@@ -1162,16 +1237,51 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateStatsDisplay();
 
+    // Check if logged in via College ERP
+    try {
+      const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+      const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+      if (rawSession && rawDb) {
+        const user = JSON.parse(rawSession);
+        const db = JSON.parse(rawDb);
+        if (user && user.role === 'STUDENT' && db && Array.isArray(db.cases)) {
+          // Find matching instructor in db
+          const matchedInst = db.instructors?.find(i => selectedSupervisor.includes(i.name) && i.collegeId === user.collegeId);
+
+          const newCase = {
+            id: caseIdText,
+            collegeId: user.collegeId,
+            studentId: user.id,
+            studentName: user.name,
+            stage: user.stage || '5th',
+            type: state.currentOpenSheet.sheet.titleAr || 'جراحة الفم والقلع',
+            patientName: patientName,
+            status: 'Pending',
+            assignedMark: '-',
+            feedback: '',
+            instructorId: matchedInst ? matchedInst.id : (db.instructors?.[0]?.id || 'inst_default'),
+            instructorName: selectedSupervisor,
+            createdAt: new Date().toISOString()
+          };
+          db.cases.push(newCase);
+          localStorage.setItem('cosmo_dental_college_erp_v3', JSON.stringify(db));
+        }
+      }
+    } catch (e) {
+      console.warn('ERP sync notice:', e);
+    }
+
     if (window.EDentalSupabase && caseIdText) {
       await window.EDentalSupabase.submitCaseReview(caseIdText, {
         status: 'submitted',
         score: finalScore,
-        notes: finalNotes
+        notes: finalNotes,
+        supervisor: selectedSupervisor
       });
     }
 
     closeCaseModal();
-    showToast('تم إرسال الطبلة للاعتماد السريري وتوقيع الطبيب المشرف بنجاح! ☁️', 'success');
+    showToast(`تم إرسال الطبلة للاعتماد السريري إلى (${selectedSupervisor}) بنجاح! 🎓`, 'success');
   }
 
   // Update Stats Display in Dashboard Bar
