@@ -923,12 +923,17 @@ function renderCollegeInstructors() {
   const list = db.instructors.filter(i => i.collegeId === user.collegeId);
 
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لم يتم إضافة أي تدريسي بعد. اضغط على زر "إضافة تدريسي" أعلاه.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-slate-400 font-semibold">لم يتم إضافة أي تدريسي بعد. اضغط على زر "إضافة تدريسي" أعلاه.</td></tr>`;
     return;
   }
 
   tbody.innerHTML = list.map(inst => {
     const evalCount = db.cases.filter(c => c.instructorId === inst.id && c.collegeId === user.collegeId).length;
+    const stageBadge = inst.stage === '5th' 
+      ? '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-sky-100 text-sky-800">المرحلة 5 BDS</span>'
+      : (inst.stage === '4th' 
+          ? '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-100 text-teal-800">المرحلة 4 BDS</span>' 
+          : '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-purple-100 text-purple-800">كافة المراحل (4 & 5)</span>');
 
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
@@ -938,6 +943,7 @@ function renderCollegeInstructors() {
         </td>
         <td class="p-3 font-semibold text-slate-700 whitespace-nowrap min-w-[120px]">${inst.title}</td>
         <td class="p-3 font-bold text-teal-800 whitespace-nowrap min-w-[150px]">${inst.department}</td>
+        <td class="p-3 whitespace-nowrap min-w-[120px]">${stageBadge}</td>
         <td class="p-3 font-latin font-bold text-slate-800 whitespace-nowrap min-w-[120px]">${inst.username}</td>
         <td class="p-3 font-latin font-bold text-slate-600 whitespace-nowrap min-w-[100px]">${inst.password}</td>
         <td class="p-3 text-center font-black font-latin text-teal-700 whitespace-nowrap min-w-[90px]">${evalCount}</td>
@@ -1003,10 +1009,12 @@ function renderCollegeEvaluations() {
           </span>
         </td>
         <td class="p-3 text-slate-500 font-latin text-[11px] whitespace-nowrap min-w-[90px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
-        <td class="p-3 text-center whitespace-nowrap min-w-[90px]">
-          <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
-            ${isPending ? 'بانتظار التدريسي' : 'معتمدة'}
-          </span>
+        <td class="p-3 text-center whitespace-nowrap min-w-[120px]">
+          ${isPending 
+            ? '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800">بانتظار تقييم التدريسي</span>' 
+            : (item.forwardedToDean 
+                ? '<span class="px-2.5 py-1 rounded-lg text-[11px] font-black bg-emerald-100 text-emerald-800 border border-emerald-300 shadow-2xs">مرسلة من المشرف معتمدة للعمادة ✅</span>' 
+                : '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-100 text-teal-800">تم رصد الدرجة ✍️</span>')}
         </td>
       </tr>
     `;
@@ -1030,8 +1038,12 @@ function handleCreateInstructorSubmit(event) {
   const name = document.getElementById('new-inst-name').value.trim();
   const title = document.getElementById('new-inst-title').value;
   const department = document.getElementById('new-inst-dept').value;
+  const stage = document.getElementById('new-inst-stage')?.value || 'ALL';
+  const emailInput = document.getElementById('new-inst-email')?.value.trim();
   const username = document.getElementById('new-inst-username').value.trim().toLowerCase();
   const password = document.getElementById('new-inst-password').value.trim();
+  const collegeDomain = (user.collegeCode || 'college').toLowerCase();
+  const email = emailInput || `${username}@${collegeDomain}.edu`;
 
   // Validate duplicate username across platform
   if (db.instructors.some(i => i.username.toLowerCase() === username) || db.students.some(s => s.username.toLowerCase() === username)) {
@@ -1045,9 +1057,10 @@ function handleCreateInstructorSubmit(event) {
     name,
     title,
     department,
+    stage,
     username,
     password,
-    email: `${username}@${user.collegeCode.toLowerCase()}.edu`,
+    email,
     role: 'INSTRUCTOR',
     status: 'Active',
     createdAt: new Date().toISOString()
@@ -1056,6 +1069,9 @@ function handleCreateInstructorSubmit(event) {
   db.instructors.push(newInst);
   writeErpDb(db);
   syncPushInstructor(newInst);
+  if (typeof syncPushInstructorToCloud === 'function') {
+    syncPushInstructorToCloud(newInst);
+  }
 
   // Auto save instructor to device accounts
   saveAccountToDevice({
@@ -1068,7 +1084,7 @@ function handleCreateInstructorSubmit(event) {
 
   closeAddInstructorModal();
   renderCollegeAdminDashboard();
-  alert(`تمت إضافة التدريسي ${name} بنجاح!\nتم حفظ حساب التدريسي (${username}) على هذا الجهاز.`);
+  alert(`تمت إضافة التدريسي (${name}) بنجاح!\nالمرحلة: ${stage === '5th' ? 'الخامسة' : (stage === '4th' ? 'الرابعة' : 'كافة المراحل')}\nالبريد: ${email}\nاسم المستخدم: ${username}`);
 }
 
 function openAddStudentModal() {
@@ -1183,6 +1199,9 @@ function deleteStudent(studentId) {
   db.students = db.students.filter(s => s.id !== studentId);
   writeErpDb(db);
   syncDeleteStudent(studentId);
+  if (typeof syncDeleteStudentFromCloud === 'function') {
+    syncDeleteStudentFromCloud(studentId);
+  }
   renderCollegeAdminDashboard();
 }
 
@@ -1192,6 +1211,9 @@ function deleteInstructor(instructorId) {
   db.instructors = db.instructors.filter(i => i.id !== instructorId);
   writeErpDb(db);
   syncDeleteInstructor(instructorId);
+  if (typeof syncDeleteInstructorFromCloud === 'function') {
+    syncDeleteInstructorFromCloud(instructorId);
+  }
   renderCollegeAdminDashboard();
 }
 
@@ -1264,9 +1286,9 @@ function renderInstructorDashboard() {
                 ${isPending ? 'قيد التقييم' : item.assignedMark + ' / 10'}
               </span>
             </td>
-            <td class="p-3 text-center whitespace-nowrap min-w-[90px]">
-              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
-                ${isPending ? 'بانتظار التقييم' : 'معتمدة'}
+            <td class="p-3 text-center whitespace-nowrap min-w-[110px]">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : (item.forwardedToDean ? 'bg-emerald-100 text-emerald-800 border border-emerald-300' : 'bg-teal-100 text-teal-800')}">
+                ${isPending ? 'بانتظار التقييم' : (item.forwardedToDean ? 'مرفوعة للعمادة ✅' : 'معتمدة محلياً ✍️')}
               </span>
             </td>
             <td class="p-3 text-center whitespace-nowrap min-w-[200px]">
@@ -1366,8 +1388,45 @@ function handleSaveEvaluationSubmit(event) {
   syncPushCase(c);
   closeEvalCaseModal();
   renderInstructorDashboard();
-  alert(`✅ تم اعتماد التقييم ورصد الدرجة (${mark} / 10) للطالب ${c.studentName} بنجاح!`);
+  alert(`✅ تم اعتماد التقييم ورصد الدرجة (${mark} / 10) للطالب ${c.studentName} بنجاح!\n\nيمكنك الآن الضغط على زر "رفع الدرجات المعتمدة إلى العمادة 📤" لترحيلها رسمياً.`);
 }
+
+async function forwardEvaluatedCasesToDean() {
+  const user = getCurrentSession();
+  if (!user || user.role !== 'INSTRUCTOR') return;
+  const db = readErpDb();
+
+  const casesToForward = (db.cases || []).filter(c => 
+    c.collegeId === user.collegeId && 
+    c.assignedMark && 
+    c.assignedMark !== '-' && 
+    c.assignedMark !== 'Pending'
+  );
+
+  if (casesToForward.length === 0) {
+    alert('⚠️ لا توجد أي درجات مرصودة جاهزة للرفع حالياً.\nيرجى رصد درجات الطلاب أولاً عبر زر "رصد الدرجة (Mark) ✍️" ثم النقر على هذا الزر.');
+    return;
+  }
+
+  casesToForward.forEach(c => {
+    c.forwardedToDean = true;
+    c.forwardedAt = c.forwardedAt || new Date().toISOString();
+    c.forwardedBy = user.name;
+    c.status = 'Approved';
+  });
+
+  writeErpDb(db);
+
+  for (const c of casesToForward) {
+    if (typeof syncPushCaseToCloud === 'function') {
+      await syncPushCaseToCloud(c);
+    }
+  }
+
+  renderInstructorDashboard();
+  alert(`📤 تم بنجاح رفع كافة الدرجات المعتمدة (عدد ${casesToForward.length} حالة سريرية) مباشرة إلى عمادة الكلية!\n\nتم اعتماد نقل الدرجات سحابياً وتظهر الآن بعلامة [مرسلة من المشرف معتمدة للعمادة ✅] في لوحة العميد.`);
+}
+window.forwardEvaluatedCasesToDean = forwardEvaluatedCasesToDean;
 
 // ============================================================================
 // 4. STUDENT CONTROLLER
@@ -2940,6 +2999,278 @@ async function syncPullCollegesFromCloud() {
 window.syncPullCollegesFromCloud = syncPullCollegesFromCloud;
 
 // ============================================================================
+// INSTRUCTORS CLOUD SYNC (مزامنة التدريسيين سحابياً)
+// ============================================================================
+async function syncPushInstructorToCloud(inst) {
+  if (!inst || !inst.id) return;
+  const candidateEndpoints = [
+    '/api/instructors',
+    '/.netlify/functions/applications?type=instructors',
+    'https://dental-casesheet-erp.netlify.app/api/instructors',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=instructors'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'upsert', type: 'instructors', instructor: inst })
+      });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync push instructor failed:', ep, e);
+    }
+  }
+}
+window.syncPushInstructorToCloud = syncPushInstructorToCloud;
+
+async function syncPullInstructorsFromCloud() {
+  const candidateEndpoints = [
+    '/api/instructors',
+    '/.netlify/functions/applications?type=instructors',
+    'https://dental-casesheet-erp.netlify.app/api/instructors',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=instructors'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep);
+      if (res.ok) {
+        const data = await res.json();
+        const cloudInsts = data.instructors || data.items || [];
+        if (Array.isArray(cloudInsts) && cloudInsts.length > 0) {
+          const db = readErpDb();
+          let modified = false;
+          cloudInsts.forEach(ci => {
+            const idx = db.instructors.findIndex(i => i.id === ci.id || (i.username && ci.username && i.username.toLowerCase() === ci.username.toLowerCase()));
+            if (idx > -1) {
+              db.instructors[idx] = { ...db.instructors[idx], ...ci };
+              modified = true;
+            } else {
+              db.instructors.push(ci);
+              modified = true;
+            }
+          });
+          if (modified) {
+            writeErpDb(db);
+            const user = getCurrentSession();
+            if (user?.role === 'COLLEGE_ADMIN') {
+              renderCollegeInstructors();
+            }
+          }
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Sync pull instructors notice:', ep, e);
+    }
+  }
+  return false;
+}
+window.syncPullInstructorsFromCloud = syncPullInstructorsFromCloud;
+
+async function syncDeleteInstructorFromCloud(instructorId) {
+  if (!instructorId) return;
+  const candidateEndpoints = [
+    `/api/instructors?id=${encodeURIComponent(instructorId)}`,
+    `/.netlify/functions/applications?type=instructors&id=${encodeURIComponent(instructorId)}`,
+    `https://dental-casesheet-erp.netlify.app/api/instructors?id=${encodeURIComponent(instructorId)}`,
+    `https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=instructors&id=${encodeURIComponent(instructorId)}`
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, { method: 'DELETE' });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync delete instructor notice:', ep, e);
+    }
+  }
+}
+window.syncDeleteInstructorFromCloud = syncDeleteInstructorFromCloud;
+
+// ============================================================================
+// STUDENTS CLOUD SYNC (مزامنة الطلبة المعتمدين سحابياً)
+// ============================================================================
+async function syncPushStudentsToCloud(studentsList) {
+  if (!Array.isArray(studentsList) || studentsList.length === 0) return;
+  const candidateEndpoints = [
+    '/api/students',
+    '/.netlify/functions/applications?type=students',
+    'https://dental-casesheet-erp.netlify.app/api/students',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=students'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'upsert', type: 'students', students: studentsList })
+      });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync push students failed:', ep, e);
+    }
+  }
+}
+window.syncPushStudentsToCloud = syncPushStudentsToCloud;
+
+async function syncPullStudentsFromCloud() {
+  const candidateEndpoints = [
+    '/api/students',
+    '/.netlify/functions/applications?type=students',
+    'https://dental-casesheet-erp.netlify.app/api/students',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=students'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep);
+      if (res.ok) {
+        const data = await res.json();
+        const cloudStudents = data.students || data.items || [];
+        if (Array.isArray(cloudStudents) && cloudStudents.length > 0) {
+          const db = readErpDb();
+          let modified = false;
+          cloudStudents.forEach(cs => {
+            const idx = db.students.findIndex(s => s.id === cs.id || (s.username && cs.username && s.username.toLowerCase() === cs.username.toLowerCase()));
+            if (idx > -1) {
+              db.students[idx] = { ...db.students[idx], ...cs };
+              modified = true;
+            } else {
+              db.students.push(cs);
+              modified = true;
+            }
+          });
+          if (modified) {
+            writeErpDb(db);
+            const user = getCurrentSession();
+            if (user?.role === 'COLLEGE_ADMIN') {
+              renderCollegeStudents();
+            } else if (user?.role === 'INSTRUCTOR') {
+              renderInstructorDashboard();
+            }
+          }
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Sync pull students notice:', ep, e);
+    }
+  }
+  return false;
+}
+window.syncPullStudentsFromCloud = syncPullStudentsFromCloud;
+
+async function syncDeleteStudentFromCloud(studentId) {
+  if (!studentId) return;
+  const candidateEndpoints = [
+    `/api/students?id=${encodeURIComponent(studentId)}`,
+    `/.netlify/functions/applications?type=students&id=${encodeURIComponent(studentId)}`,
+    `https://dental-casesheet-erp.netlify.app/api/students?id=${encodeURIComponent(studentId)}`,
+    `https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=students&id=${encodeURIComponent(studentId)}`
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, { method: 'DELETE' });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync delete student notice:', ep, e);
+    }
+  }
+}
+window.syncDeleteStudentFromCloud = syncDeleteStudentFromCloud;
+
+// ============================================================================
+// CASES CLOUD SYNC (مزامنة الطبلة السريرية والدرجات سحابياً)
+// ============================================================================
+async function syncPushCaseToCloud(caseItem) {
+  if (!caseItem || !caseItem.id) return;
+  const candidateEndpoints = [
+    '/api/cases',
+    '/.netlify/functions/applications?type=cases',
+    'https://dental-casesheet-erp.netlify.app/api/cases',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=cases'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'upsert', type: 'cases', case: caseItem })
+      });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync push case failed:', ep, e);
+    }
+  }
+}
+window.syncPushCaseToCloud = syncPushCaseToCloud;
+
+async function syncPullCasesFromCloud() {
+  const candidateEndpoints = [
+    '/api/cases',
+    '/.netlify/functions/applications?type=cases',
+    'https://dental-casesheet-erp.netlify.app/api/cases',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=cases'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep);
+      if (res.ok) {
+        const data = await res.json();
+        const cloudCases = data.cases || data.items || [];
+        if (Array.isArray(cloudCases) && cloudCases.length > 0) {
+          const db = readErpDb();
+          let modified = false;
+          cloudCases.forEach(cc => {
+            const idx = db.cases.findIndex(c => c.id === cc.id);
+            if (idx > -1) {
+              db.cases[idx] = { ...db.cases[idx], ...cc };
+              modified = true;
+            } else {
+              db.cases.push(cc);
+              modified = true;
+            }
+          });
+          if (modified) {
+            writeErpDb(db);
+            const user = getCurrentSession();
+            if (user?.role === 'COLLEGE_ADMIN') {
+              renderCollegeEvaluations();
+            } else if (user?.role === 'INSTRUCTOR') {
+              renderInstructorDashboard();
+            } else if (user?.role === 'STUDENT') {
+              renderStudentDashboard();
+            }
+          }
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Sync pull cases notice:', ep, e);
+    }
+  }
+  return false;
+}
+window.syncPullCasesFromCloud = syncPullCasesFromCloud;
+
+async function syncPushCollegeStudent(student) {
+  if (!student) return;
+  syncPushStudents([student]);
+  if (typeof syncPushStudentsToCloud === 'function') {
+    await syncPushStudentsToCloud([student]);
+  }
+}
+window.syncPushCollegeStudent = syncPushCollegeStudent;
+
+
+// ============================================================================
 // STUDENT APPLICATIONS MANAGEMENT (إدارة وتقديم طلبات انضمام الطلبة الجدد للعمادة)
 // ============================================================================
 function openStudentApplicationModal() {
@@ -3427,13 +3758,19 @@ window.addEventListener('DOMContentLoaded', () => {
   syncPullCollegesFromCloud();
   syncPullApplicationsFromCloud();
   syncPullStudentApplicationsFromCloud();
+  syncPullInstructorsFromCloud();
+  syncPullStudentsFromCloud();
+  syncPullCasesFromCloud();
   renderApp();
 
-  // Periodic background check for new colleges, college apps, and student applications
+  // Periodic background check for colleges, apps, instructors, students, and cases
   setInterval(() => {
     syncPullCollegesFromCloud();
     syncPullApplicationsFromCloud();
     syncPullStudentApplicationsFromCloud();
+    syncPullInstructorsFromCloud();
+    syncPullStudentsFromCloud();
+    syncPullCasesFromCloud();
   }, 10000);
 });
 

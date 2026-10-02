@@ -115,13 +115,22 @@ exports.handler = async function (event, context) {
       } catch (e) {}
     }
 
-    const isColleges = queryType === 'colleges' || 
-                       parsedBody.type === 'colleges' || 
-                       (event.path && event.path.includes('colleges'));
-    const isStudent = !isColleges && (queryType === 'student' || 
-                      parsedBody.type === 'student' || 
-                      (event.path && event.path.includes('student')));
-    const blobKey = isColleges ? 'registered_colleges' : (isStudent ? 'student_applications' : 'applications');
+    const rawType = (queryType || parsedBody.type || '').toLowerCase();
+    let blobKey = 'applications';
+    if (rawType === 'colleges' || (event.path && event.path.includes('colleges'))) {
+      blobKey = 'registered_colleges';
+    } else if (rawType === 'student' || rawType === 'student_applications' || (event.path && event.path.includes('student'))) {
+      blobKey = 'student_applications';
+    } else if (rawType === 'instructors') {
+      blobKey = 'registered_instructors';
+    } else if (rawType === 'students') {
+      blobKey = 'registered_students';
+    } else if (rawType === 'cases') {
+      blobKey = 'registered_cases';
+    }
+
+    const isColleges = blobKey === 'registered_colleges';
+    const isStudent = blobKey === 'student_applications';
 
     if (event.httpMethod === 'GET') {
       const items = await getCloudApplications(blobKey);
@@ -131,7 +140,12 @@ exports.handler = async function (event, context) {
         body: JSON.stringify({
           success: true,
           type: blobKey,
-          colleges: isColleges ? (items || []) : undefined,
+          items: items || [],
+          colleges: blobKey === 'registered_colleges' ? (items || []) : undefined,
+          studentApplications: blobKey === 'student_applications' ? (items || []) : undefined,
+          instructors: blobKey === 'registered_instructors' ? (items || []) : undefined,
+          students: blobKey === 'registered_students' ? (items || []) : undefined,
+          cases: blobKey === 'registered_cases' ? (items || []) : undefined,
           applications: items || []
         })
       };
@@ -148,7 +162,7 @@ exports.handler = async function (event, context) {
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ success: true, message: 'All items cleared successfully', type: blobKey, colleges: [], applications: [] })
+          body: JSON.stringify({ success: true, message: 'All items cleared successfully', type: blobKey, items: [], colleges: [], applications: [] })
         };
       }
 
@@ -159,28 +173,29 @@ exports.handler = async function (event, context) {
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ success: true, type: blobKey, colleges: currentItems, applications: currentItems })
+          body: JSON.stringify({ success: true, type: blobKey, items: currentItems, colleges: currentItems, applications: currentItems })
         };
       }
 
-      // Handle batch colleges upsert
-      if (isColleges && Array.isArray(parsedBody.colleges)) {
-        parsedBody.colleges.forEach(col => {
-          if (!col || !col.id) return;
-          const idx = currentItems.findIndex(c => c.id === col.id);
-          if (idx > -1) currentItems[idx] = { ...currentItems[idx], ...col };
-          else currentItems.push(col);
+      // Handle batch upsert
+      const batchList = parsedBody.items || parsedBody.colleges || parsedBody.students || parsedBody.instructors || parsedBody.cases;
+      if (Array.isArray(batchList)) {
+        batchList.forEach(obj => {
+          if (!obj || !obj.id) return;
+          const idx = currentItems.findIndex(c => c.id === obj.id);
+          if (idx > -1) currentItems[idx] = { ...currentItems[idx], ...obj };
+          else currentItems.push(obj);
         });
         await setCloudApplications(currentItems, blobKey);
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ success: true, type: blobKey, colleges: currentItems, applications: currentItems })
+          body: JSON.stringify({ success: true, type: blobKey, items: currentItems })
         };
       }
 
-      // Upsert single item (college, student application, or college application)
-      const item = parsedBody.college || parsedBody.application;
+      // Upsert single item
+      const item = parsedBody.item || parsedBody.college || parsedBody.application || parsedBody.instructor || parsedBody.student || parsedBody.case;
       if (!item || !item.id) {
         return {
           statusCode: 400,
@@ -224,6 +239,7 @@ exports.handler = async function (event, context) {
         body: JSON.stringify({
           success: true,
           type: blobKey,
+          items: currentItems,
           colleges: isColleges ? currentItems : undefined,
           applications: currentItems,
           application: item
@@ -244,7 +260,7 @@ exports.handler = async function (event, context) {
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, type: blobKey, colleges: currentItems, applications: currentItems })
+        body: JSON.stringify({ success: true, type: blobKey, items: currentItems, colleges: currentItems, applications: currentItems })
       };
     }
 

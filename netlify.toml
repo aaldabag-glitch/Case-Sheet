@@ -26,3 +26,19 @@
   to = "/.netlify/functions/applications?type=colleges"
   status = 200
 
+[[redirects]]
+  from = "/api/instructors"
+  to = "/.netlify/functions/applications?type=instructors"
+  status = 200
+
+[[redirects]]
+  from = "/api/students"
+  to = "/.netlify/functions/applications?type=students"
+  status = 200
+
+[[redirects]]
+  from = "/api/cases"
+  to = "/.netlify/functions/applications?type=cases"
+  status = 200
+
+

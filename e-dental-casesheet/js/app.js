@@ -70,13 +70,8 @@ document.addEventListener('DOMContentLoaded', () => {
       const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
       if (rawSession) {
         const parsed = JSON.parse(rawSession);
-        if (parsed && parsed.role === 'STUDENT') {
-          const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
-          const parsedDb = rawDb ? JSON.parse(rawDb) : null;
-          const hasActiveCollege = parsedDb && Array.isArray(parsedDb.colleges) && parsedDb.colleges.some(c => c.id === parsed.collegeId && c.status === 'Active');
-          if (hasActiveCollege) {
-            activeStudent = parsed;
-          }
+        if (parsed && (parsed.role === 'STUDENT' || parsed.role === 'COLLEGE_ADMIN' || parsed.role === 'INSTRUCTOR')) {
+          activeStudent = parsed;
         }
       }
       const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
@@ -95,6 +90,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const studentNameElem = document.getElementById('student-name-display');
     const stageElem = document.getElementById('student-stage-badge');
+    const collegeElem = document.getElementById('header-college-name');
 
     // Clean student name from email suffix if present
     let displayName = activeStudent.name || activeStudent.username || 'طالب';
@@ -104,6 +100,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (studentNameElem) studentNameElem.textContent = displayName;
     if (stageElem) {
       stageElem.textContent = activeStudent.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)';
+    }
+    if (collegeElem && activeStudent.collegeName) {
+      collegeElem.textContent = activeStudent.collegeName;
     }
 
     // Populate instructor lists in case sheet modal
@@ -152,7 +151,15 @@ document.addEventListener('DOMContentLoaded', () => {
       // 1. Strict Isolation: Only instructors registered in THIS college
       let collegeInsts = erpInstructors.filter(inst => inst.collegeId === activeStudent.collegeId);
 
-      // 2. Specialty/Department Filter: Only instructors teaching this specialty
+      // 2. Filter by stage if configured
+      if (activeStudent.stage) {
+        const stageInsts = collegeInsts.filter(inst => !inst.stage || inst.stage === 'ALL' || inst.stage === activeStudent.stage);
+        if (stageInsts.length > 0) {
+          collegeInsts = stageInsts;
+        }
+      }
+
+      // 3. Specialty/Department Filter
       if (deptKeywords.length > 0) {
         const matchingInsts = collegeInsts.filter(inst => {
           const instDept = (inst.department || '').toLowerCase();
@@ -166,28 +173,21 @@ document.addEventListener('DOMContentLoaded', () => {
       instructorsList = collegeInsts.map(inst => `${inst.title || 'د.'} ${inst.name} (${inst.department || 'مشرف العيادة التعليمية'})`);
     }
 
-    if (instructorsList.length === 0) {
-      // Fallback: Default instructors for the selected department
-      if (currentDeptId === 'omfs') {
-        instructorsList = [
-          'أ.د. عبد الله الصالحي (أستاذ جراحة الفم والوجه والفكين)',
-          'د. وسام كاظم (مدرس جراحة الفم والقلع)'
-        ];
-      } else if (currentDeptId === 'perio') {
-        instructorsList = [
-          'د. زينب الموسوي (مدرس طب وجراحة اللثة)',
-          'د. سارة خليل (مشرفة عيادة التقليح)'
-        ];
-      } else {
-        instructorsList = [
-          'أ.د. عبد الله الصالحي (مشرف العيادة الأكاديمي)',
-          'د. وسام كاظم (مشرف تدريب سريري)',
-          'د. زينب الموسوي (مشرفة سريرية)'
-        ];
+    if (instructorsList.length === 0 && activeStudent && erpInstructors && erpInstructors.length > 0) {
+      // Fallback: any instructor from the same college
+      const anyCollegeInsts = erpInstructors.filter(inst => inst.collegeId === activeStudent.collegeId);
+      if (anyCollegeInsts.length > 0) {
+        instructorsList = anyCollegeInsts.map(inst => `${inst.title || 'د.'} ${inst.name} (${inst.department || 'مشرف العيادة'})`);
       }
     }
 
-    const htmlOptions = instructorsList.map(name => `<option value="${name}">${name}</option>`).join('');
+    let htmlOptions = '';
+    if (instructorsList.length > 0) {
+      htmlOptions = instructorsList.map(name => `<option value="${name}">${name}</option>`).join('');
+    } else {
+      htmlOptions = '<option value="" disabled selected>-- لم يقم عميد الكلية بإضافة تدريسيين لهذا القسم بعد --</option>';
+    }
+
     if (footerSelect) {
       footerSelect.innerHTML = htmlOptions;
       footerSelect.onchange = () => {
@@ -1298,7 +1298,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Get selected instructor name
     const footerSelect = document.getElementById('footer-instructor-select');
     const caseSelect = document.getElementById('case-selected-supervisor');
-    const selectedSupervisor = (footerSelect && footerSelect.value) || (caseSelect && caseSelect.value) || 'أ.د. عبد الله الصالحي';
+    const selectedSupervisor = (footerSelect && footerSelect.value) || (caseSelect && caseSelect.value) || '';
+
+    if (!selectedSupervisor || selectedSupervisor.includes('--')) {
+      alert('⚠️ يرجى اختيار التدريسي المشرف المعتمد من كليتك لاعتماد الكيس شيت سريرياً.');
+      return;
+    }
 
     const patientName = document.getElementById('modal-patient-name')?.value.trim() || 'مريض تدريب سريري';
     const isAlqabas = state.currentOpenSheet.sheet.id === 'omfs-ext-01' || state.currentOpenSheet.dept.id === 'omfs';
@@ -1340,6 +1345,26 @@ document.addEventListener('DOMContentLoaded', () => {
           };
           db.cases.push(newCase);
           localStorage.setItem('cosmo_dental_college_erp_v3', JSON.stringify(db));
+
+          // Cloud push to Netlify Blobs so instructors and deans can see the submitted case immediately
+          try {
+            const candidateEndpoints = [
+              '/api/cases',
+              '/.netlify/functions/applications?type=cases',
+              'https://dental-casesheet-erp.netlify.app/api/cases',
+              'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=cases'
+            ];
+            for (const ep of candidateEndpoints) {
+              try {
+                const res = await fetch(ep, {
+                  method: 'POST',
+                  headers: { 'Content-Type': 'application/json' },
+                  body: JSON.stringify({ action: 'upsert', type: 'cases', case: newCase })
+                });
+                if (res.ok) break;
+              } catch (e) {}
+            }
+          } catch (e) {}
         }
       }
     } catch (e) {
