@@ -15,3 +15,8 @@
   from = "/api/applications"
   to = "/.netlify/functions/applications"
   status = 200
+
+[[redirects]]
+  from = "/api/student-applications"
+  to = "/.netlify/functions/applications?type=student"
+  status = 200

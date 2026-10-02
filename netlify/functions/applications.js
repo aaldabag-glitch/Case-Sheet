@@ -6,26 +6,29 @@ const nodemailer = require('nodemailer');
 const SMTP_USER = process.env.SMTP_USER || 'aaldabag@gmail.com';
 const SMTP_PASS = process.env.SMTP_PASS || 'hsswsofnsnkuafcv';
 
-// In-memory / local disk cache fallback for dev or fallback
-const LOCAL_STORAGE_FILE = path.join(__dirname, 'applications_cache.json');
+function getLocalFilePath(blobKey) {
+  return path.join(__dirname, `${blobKey}_cache.json`);
+}
 
-function readLocalApplications() {
+function readLocalApplications(blobKey) {
   try {
-    if (fs.existsSync(LOCAL_STORAGE_FILE)) {
-      const data = fs.readFileSync(LOCAL_STORAGE_FILE, 'utf8');
+    const file = getLocalFilePath(blobKey);
+    if (fs.existsSync(file)) {
+      const data = fs.readFileSync(file, 'utf8');
       return JSON.parse(data || '[]');
     }
   } catch (e) {
-    console.warn('Error reading local applications cache:', e);
+    console.warn(`Error reading local ${blobKey} cache:`, e);
   }
   return [];
 }
 
-function writeLocalApplications(apps) {
+function writeLocalApplications(apps, blobKey) {
   try {
-    fs.writeFileSync(LOCAL_STORAGE_FILE, JSON.stringify(apps, null, 2), 'utf8');
+    const file = getLocalFilePath(blobKey);
+    fs.writeFileSync(file, JSON.stringify(apps, null, 2), 'utf8');
   } catch (e) {
-    console.warn('Error writing local applications cache:', e);
+    console.warn(`Error writing local ${blobKey} cache:`, e);
   }
 }
 
@@ -38,27 +41,27 @@ function getAppStore() {
   });
 }
 
-async function getCloudApplications() {
+async function getCloudApplications(blobKey = 'applications') {
   try {
     const store = getAppStore();
-    const data = await store.get('applications', { type: 'json' });
+    const data = await store.get(blobKey, { type: 'json' });
     if (Array.isArray(data)) {
       return data;
     }
   } catch (err) {
-    console.warn('Netlify Blobs get failed, using fallback:', err.message);
+    console.warn(`Netlify Blobs get for ${blobKey} failed, using fallback:`, err.message);
   }
-  return readLocalApplications();
+  return readLocalApplications(blobKey);
 }
 
-async function setCloudApplications(apps) {
-  writeLocalApplications(apps);
+async function setCloudApplications(apps, blobKey = 'applications') {
+  writeLocalApplications(apps, blobKey);
   try {
     const store = getAppStore();
-    await store.setJSON('applications', apps);
+    await store.setJSON(blobKey, apps);
     return true;
   } catch (err) {
-    console.warn('Netlify Blobs set failed:', err.message);
+    console.warn(`Netlify Blobs set for ${blobKey} failed:`, err.message);
     return false;
   }
 }
@@ -96,34 +99,46 @@ exports.handler = async function (event, context) {
   }
 
   try {
+    const queryType = event.queryStringParameters?.type || '';
+    let parsedBody = {};
+    if (event.body) {
+      try {
+        parsedBody = JSON.parse(event.body);
+      } catch (e) {}
+    }
+
+    const isStudent = queryType === 'student' || 
+                      parsedBody.type === 'student' || 
+                      (event.path && event.path.includes('student'));
+    const blobKey = isStudent ? 'student_applications' : 'applications';
+
     if (event.httpMethod === 'GET') {
-      const apps = await getCloudApplications();
+      const apps = await getCloudApplications(blobKey);
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, applications: apps || [] })
+        body: JSON.stringify({ success: true, type: blobKey, applications: apps || [] })
       };
     }
 
     if (event.httpMethod === 'POST') {
-      const payload = JSON.parse(event.body || '{}');
-      const action = payload.action || 'upsert';
-      let currentApps = await getCloudApplications();
+      const action = parsedBody.action || 'upsert';
+      let currentApps = await getCloudApplications(blobKey);
       if (!Array.isArray(currentApps)) currentApps = [];
 
       if (action === 'delete') {
-        const appId = payload.id;
+        const appId = parsedBody.id;
         currentApps = currentApps.filter(a => a.id !== appId);
-        await setCloudApplications(currentApps);
+        await setCloudApplications(currentApps, blobKey);
         return {
           statusCode: 200,
           headers,
-          body: JSON.stringify({ success: true, applications: currentApps })
+          body: JSON.stringify({ success: true, type: blobKey, applications: currentApps })
         };
       }
 
-      // Upsert / Create application
-      const app = payload.application;
+      // Upsert application
+      const app = parsedBody.application;
       if (!app || !app.id) {
         return {
           statusCode: 400,
@@ -141,34 +156,33 @@ exports.handler = async function (event, context) {
         currentApps.unshift(app);
       }
 
-      await setCloudApplications(currentApps);
+      await setCloudApplications(currentApps, blobKey);
 
-      if (isNew) {
-        // Asynchronously notify Super Admin
+      if (isNew && !isStudent) {
         notifySuperAdminNewApp(app).catch(() => {});
       }
 
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, applications: currentApps, application: app })
+        body: JSON.stringify({ success: true, type: blobKey, applications: currentApps, application: app })
       };
     }
 
     if (event.httpMethod === 'DELETE') {
       const appId = event.queryStringParameters?.id;
-      let currentApps = await getCloudApplications();
+      let currentApps = await getCloudApplications(blobKey);
       if (!Array.isArray(currentApps)) currentApps = [];
 
       if (appId) {
         currentApps = currentApps.filter(a => a.id !== appId);
-        await setCloudApplications(currentApps);
+        await setCloudApplications(currentApps, blobKey);
       }
 
       return {
         statusCode: 200,
         headers,
-        body: JSON.stringify({ success: true, applications: currentApps })
+        body: JSON.stringify({ success: true, type: blobKey, applications: currentApps })
       };
     }
 

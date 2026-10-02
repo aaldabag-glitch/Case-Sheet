@@ -254,6 +254,15 @@
             <i data-lucide="file-signature" class="w-4 h-4 text-amber-700 group-hover:scale-110 transition-transform"></i>
             <span>تقديم طلب لكلية جديدة 📝</span>
           </button>
+
+          <button 
+            type="button" 
+            onclick="openStudentApplicationModal()"
+            class="w-full mt-2 py-3.5 sm:py-3 px-4 bg-gradient-to-r from-teal-50 to-emerald-100/90 hover:from-teal-100 hover:to-emerald-200 text-teal-950 border-2 border-teal-300 hover:border-teal-400 font-black rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer group"
+          >
+            <i data-lucide="user-plus" class="w-4 h-4 text-teal-700 group-hover:scale-110 transition-transform"></i>
+            <span>تقديم طلب انضمام لطالب جديد 🎓</span>
+          </button>
         </div>
 
       </div>
@@ -522,6 +531,16 @@
           <span>سجل الدرجات السريرية (من 10)</span>
           <span id="dean-tab-evals-count" class="px-2 py-0.5 rounded-full bg-slate-300 text-slate-800 text-[11px] font-latin">0</span>
         </button>
+
+        <button 
+          id="tab-btn-student-apps" 
+          onclick="switchCollegeTab('student-apps')" 
+          class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 bg-slate-200/80 text-slate-700 hover:bg-slate-300/80 cursor-pointer"
+        >
+          <i data-lucide="user-check" class="w-4 h-4 text-emerald-700"></i>
+          <span>طلبات انضمام الطلبة الجدد 🎓</span>
+          <span id="dean-tab-student-apps-count" class="px-2 py-0.5 rounded-full bg-amber-200 text-amber-950 font-black text-[11px] font-latin">0</span>
+        </button>
       </div>
 
       <!-- TAB 1 CONTENT: STUDENTS -->
@@ -642,6 +661,49 @@
               </tr>
             </thead>
             <tbody id="college-evaluations-tbody" class="divide-y divide-slate-200 bg-white">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- TAB 4 CONTENT: STUDENT APPLICATIONS -->
+      <div id="tab-content-student-apps" class="hidden glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4 border-b border-slate-100 pb-3">
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
+              <i data-lucide="user-check" class="w-5 h-5 text-teal-600"></i>
+              <span>طلبات انضمام الطلبة الجدد الواردة إلى الكلية 🎓</span>
+            </h3>
+            <p class="text-slate-500 text-xs mt-0.5 font-semibold">
+              تدقيق ومراجعة طلبات الطلاب الجدد، فحص رقم الهوية الجامعية، اعتماد الحساب، والتواصل المباشر عبر واتساب
+            </p>
+          </div>
+          <button 
+            type="button" 
+            onclick="syncPullStudentApplicationsFromCloud(true)"
+            class="px-3.5 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-all cursor-pointer shadow-2xs"
+          >
+            <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
+            <span>تحديث طلبات الطلبة 🔄</span>
+          </button>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-teal-50/80 text-teal-950 font-bold border-b border-teal-200">
+              <tr>
+                <th class="p-3.5 whitespace-nowrap">رقم الطلب</th>
+                <th class="p-3.5 whitespace-nowrap">اسم الطالب الكامل</th>
+                <th class="p-3.5 whitespace-nowrap">رقم الهوية الجامعية 🆔</th>
+                <th class="p-3.5 text-center whitespace-nowrap">المرحلة والكروب</th>
+                <th class="p-3.5 whitespace-nowrap">الهاتف والواتساب</th>
+                <th class="p-3.5 whitespace-nowrap">البريد الإلكتروني</th>
+                <th class="p-3.5 text-center whitespace-nowrap">حالة الطلب</th>
+                <th class="p-3.5 text-center whitespace-nowrap">الإجراءات والاعتماد</th>
+              </tr>
+            </thead>
+            <tbody id="student-applications-table-body" class="divide-y divide-slate-200 bg-white">
               <!-- Rendered via JS -->
             </tbody>
           </table>
@@ -1551,6 +1613,179 @@
           <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow cursor-pointer">اعتماد وإنشاء الكلية فوراً ✅</button>
         </div>
       </form>
+  </div>
+
+  <!-- MODAL: NEW STUDENT APPLICATION (تقديم طلب انضمام لطالب جديد إلى الكلية) -->
+  <div id="modal-student-application" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-xl w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
+      
+      <!-- Modal Header -->
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-2xl bg-teal-50 text-teal-800 flex items-center justify-center font-bold border border-teal-200 shrink-0">
+            <i data-lucide="graduation-cap" class="w-5 h-5"></i>
+          </div>
+          <div>
+            <h3 class="text-base sm:text-lg font-black text-slate-900">تقديم طلب انضمام لطالب جديد 🎓</h3>
+            <p class="text-slate-500 text-xs font-semibold">إرسال بيانات التسجيل لعمادة الكلية المحددة للاعتماد والتوثيق</p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="closeStudentApplicationModal()" 
+          class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none p-1 cursor-pointer"
+        >&times;</button>
+      </div>
+
+      <!-- Application Form -->
+      <form onsubmit="handleStudentApplicationSubmit(event)" class="space-y-3.5 text-xs">
+        
+        <!-- College Selection -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">اختيار الكلية المسجلة بالمنظومة *</label>
+          <select 
+            id="sapp-college-id" 
+            required 
+            class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:border-teal-500 focus:bg-white focus:outline-none"
+          >
+            <option value="" disabled selected>-- اختر كليتك من القائمة --</option>
+          </select>
+          <span class="text-[10px] text-teal-700 font-semibold block mt-1">💡 سيتم إرسال طلبك مباشرة إلى لوحة عمادة هذه الكلية للمراجعة والاعتماد.</span>
+        </div>
+
+        <!-- Student Full Name -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">اسم الطالب الرباعي واللقب *</label>
+          <input 
+            type="text" 
+            id="sapp-student-name" 
+            required 
+            placeholder="مثال: علي حيدر جاسم الموسوي" 
+            class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:border-teal-500 focus:bg-white focus:outline-none"
+          >
+        </div>
+
+        <!-- University ID Number (CRITICAL!) -->
+        <div class="p-3 bg-teal-50/70 rounded-xl border-2 border-teal-500/50 space-y-1.5 shadow-xs">
+          <label class="block font-black text-teal-950 mb-0.5 flex items-center justify-between">
+            <span class="flex items-center gap-1.5">
+              <i data-lucide="badge-check" class="w-4 h-4 text-teal-700"></i>
+              <span>رقم الهوية الجامعية (رقم الاعتماد الأكاديمي) *</span>
+            </span>
+            <span class="text-[10px] text-teal-700 font-bold bg-teal-100/80 px-2 py-0.5 rounded-full">إلزامي لاعتماد الحساب</span>
+          </label>
+          <input 
+            type="text" 
+            id="sapp-university-id" 
+            required 
+            maxlength="25"
+            inputmode="numeric"
+            placeholder="مثال: 2024108849201 (رقم الهوية الجامعية الرسمي)" 
+            class="w-full p-2.5 bg-white border-2 border-teal-500/80 rounded-xl font-black font-latin text-center text-sm tracking-widest text-teal-950 focus:border-teal-600 focus:outline-none shadow-xs"
+            dir="ltr"
+          >
+          <p class="text-[11px] text-teal-900 font-semibold leading-relaxed">
+            ⚠️ <strong>تنبيه هام:</strong> رقم الهوية الجامعية هو المعرف الرسمي والأساسي الذي تعتمده عمادة الكلية لتوثيق وتفعيل حسابك في منظومة العيادات السريرية.
+          </p>
+        </div>
+
+        <!-- Stage & Group -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">المرحلة الدراسية *</label>
+            <select 
+              id="sapp-stage" 
+              required 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-slate-900 focus:border-teal-500 focus:bg-white focus:outline-none"
+            >
+              <option value="4th">المرحلة الرابعة (4th Year BDS)</option>
+              <option value="5th">المرحلة الخامسة (5th Year BDS)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">الشعبة / الكروب (Group) *</label>
+            <input 
+              type="text" 
+              id="sapp-group" 
+              required 
+              placeholder="مثال: Group A أو C1" 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin focus:border-teal-500 focus:bg-white focus:outline-none"
+            >
+          </div>
+        </div>
+
+        <!-- Phone & Email -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">رقم الهاتف للتواصل والواتساب *</label>
+            <input 
+              type="tel" 
+              id="sapp-phone" 
+              required 
+              placeholder="07701234567" 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin text-right focus:border-teal-500 focus:bg-white focus:outline-none"
+              dir="ltr"
+            >
+          </div>
+          <div>
+            <label class="block font-bold text-slate-700 mb-1">البريد الإلكتروني المعتمد *</label>
+            <input 
+              type="email" 
+              id="sapp-email" 
+              required 
+              placeholder="student@gmail.com" 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin text-right focus:border-teal-500 focus:bg-white focus:outline-none"
+              dir="ltr"
+            >
+          </div>
+        </div>
+
+        <!-- Proposed Password -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">كلمة المرور المقترحة لحسابك *</label>
+          <input 
+            type="text" 
+            id="sapp-password" 
+            required 
+            placeholder="مثال: Stu2026#Secure" 
+            class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin focus:border-teal-500 focus:bg-white focus:outline-none"
+            dir="ltr"
+          >
+          <span class="text-[10px] text-slate-400">ستستخدم هذه الكلمة لتسجيل الدخول بعد موافقة عمادة الكلية.</span>
+        </div>
+
+        <!-- Additional Notes -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">ملاحظات إضافية (اختياري)</label>
+          <textarea 
+            id="sapp-notes" 
+            rows="2" 
+            placeholder="أي تفاصيل أو معلومات ترغب بإبلاغ العمادة بها..." 
+            class="w-full p-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:border-teal-500 focus:bg-white focus:outline-none resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Submit & Cancel Buttons -->
+        <div class="pt-3 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button 
+            type="button" 
+            onclick="closeStudentApplicationModal()" 
+            class="w-full sm:w-auto px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold transition-all cursor-pointer text-center"
+          >
+            إلغاء
+          </button>
+          <button 
+            type="submit" 
+            id="btn-submit-student-app"
+            class="w-full sm:w-auto px-6 py-2.5 bg-gradient-to-r from-teal-700 to-emerald-700 hover:from-teal-800 hover:to-emerald-800 text-white rounded-xl font-black shadow-md transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+          >
+            <i data-lucide="send" class="w-4 h-4"></i>
+            <span>إرسال طلب الانضمام لعمادة الكلية 🚀</span>
+          </button>
+        </div>
+
+      </form>
+    </div>
   </div>
 
   <!-- ========================================================================
