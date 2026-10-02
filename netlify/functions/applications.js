@@ -51,7 +51,8 @@ async function getCloudApplications(blobKey = 'applications') {
           !a.id?.startsWith('sapp_179095') && 
           !a.notes?.includes('تجريبي') && 
           a.studentName !== 'ff' &&
-          a.email !== 'rrrr@gmail.com'
+          a.email !== 'rrrr@gmail.com' &&
+          a.id !== 'sapp_1790970505039'
         );
       }
       return data;
@@ -116,17 +117,19 @@ exports.handler = async function (event, context) {
     }
 
     const rawType = (queryType || parsedBody.type || '').toLowerCase();
+    const rawPath = (event.path || '').toLowerCase();
     let blobKey = 'applications';
-    if (rawType === 'colleges' || (event.path && event.path.includes('colleges'))) {
+
+    if (rawType === 'colleges' || rawPath.includes('colleges')) {
       blobKey = 'registered_colleges';
-    } else if (rawType === 'student' || rawType === 'student_applications' || (event.path && event.path.includes('student'))) {
-      blobKey = 'student_applications';
-    } else if (rawType === 'instructors') {
+    } else if (rawType === 'instructors' || rawPath.includes('instructors')) {
       blobKey = 'registered_instructors';
-    } else if (rawType === 'students') {
+    } else if (rawType === 'students' || rawPath.includes('/students') || rawPath.endsWith('students')) {
       blobKey = 'registered_students';
-    } else if (rawType === 'cases') {
+    } else if (rawType === 'cases' || rawPath.includes('cases')) {
       blobKey = 'registered_cases';
+    } else if (rawType === 'student' || rawType === 'student_applications' || rawPath.includes('student')) {
+      blobKey = 'student_applications';
     }
 
     const isColleges = blobKey === 'registered_colleges';
