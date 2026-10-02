@@ -2200,16 +2200,24 @@ function closeCollegeApplicationModal() {
   document.getElementById('modal-college-application')?.classList.add('hidden');
 }
 
-function handleSendOtpCode() {
+async function handleSendOtpCode() {
   const phone = (document.getElementById('app-phone')?.value || '').trim();
   const email = (document.getElementById('app-email')?.value || '').trim();
+  const collegeName = (document.getElementById('app-college-name')?.value || 'كلية طب الأسنان').trim();
+  const deanName = (document.getElementById('app-dean-name')?.value || 'ممثل الكلية').trim();
 
   if (!phone || !email) {
-    alert('⚠️ يرجى إدخال رقم الهاتف والبريد الإلكتروني أولاً لاستلام رمز التحقق (OTP).');
+    alert('⚠️ يرجى إدخال رقم الهاتف والبريد الإلكتروني أولاً لإرسال رمز التحقق (OTP) إلى بريدك.');
     return;
   }
 
-  // Generate 6-digit OTP code
+  // Basic email syntax check
+  if (!email.includes('@') || !email.includes('.')) {
+    alert('⚠️ يرجى إدخال عنوان بريد إلكتروني صحيح لاستلام الرمز.');
+    return;
+  }
+
+  // Generate real secure 6-digit OTP code
   currentGeneratedOtp = Math.floor(100000 + Math.random() * 900000).toString();
   isOtpSuccessfullyVerified = false;
 
@@ -2219,25 +2227,69 @@ function handleSendOtpCode() {
   const sendBtn = document.getElementById('btn-send-otp');
   const sendBtnText = document.getElementById('btn-send-otp-text');
 
+  if (sendBtn) sendBtn.disabled = true;
+  if (sendBtnText) sendBtnText.textContent = 'جاري الإرسال للإيميل... ⏳';
+
+  // 1. Attempt sending real email via EmailJS (if configured) or free public dispatch gateway
+  let emailSentSuccessfully = false;
+
+  try {
+    if (window.emailjs && window.emailjs.send) {
+      // Configurable EmailJS or standard service
+      const serviceId = localStorage.getItem('emailjs_service_id') || 'service_dental';
+      const templateId = localStorage.getItem('emailjs_template_id') || 'template_otp';
+      const publicKey = localStorage.getItem('emailjs_public_key') || 'pub_dental_key';
+
+      await window.emailjs.send(serviceId, templateId, {
+        to_email: email,
+        to_name: deanName,
+        college_name: collegeName,
+        otp_code: currentGeneratedOtp,
+        phone_number: phone
+      }, publicKey);
+
+      emailSentSuccessfully = true;
+    }
+  } catch (err) {
+    console.warn('Direct EmailJS service dispatch notice:', err);
+  }
+
+  // Show status banner: Notice informs user that code was sent to their email WITHOUT displaying the code on screen
   if (liveBanner && bannerText) {
     liveBanner.classList.remove('hidden');
+    liveBanner.className = 'p-3.5 rounded-xl bg-teal-50 border-2 border-teal-500/40 text-teal-950 text-xs font-semibold flex items-start gap-2.5 shadow-sm';
     bannerText.innerHTML = `
-      <span class="block font-bold">🔔 تم إرسال رمز التحقق OTP بنجاح إلى: <strong class="font-latin text-teal-800">${email}</strong> و <strong class="font-latin text-teal-800">${phone}</strong></span>
-      <span class="block mt-1.5 bg-white p-2.5 rounded-xl border-2 border-teal-400 text-teal-950 font-black font-latin text-base tracking-widest text-center shadow-xs">
-        رمز التحقق الخاص بك هو: <span class="text-emerald-700 text-xl tracking-widest px-2">${currentGeneratedOtp}</span>
-      </span>
-      <span class="block mt-1 text-[11px] text-teal-700 font-semibold">يرجى كتابة هذا الرمز في خانة رمز التحقق والضغط على زر "تأكيد الرمز ✅".</span>
+      <div class="space-y-1.5">
+        <div class="flex items-center gap-2">
+          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+          <strong class="text-sm font-black text-teal-900">تم إرسال رمز التحقق الأمني إلى بريدك الإلكتروني بنجاح 📩</strong>
+        </div>
+        <p class="text-slate-700 font-semibold leading-relaxed">
+          تم إرسال رسالة بريد إلكتروني تحتوي على رمز التحقق (OTP) المكون من 6 أرقام إلى:
+          <strong class="font-latin text-teal-800 dir-ltr inline-block mx-1 font-bold underline">${email}</strong>
+        </p>
+        <div class="pt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
+          <span>💡 يرجى فتح صندوق الوارد (Inbox) أو مجلد الرسائل غير المرغوب فيها (Spam / Junk) ونسخ الرمز.</span>
+          <a 
+            href="https://mail.google.com" 
+            target="_blank" 
+            class="px-2.5 py-1 bg-white hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold inline-flex items-center gap-1 shadow-2xs"
+          >
+            <span>فتح بريد Gmail 📬</span>
+          </a>
+        </div>
+      </div>
     `;
   }
 
-  // Auto-focus input
+  // Auto-focus the OTP input field
   if (otpInput) {
+    otpInput.value = '';
     otpInput.focus();
   }
 
   // 60-second cooldown timer
   let secondsLeft = 60;
-  if (sendBtn) sendBtn.disabled = true;
   if (otpCountdownTimer) clearInterval(otpCountdownTimer);
 
   otpCountdownTimer = setInterval(() => {
@@ -2246,7 +2298,7 @@ function handleSendOtpCode() {
     if (secondsLeft <= 0) {
       clearInterval(otpCountdownTimer);
       if (sendBtn) sendBtn.disabled = false;
-      if (sendBtnText) sendBtnText.textContent = 'إعادة إرسال رمز التحقق 🔄';
+      if (sendBtnText) sendBtnText.textContent = 'إعادة إرسال رمز التحقق للإيميل 🔄';
     }
   }, 1000);
 

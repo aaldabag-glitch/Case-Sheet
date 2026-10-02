@@ -38,6 +38,8 @@
   <script src="https://unpkg.com/lucide@latest"></script>
   <!-- Supabase JS Client -->
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <!-- EmailJS SDK for Real Email OTP Dispatch -->
+  <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
   <link rel="stylesheet" href="css/styles.css">
 
   <style>
@@ -805,7 +807,31 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">المحافظة *</label>
-            <input type="text" id="new-college-city" required placeholder="بغداد / نينوى / البصرة..." class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
+            <select 
+              id="new-college-city" 
+              required 
+              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-xs text-slate-800 focus:border-teal-600 focus:bg-white focus:outline-none transition-all cursor-pointer"
+            >
+              <option value="" disabled selected>-- اختر المحافظة ▼ --</option>
+              <option value="بغداد">بغداد (العاصمة)</option>
+              <option value="نينوى">نينوى (الموصل)</option>
+              <option value="البصرة">البصرة</option>
+              <option value="أربيل">أربيل</option>
+              <option value="السليمانية">السليمانية</option>
+              <option value="دهوك">دهوك</option>
+              <option value="كركوك">كركوك</option>
+              <option value="الأنبار">الأنبار (الرمادي)</option>
+              <option value="صلاح الدين">صلاح الدين (تكريت)</option>
+              <option value="ديالى">ديالى (بعقوبة)</option>
+              <option value="بابل">بابل (الحلة)</option>
+              <option value="كربلاء المقدسة">كربلاء المقدسة</option>
+              <option value="النجف الأشرف">النجف الأشرف</option>
+              <option value="القادسية">الديوانية (القادسية)</option>
+              <option value="واسط">واسط (الكوت)</option>
+              <option value="ذي قار">ذي قار (الناصرية)</option>
+              <option value="ميسان">ميسان (العمارة)</option>
+              <option value="المثنى">المثنى (السماوة)</option>
+            </select>
           </div>
         </div>
 
@@ -1239,13 +1265,31 @@
           <div class="grid grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 mb-1">المحافظة / المقر *</label>
-              <input 
-                type="text" 
+              <select 
                 id="app-college-city" 
                 required 
-                placeholder="بغداد / نينوى / البصرة..." 
-                class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold focus:border-amber-500 focus:bg-white focus:outline-none transition-all"
+                class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold text-xs text-slate-800 focus:border-amber-500 focus:bg-white focus:outline-none transition-all cursor-pointer"
               >
+                <option value="" disabled selected>-- اختر المحافظة ▼ --</option>
+                <option value="بغداد">بغداد (العاصمة)</option>
+                <option value="نينوى">نينوى (الموصل)</option>
+                <option value="البصرة">البصرة</option>
+                <option value="أربيل">أربيل</option>
+                <option value="السليمانية">السليمانية</option>
+                <option value="دهوك">دهوك</option>
+                <option value="كركوك">كركوك</option>
+                <option value="الأنبار">الأنبار (الرمادي)</option>
+                <option value="صلاح الدين">صلاح الدين (تكريت)</option>
+                <option value="ديالى">ديالى (بعقوبة)</option>
+                <option value="بابل">بابل (الحلة)</option>
+                <option value="كربلاء المقدسة">كربلاء المقدسة</option>
+                <option value="النجف الأشرف">النجف الأشرف</option>
+                <option value="القادسية">الديوانية (القادسية)</option>
+                <option value="واسط">واسط (الكوت)</option>
+                <option value="ذي قار">ذي قار (الناصرية)</option>
+                <option value="ميسان">ميسان (العمارة)</option>
+                <option value="المثنى">المثنى (السماوة)</option>
+              </select>
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">اسم ممثل الكلية / العميد المعتمد *</label>
