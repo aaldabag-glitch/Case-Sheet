@@ -1,0 +1,9 @@
+{
+  "name": "dental-casesheet-erp",
+  "version": "1.0.0",
+  "description": "Iraqi Dental Colleges ERP & Clinical Training System",
+  "private": true,
+  "dependencies": {
+    "nodemailer": "^6.9.14"
+  }
+}

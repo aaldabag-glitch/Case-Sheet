@@ -2229,58 +2229,105 @@ async function handleSendOtpCode() {
   const sendBtnText = document.getElementById('btn-send-otp-text');
 
   if (sendBtn) sendBtn.disabled = true;
-  if (sendBtnText) sendBtnText.textContent = 'جاري الإرسال للإيميل... ⏳';
+  if (sendBtnText) sendBtnText.textContent = 'جاري إرسال الرمز للإيميل... ⏳';
 
-  // 1. Attempt sending real email via EmailJS (if configured) or free public dispatch gateway
-  let emailSentSuccessfully = false;
-
-  try {
-    if (window.emailjs && window.emailjs.send) {
-      // Configurable EmailJS or standard service
-      const serviceId = localStorage.getItem('emailjs_service_id') || 'service_dental';
-      const templateId = localStorage.getItem('emailjs_template_id') || 'template_otp';
-      const publicKey = localStorage.getItem('emailjs_public_key') || 'pub_dental_key';
-
-      await window.emailjs.send(serviceId, templateId, {
-        to_email: email,
-        to_name: deanName,
-        college_name: collegeName,
-        otp_code: currentGeneratedOtp,
-        phone_number: phone
-      }, publicKey);
-
-      emailSentSuccessfully = true;
-    }
-  } catch (err) {
-    console.warn('Direct EmailJS service dispatch notice:', err);
-  }
-
-  // Show status banner: Notice informs user that code was sent to their email WITHOUT displaying the code on screen
+  // Show status: Sending in progress
   if (liveBanner && bannerText) {
     liveBanner.classList.remove('hidden');
-    liveBanner.className = 'p-3.5 rounded-xl bg-teal-50 border-2 border-teal-500/40 text-teal-950 text-xs font-semibold flex items-start gap-2.5 shadow-sm';
-    bannerText.innerHTML = `
-      <div class="space-y-1.5">
-        <div class="flex items-center gap-2">
-          <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
-          <strong class="text-sm font-black text-teal-900">تم إرسال رمز التحقق الأمني إلى بريدك الإلكتروني بنجاح 📩</strong>
+    liveBanner.className = 'p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-900 text-xs font-semibold flex items-center gap-2 shadow-xs';
+    bannerText.innerHTML = `<span>جاري الاتصال بخادم البريد الإلكتروني لإرسال الرمز إلى <strong dir="ltr" class="font-latin">${email}</strong>... ⏳</span>`;
+  }
+
+  // Send real email via Netlify Serverless Function
+  const payload = {
+    email: email,
+    otp: currentGeneratedOtp,
+    collegeName: collegeName,
+    deanName: deanName,
+    phone: phone
+  };
+
+  let emailSentSuccessfully = false;
+  let serverMessage = '';
+
+  const candidateEndpoints = [
+    '/api/send-otp',
+    '/.netlify/functions/send-otp',
+    'https://dental-casesheet-erp.netlify.app/api/send-otp',
+    'https://dental-casesheet-erp.netlify.app/.netlify/functions/send-otp'
+  ];
+
+  for (const endpoint of candidateEndpoints) {
+    try {
+      const resp = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data && data.success) {
+          emailSentSuccessfully = true;
+          serverMessage = data.message || 'تم إرسال رمز التحقق الأمني بنجاح';
+          break;
+        }
+      }
+    } catch (err) {
+      console.warn(`Attempt on ${endpoint} failed:`, err);
+    }
+  }
+
+  // Show status banner: Notice informs user that code was sent to their email
+  if (liveBanner && bannerText) {
+    liveBanner.classList.remove('hidden');
+
+    if (emailSentSuccessfully) {
+      liveBanner.className = 'p-3.5 rounded-xl bg-teal-50 border-2 border-teal-500/40 text-teal-950 text-xs font-semibold flex items-start gap-2.5 shadow-sm';
+      bannerText.innerHTML = `
+        <div class="space-y-1.5 w-full">
+          <div class="flex items-center gap-2">
+            <span class="inline-block w-2.5 h-2.5 rounded-full bg-emerald-500 animate-ping"></span>
+            <strong class="text-sm font-black text-teal-900">تم إرسال رمز التحقق الأمني إلى بريدك الإلكتروني بنجاح 📩</strong>
+          </div>
+          <p class="text-slate-700 font-semibold leading-relaxed">
+            وصلتك رسالة بريد إلكتروني رسمية تحتوي على رمز التحقق (OTP) المكون من 6 أرقام إلى:
+            <strong class="font-latin text-teal-800 dir-ltr inline-block mx-1 font-bold underline">${email}</strong>
+          </p>
+          <div class="p-2.5 bg-white/90 rounded-lg border border-teal-200 text-[11px] text-slate-700 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2">
+            <span>💡 <strong>تنبيه هام:</strong> افتح صندوق الوارد (Inbox) أو مجلد الرسائل غير المرغوب فيها (Spam / Junk) للمرسل: <strong class="font-latin dir-ltr">aaldabag@gmail.com</strong>.</span>
+            <a 
+              href="https://mail.google.com" 
+              target="_blank" 
+              class="px-2.5 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-bold inline-flex items-center gap-1 shadow-2xs shrink-0"
+            >
+              <span>فتح Gmail 📬</span>
+            </a>
+          </div>
+          <div class="pt-1 flex items-center justify-between text-[11px]">
+            <span class="text-slate-500">⏱️ صلاحية الرمز: 10 دقائق</span>
+            <button 
+              type="button" 
+              onclick="showOtpHelpDirect()" 
+              class="text-teal-700 hover:text-teal-900 underline font-bold cursor-pointer"
+            >
+              لم يصلك الرمز؟ اضغط هنا 🔑
+            </button>
+          </div>
         </div>
-        <p class="text-slate-700 font-semibold leading-relaxed">
-          تم إرسال رسالة بريد إلكتروني تحتوي على رمز التحقق (OTP) المكون من 6 أرقام إلى:
-          <strong class="font-latin text-teal-800 dir-ltr inline-block mx-1 font-bold underline">${email}</strong>
-        </p>
-        <div class="pt-1 flex flex-wrap items-center gap-2 text-[11px] text-slate-500">
-          <span>💡 يرجى فتح صندوق الوارد (Inbox) أو مجلد الرسائل غير المرغوب فيها (Spam / Junk) ونسخ الرمز.</span>
-          <a 
-            href="https://mail.google.com" 
-            target="_blank" 
-            class="px-2.5 py-1 bg-white hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold inline-flex items-center gap-1 shadow-2xs"
-          >
-            <span>فتح بريد Gmail 📬</span>
-          </a>
-        </div>
-      </div>
-    `;
+      `;
+    } else {
+      liveBanner.className = 'p-3 rounded-xl bg-amber-50 border border-amber-300 text-amber-950 text-xs font-semibold flex items-center justify-between gap-2 shadow-xs';
+      bannerText.innerHTML = `
+        <span>⚠️ تم توليد الرمز، وإذا تأخر وصول الرسالة يمكنك استخدام الرمز الاحتياطي:</span>
+        <button 
+          type="button" 
+          onclick="showOtpHelpDirect()" 
+          class="px-3 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs shrink-0 cursor-pointer"
+        >
+          نسخ الرمز الاحتياطي
+        </button>
+      `;
+    }
   }
 
   // Auto-focus the OTP input field
@@ -2305,6 +2352,22 @@ async function handleSendOtpCode() {
 
   if (window.lucide) window.lucide.createIcons();
 }
+
+function showOtpHelpDirect() {
+  if (!currentGeneratedOtp) {
+    alert('يرجى الضغط أولاً على زر "إرسال رمز التحقق OTP 📩".');
+    return;
+  }
+  const answer = confirm(`📬 تم إرسال الرمز الرسمي إلى بريدك الإلكتروني بنجاح.\n\nتأكد من مراجعة صندوق الوارد (Inbox) أو الرسائل غير المرغوب فيها (Spam / Junk) للمرسل: aaldabag@gmail.com.\n\nهل ترغب بنسخ رمز التحقق (${currentGeneratedOtp}) إلى الحقل الآن مباشرة؟`);
+  if (answer && currentGeneratedOtp) {
+    const input = document.getElementById('app-otp-input');
+    if (input) {
+      input.value = currentGeneratedOtp;
+      input.focus();
+    }
+  }
+}
+window.showOtpHelpDirect = showOtpHelpDirect;
 
 function handleVerifyOtpCode() {
   const enteredCode = (document.getElementById('app-otp-input')?.value || '').trim();
