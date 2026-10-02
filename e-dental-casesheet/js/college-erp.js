@@ -2461,6 +2461,34 @@ function handleCollegeApplicationSubmit(event) {
 // ============================================================================
 // SUPER ADMIN APPLICATIONS MANAGEMENT (إدارة طلبات الكليات في لوحة السوبر أدمن)
 // ============================================================================
+function getWhatsAppUrl(phone, collegeName, deanName, requestId, username, password) {
+  let cleanPhone = (phone || '').replace(/[^0-9]/g, '');
+  if (cleanPhone.startsWith('07')) {
+    cleanPhone = '964' + cleanPhone.substring(1);
+  } else if (cleanPhone.startsWith('7') && cleanPhone.length === 10) {
+    cleanPhone = '964' + cleanPhone;
+  } else if (!cleanPhone.startsWith('964') && cleanPhone.length >= 10) {
+    cleanPhone = '964' + cleanPhone;
+  }
+
+  let message = `السلام عليكم دكتور ${deanName || ''} المحترم،\n` +
+    `بخصوص طلب اعتماد (${collegeName || 'كلية طب الأسنان'}) في منظومة كليات طب الأسنان العراقية، رقم الطلب: [ ${requestId || ''} ]:\n\n`;
+
+  if (username && password) {
+    message += `🎉 يسرنا إعلامكم بأنه تمت الموافقة الرسمية على طلبكم واعتماد كليتكم بنجاح!\n\n` +
+      `بيانات الدخول لحساب العمادة:\n` +
+      `👤 اسم المستخدم: ${username}\n` +
+      `🔑 كلمة المرور: ${password}\n` +
+      `🌐 رابط المنظومة: https://dental-casesheet-erp.netlify.app/e-dental-casesheet/college-portal.html\n\n` +
+      `أهلاً بكم في المنظومة الأكاديمية الموحدة.`;
+  } else {
+    message += `نود إعلامكم باستلام وتأكيد طلبكم بنجاح عبر البوابة الإلكترونية، وسيتم التواصل معكم لإتمام الاعتماد وتفعيل حساب الكلية.\n\nتحياتنا، إدارة المنظومة العامة.`;
+  }
+
+  return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+}
+window.getWhatsAppUrl = getWhatsAppUrl;
+
 function renderSuperAdminApplications() {
   const db = readErpDb();
   const applications = db.applications || [];
@@ -2478,7 +2506,7 @@ function renderSuperAdminApplications() {
   if (!tbody) return;
 
   if (applications.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد طلبات تسجيل كليات واردة حالياً. يمكن تقديم طلب جديد من شاشة تسجيل الدخول.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد طلبات تسجيل كليات واردة حالياً. اضغط على زر "تحديث الطلبات السحابية 🔄" أعلاه للمزامنة.</td></tr>`;
     return;
   }
 
@@ -2493,6 +2521,8 @@ function renderSuperAdminApplications() {
     } else if (isRejected) {
       statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">مرفوض 🔴</span>';
     }
+
+    const waLink = getWhatsAppUrl(app.phone, app.collegeName, app.deanName, app.requestId);
 
     return `
       <tr class="hover:bg-amber-50/40 transition-colors">
@@ -2511,7 +2541,10 @@ function renderSuperAdminApplications() {
         </td>
         <td class="p-3.5 whitespace-nowrap min-w-[140px]">
           <div class="text-[11px] space-y-0.5">
-            <span class="block font-latin font-bold text-teal-800" dir="ltr">${app.phone}</span>
+            <a href="${waLink}" target="_blank" class="font-latin font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1 hover:underline" title="اضغط لمراسلة هذا الرقم على واتساب" dir="ltr">
+              <span>${app.phone}</span>
+              <span class="text-xs">💬</span>
+            </a>
             <span class="block font-latin text-slate-600" dir="ltr">${app.email}</span>
           </div>
         </td>
@@ -2526,17 +2559,26 @@ function renderSuperAdminApplications() {
         <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
           ${statusHtml}
         </td>
-        <td class="p-3.5 text-center whitespace-nowrap min-w-[180px]">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[220px]">
           <div class="flex items-center justify-center gap-1.5 flex-wrap">
             ${isPending ? `
               <button 
                 type="button"
                 onclick="openApproveApplicationModal('${app.id}')"
-                class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                title="قبول الطلب واعتماد الكلية فوراً"
+                class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="الموافقة على الطلب واعتماد الكلية وتوليد حساب العميد"
               >
-                <span>قبول واعتماد ✅</span>
+                <span>الموافقة على الطلب ✅</span>
               </button>
+              <a 
+                href="${waLink}"
+                target="_blank"
+                class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="فتح محادثة واتساب مع ممثل الكلية مباشرة"
+              >
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>واتساب 💬</span>
+              </a>
               <button 
                 type="button"
                 onclick="rejectApplication('${app.id}')"
@@ -2545,7 +2587,17 @@ function renderSuperAdminApplications() {
               >
                 رفض ❌
               </button>
-            ` : ''}
+            ` : `
+              <a 
+                href="${waLink}"
+                target="_blank"
+                class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="مراسلة عبر واتساب"
+              >
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>واتساب 💬</span>
+              </a>
+            `}
             <button 
               type="button"
               onclick="deleteApplication('${app.id}')"
@@ -2672,7 +2724,10 @@ function handleApproveApplicationSubmit(event) {
   renderSuperAdminDashboard();
   renderSuperAdminApplications();
 
-  if (confirm(`🎉 تم اعتماد كلية ${app.collegeName} بنجاح تام!\nتم إنشاء حساب العميد (${adminUsername}).\n\nهل ترغب في طباعة سند ترخيص الكلية الآن؟`)) {
+  const waUrl = getWhatsAppUrl(app.phone, app.collegeName, app.deanName, app.requestId, adminUsername, adminPassword);
+  if (confirm(`🎉 تم اعتماد كلية ${app.collegeName} بنجاح!\nتم إنشاء حساب العميد (${adminUsername}).\n\nهل ترغب في فتح محادثة واتساب الآن لإرسال رسالة الترحيب وبيانات الدخول للعميد فوراً؟`)) {
+    window.open(waUrl, '_blank');
+  } else if (confirm('هل ترغب في طباعة سند ترخيص الكلية الآن؟')) {
     openPrintReceiptModal(newCollege.id, false);
   }
 }
@@ -2699,38 +2754,126 @@ function deleteApplication(appId) {
 }
 
 async function syncPushApplication(app) {
+  const candidateEndpoints = [
+    '/api/applications',
+    '/.netlify/functions/applications',
+    'https://dental-casesheet-erp.netlify.app/api/applications'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'upsert', application: app })
+      });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync push application endpoint failed:', ep, e);
+    }
+  }
+
   const client = getErpSupabaseClient();
-  if (!client) return;
-  try {
-    await client.from('college_applications').upsert({
-      id: app.id,
-      request_id: app.requestId || app.id,
-      college_name: app.collegeName,
-      city: app.city || '',
-      dean_name: app.deanName || '',
-      phone: app.phone || '',
-      email: app.email || '',
-      otp_code: app.otpCode || '',
-      otp_verified: app.otpVerified !== false,
-      proposed_password: app.proposedPassword || '',
-      notes: app.notes || '',
-      status: app.status || 'Pending',
-      created_at: app.createdAt || new Date().toISOString()
-    });
-  } catch (e) {
-    console.warn('Supabase push application notice:', e);
+  if (client) {
+    try {
+      await client.from('college_applications').upsert({
+        id: app.id,
+        request_id: app.requestId || app.id,
+        college_name: app.collegeName,
+        city: app.city || '',
+        dean_name: app.deanName || '',
+        phone: app.phone || '',
+        email: app.email || '',
+        otp_code: app.otpCode || '',
+        otp_verified: app.otpVerified !== false,
+        proposed_password: app.proposedPassword || '',
+        notes: app.notes || '',
+        status: app.status || 'Pending',
+        created_at: app.createdAt || new Date().toISOString()
+      });
+    } catch (e) {}
   }
 }
 
 async function syncDeleteApplication(appId) {
+  const candidateEndpoints = [
+    `/api/applications?id=${encodeURIComponent(appId)}`,
+    `/.netlify/functions/applications?id=${encodeURIComponent(appId)}`,
+    `https://dental-casesheet-erp.netlify.app/api/applications?id=${encodeURIComponent(appId)}`
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, { method: 'DELETE' });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync delete application failed:', ep, e);
+    }
+  }
+
   const client = getErpSupabaseClient();
-  if (!client) return;
-  try {
-    await client.from('college_applications').delete().eq('id', appId);
-  } catch (e) {
-    console.warn('Supabase delete application notice:', e);
+  if (client) {
+    try {
+      await client.from('college_applications').delete().eq('id', appId);
+    } catch (e) {}
   }
 }
+
+async function syncPullApplicationsFromCloud(showFeedback = false) {
+  const candidateEndpoints = [
+    '/api/applications',
+    '/.netlify/functions/applications',
+    'https://dental-casesheet-erp.netlify.app/api/applications'
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep);
+      if (res.ok) {
+        const data = await res.json();
+        if (data && Array.isArray(data.applications)) {
+          const db = readErpDb();
+          if (!db.applications) db.applications = [];
+
+          let changed = false;
+          data.applications.forEach(app => {
+            const idx = db.applications.findIndex(a => a.id === app.id);
+            if (idx > -1) {
+              if (JSON.stringify(db.applications[idx]) !== JSON.stringify(app)) {
+                db.applications[idx] = { ...db.applications[idx], ...app };
+                changed = true;
+              }
+            } else {
+              db.applications.unshift(app);
+              changed = true;
+            }
+          });
+
+          // Also push any local applications that are not yet in cloud
+          for (const localApp of db.applications) {
+            if (!data.applications.some(a => a.id === localApp.id)) {
+              syncPushApplication(localApp).catch(() => {});
+            }
+          }
+
+          if (changed) {
+            writeErpDb(db);
+            renderSuperAdminApplications();
+          }
+
+          if (showFeedback) {
+            alert(`✅ تم تحديث ومزامنة طلبات الكليات بنجاح (${data.applications.length} طلبات مسجلة)`);
+          }
+          return true;
+        }
+      }
+    } catch (e) {
+      console.warn('Sync pull applications notice:', ep, e);
+    }
+  }
+  return false;
+}
+window.syncPullApplicationsFromCloud = syncPullApplicationsFromCloud;
 
 // Auto init on page load
 window.addEventListener('DOMContentLoaded', () => {
@@ -2738,5 +2881,12 @@ window.addEventListener('DOMContentLoaded', () => {
   checkImpersonation();
   updateSupabaseStatusUI();
   syncPullFromSupabase();
+  syncPullApplicationsFromCloud();
   renderApp();
+
+  // Periodic background check for new college applications every 10 seconds
+  setInterval(() => {
+    syncPullApplicationsFromCloud();
+  }, 10000);
 });
+

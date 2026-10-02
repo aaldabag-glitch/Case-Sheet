@@ -1,0 +1,17 @@
+[
+  {
+    "id": "app_1790951469170",
+    "requestId": "REQ-2026-7934",
+    "collegeName": "كلية طب الأسنان",
+    "city": "بغداد",
+    "deanName": "أ.د. عبد الحميد ناطق",
+    "phone": "07722887654",
+    "email": "abdulhameednateq@gmail.com",
+    "otpCode": "631892",
+    "otpVerified": true,
+    "proposedPassword": "Dean7934@#",
+    "notes": "طلب تسجيل واعتماد كلية جديدة عبر البوابة الإلكترونية",
+    "status": "Pending",
+    "createdAt": "2026-10-02T14:31:00.000Z"
+  }
+]

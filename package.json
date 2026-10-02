@@ -4,6 +4,7 @@
   "description": "Iraqi Dental Colleges ERP & Clinical Training System",
   "private": true,
   "dependencies": {
+    "@netlify/blobs": "^11.1.3",
     "nodemailer": "^6.9.14"
   }
 }
