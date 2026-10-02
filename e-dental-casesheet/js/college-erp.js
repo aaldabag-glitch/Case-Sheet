@@ -73,6 +73,25 @@ function loginAsDeanNewTab() {}
 function loginAsInstructorNewTab() {}
 function checkImpersonation() {}
 
+// ============================================================================
+// PASSWORD VISIBILITY TOGGLE (إظهار وإخفاء كلمة المرور)
+// ============================================================================
+function togglePasswordVisibility(inputId, btnEl) {
+  const input = document.getElementById(inputId);
+  if (!input) return;
+  const isPass = input.type === 'password';
+  input.type = isPass ? 'text' : 'password';
+
+  if (btnEl) {
+    btnEl.innerHTML = `<i data-lucide="${isPass ? 'eye-off' : 'eye'}" class="w-4 h-4"></i>`;
+    btnEl.title = isPass ? 'إخفاء كلمة المرور' : 'إظهار كلمة المرور';
+    if (window.lucide && window.lucide.createIcons) {
+      window.lucide.createIcons();
+    }
+  }
+}
+window.togglePasswordVisibility = togglePasswordVisibility;
+
 
 // Read database
 function readErpDb() {
