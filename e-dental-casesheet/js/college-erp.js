@@ -2787,157 +2787,9 @@ function renderSuperAdminApplications() {
 }
 
 function renderSuperAdminStudentApplications() {
-  const db = readErpDb();
-  const allApps = db.studentApplications || [];
-  const filterCollege = document.getElementById('super-admin-student-apps-college-filter')?.value || 'ALL';
-  const tbody = document.getElementById('super-admin-student-apps-tbody');
-  const countBadge = document.getElementById('super-admin-student-apps-count');
-  const statBadge = document.getElementById('stat-student-apps-count');
-
-  if (countBadge) countBadge.textContent = `${allApps.length} طلبات`;
-  if (statBadge) statBadge.textContent = allApps.length.toString();
-
-  // Populate college filter dropdown if needed
-  const filterSelect = document.getElementById('super-admin-student-apps-college-filter');
-  if (filterSelect && filterSelect.options.length <= 1) {
-    const colleges = db.colleges || [];
-    colleges.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.id;
-      opt.textContent = c.name;
-      filterSelect.appendChild(opt);
-    });
-  }
-
-  if (!tbody) return;
-
-  const filtered = filterCollege === 'ALL'
-    ? allApps
-    : allApps.filter(a => a.collegeId === filterCollege || a.collegeName?.includes(filterCollege));
-
-  if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-slate-400 font-semibold">لا توجد طلبات انضمام طلاب واردة حالياً. عند تقديم أي طالب لطلب انضمام سيظهر هنا وفي لوحة عمادة كليته فوراً.</td></tr>`;
-    return;
-  }
-
-  tbody.innerHTML = filtered.map(app => {
-    const isPending = app.status === 'Pending';
-    const isApproved = app.status === 'Approved';
-    const isRejected = app.status === 'Rejected';
-
-    let statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">قيد التدقيق 🟡</span>';
-    if (isApproved) {
-      statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">معتمد ومقبول 🟢</span>';
-    } else if (isRejected) {
-      statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">مرفوض 🔴</span>';
-    }
-
-    const waLink = getStudentWhatsAppUrl(app.phone, app.studentName, app.collegeName, app.universityId);
-
-    return `
-      <tr class="hover:bg-teal-50/40 transition-colors">
-        <td class="p-3.5 whitespace-nowrap min-w-[100px]">
-          <span class="font-latin font-bold text-slate-900 block">${app.requestId || app.id}</span>
-          <span class="text-[10px] text-slate-400 font-latin">${new Date(app.createdAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
-        </td>
-        <td class="p-3.5 whitespace-nowrap min-w-[150px]">
-          <strong class="text-slate-900 block text-sm font-black">${app.studentName}</strong>
-          ${app.notes ? `<span class="block text-[10px] text-slate-500 mt-0.5">${app.notes}</span>` : ''}
-        </td>
-        <td class="p-3.5 whitespace-nowrap min-w-[130px]">
-          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-300 text-teal-950">
-            <span class="text-xs">🆔</span>
-            <span class="font-latin font-black text-sm tracking-wide" dir="ltr">${app.universityId}</span>
-          </div>
-        </td>
-        <td class="p-3.5 whitespace-nowrap min-w-[150px]">
-          <strong class="text-teal-900 block font-bold">${app.collegeName || 'كلية طب الأسنان'}</strong>
-        </td>
-        <td class="p-3.5 text-center whitespace-nowrap min-w-[100px]">
-          <span class="font-bold text-slate-800 block">${app.stage === '5th' ? 'المرحلة الخامسة' : 'المرحلة الرابعة'}</span>
-          <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-latin font-semibold text-[11px]">${app.group || 'Group A'}</span>
-        </td>
-        <td class="p-3.5 whitespace-nowrap min-w-[130px]">
-          <a href="${waLink}" target="_blank" class="font-latin font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1 hover:underline" title="مراسلة الطالب عبر واتساب" dir="ltr">
-            <span>${app.phone}</span>
-            <span class="text-xs">💬</span>
-          </a>
-        </td>
-        <td class="p-3.5 whitespace-nowrap min-w-[120px]">
-          <span class="font-latin text-slate-600 text-xs" dir="ltr">${app.email}</span>
-        </td>
-        <td class="p-3.5 text-center whitespace-nowrap min-w-[100px]">
-          ${statusHtml}
-        </td>
-        <td class="p-3.5 text-center whitespace-nowrap min-w-[220px]">
-          <div class="flex items-center justify-center gap-1.5 flex-wrap">
-            ${isPending ? `
-              <button 
-                type="button" 
-                onclick="approveStudentApplication('${app.id}')"
-                class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                title="الموافقة على الطالب واعتماد حسابه"
-              >
-                <span>اعتماد الطالب ✅</span>
-              </button>
-              <button 
-                type="button" 
-                onclick="loginAsDeanNewTab('${app.collegeId}')"
-                class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
-                title="فتح لوحة عميد هذه الكلية بتبويب جديد"
-              >
-                <span>دخول كعميد 🏛️</span>
-              </button>
-              <a 
-                href="${waLink}"
-                target="_blank"
-                class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                title="مراسلة الطالب عبر واتساب"
-              >
-                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-                <span>واتساب 💬</span>
-              </a>
-              <button 
-                type="button" 
-                onclick="rejectStudentApplication('${app.id}')"
-                class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer"
-              >
-                رفض ❌
-              </button>
-            ` : `
-              <button 
-                type="button" 
-                onclick="loginAsDeanNewTab('${app.collegeId}')"
-                class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
-                title="فتح لوحة عميد هذه الكلية بتبويب جديد"
-              >
-                <span>دخول كعميد 🏛️</span>
-              </button>
-              <a 
-                href="${waLink}"
-                target="_blank"
-                class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                title="مراسلة الطالب عبر واتساب"
-              >
-                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
-                <span>واتساب 💬</span>
-              </a>
-            `}
-            <button 
-              type="button" 
-              onclick="deleteStudentApplication('${app.id}')"
-              class="p-1.5 text-slate-400 hover:text-rose-600 rounded text-xs font-bold cursor-pointer"
-              title="حذف الطلب"
-            >
-              🗑️
-            </button>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
-
-  if (window.lucide) window.lucide.createIcons();
+  // Deprecated: Super Admin does not receive or manage student applications.
+  // Student applications are strictly routed and isolated to the specific College Dean only.
+  return;
 }
 window.renderSuperAdminStudentApplications = renderSuperAdminStudentApplications;
 
@@ -3539,8 +3391,8 @@ function renderCollegeStudentApplications() {
   // Filter strictly for current college when logged in as dean
   const apps = currentCollege 
     ? allApps.filter(a => {
-        if (a.collegeId && a.collegeId === currentCollege.id) return true;
-        if (a.collegeName && currentCollege.name && (a.collegeName === currentCollege.name || a.collegeName.includes(currentCollege.name) || currentCollege.name.includes(a.collegeName))) return true;
+        if (a.collegeId && currentCollege.id && a.collegeId === currentCollege.id) return true;
+        if (a.collegeName && currentCollege.name && a.collegeName.trim() === currentCollege.name.trim()) return true;
         return false;
       }) 
     : [];

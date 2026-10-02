@@ -134,6 +134,16 @@ exports.handler = async function (event, context) {
       let currentItems = await getCloudApplications(blobKey);
       if (!Array.isArray(currentItems)) currentItems = [];
 
+      if (action === 'clear_all' || action === 'clear_students') {
+        currentItems = [];
+        await setCloudApplications([], blobKey);
+        return {
+          statusCode: 200,
+          headers,
+          body: JSON.stringify({ success: true, message: 'All items cleared successfully', type: blobKey, colleges: [], applications: [] })
+        };
+      }
+
       if (action === 'delete') {
         const itemId = parsedBody.id;
         currentItems = currentItems.filter(a => a.id !== itemId);

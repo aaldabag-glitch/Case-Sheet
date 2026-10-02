@@ -309,7 +309,7 @@
       </div>
 
       <!-- Quick Stats: College Subscriptions & Financials (نفس نظام العيادات) -->
-      <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-4">
+      <div class="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
         <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200">
           <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-1.5 sm:mb-2">
             <span>الكليات المرخصة</span>
@@ -344,15 +344,6 @@
           </div>
           <div id="stat-pending-subs" class="text-xl sm:text-2xl md:text-3xl font-black text-amber-600 font-latin">0</div>
           <p class="text-[10px] sm:text-[11px] text-amber-700 font-semibold mt-0.5 sm:mt-1">بانتظار السداد والتجديد</p>
-        </div>
-
-        <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200">
-          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-1.5 sm:mb-2">
-            <span>طلبات انضمام الطلبة</span>
-            <i data-lucide="graduation-cap" class="w-4 h-4 text-teal-600"></i>
-          </div>
-          <div id="stat-student-apps-count" class="text-xl sm:text-2xl md:text-3xl font-black text-teal-800 font-latin">0</div>
-          <p class="text-[10px] sm:text-[11px] text-teal-700 font-semibold mt-0.5 sm:mt-1">طلبات مقدمة للجامعات</p>
         </div>
       </div>
 
@@ -456,79 +447,6 @@
               </tr>
             </thead>
             <tbody id="applications-table-body" class="divide-y divide-slate-200 bg-white">
-              <!-- Populated via JS -->
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      <!-- Student Applications Master Section in Super Admin (طلبات انضمام الطلبة الواردة لكافة الكليات) -->
-      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-3 sm:space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-teal-50 text-teal-800 flex items-center justify-center font-bold border border-teal-200 shrink-0">
-              <i data-lucide="graduation-cap" class="w-5 h-5 sm:w-6 sm:h-6"></i>
-            </div>
-            <div>
-              <div class="flex items-center gap-2 flex-wrap">
-                <h3 class="text-sm sm:text-base font-black text-slate-900">طلبات انضمام الطلبة الجدد في الجامعات (الإشراف العام) 🎓</h3>
-                <span id="super-admin-student-apps-count" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-teal-100 text-teal-900 border border-teal-300">0 طلبات</span>
-              </div>
-              <p class="text-xs text-slate-500 font-semibold mt-0.5">
-                متابعة وإدارة كافة طلبات الطلبة المحالة إلى عمادات الكليات، مع إمكانية الاعتماد المباشر أو المراسلة عبر الواتساب
-              </p>
-            </div>
-          </div>
-          
-          <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
-            <select 
-              id="super-admin-student-apps-college-filter" 
-              onchange="renderSuperAdminStudentApplications()" 
-              class="px-3 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-bold text-slate-800 focus:outline-none"
-            >
-              <option value="ALL">-- كافة الجامعات والكليات --</option>
-            </select>
-            <button 
-              type="button" 
-              onclick="syncPullStudentApplicationsFromCloud(true)"
-              class="justify-center px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap"
-            >
-              <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
-              <span>تحديث سحابي 🔄</span>
-            </button>
-            <button 
-              type="button" 
-              onclick="openStudentApplicationModal()"
-              class="justify-center px-3 py-2 bg-gradient-to-r from-teal-600 to-emerald-600 hover:from-teal-700 hover:to-emerald-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer whitespace-nowrap shadow-xs"
-            >
-              <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
-              <span>تقديم طلب لطالب 🎓</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- Mobile Scroll Indicator Hint -->
-        <div class="sm:hidden p-2 bg-teal-50 border border-teal-200/70 rounded-xl text-[11px] text-teal-950 font-bold flex items-center justify-between">
-          <span>👉 اسحب الجدول أفقياً للاطلاع على بيانات الطلبة ورقم الهوية الجامعية</span>
-          <span>↔️</span>
-        </div>
-
-        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
-          <table class="w-full text-right text-xs">
-            <thead class="bg-teal-50/80 text-teal-950 font-bold border-b border-teal-200">
-              <tr>
-                <th class="p-3.5 whitespace-nowrap">رقم الطلب</th>
-                <th class="p-3.5 whitespace-nowrap">اسم الطالب الكامل</th>
-                <th class="p-3.5 whitespace-nowrap">رقم الهوية الجامعية</th>
-                <th class="p-3.5 whitespace-nowrap">الكلية والجامعة المحددة</th>
-                <th class="p-3.5 text-center whitespace-nowrap">المرحلة والشعبة</th>
-                <th class="p-3.5 whitespace-nowrap">الهاتف والواتساب</th>
-                <th class="p-3.5 whitespace-nowrap">البريد الإلكتروني</th>
-                <th class="p-3.5 text-center whitespace-nowrap">الحالة</th>
-                <th class="p-3.5 text-center whitespace-nowrap">الإجراءات</th>
-              </tr>
-            </thead>
-            <tbody id="super-admin-student-apps-tbody" class="divide-y divide-slate-200 bg-white">
               <!-- Populated via JS -->
             </tbody>
           </table>
@@ -1907,7 +1825,7 @@
   </footer>
 
   <!-- Core ERP Engine Script (Cache-busted) -->
-  <script src="js/college-erp.js?v=20261002_06"></script>
+  <script src="js/college-erp.js?v=20261002_07"></script>
 
   <!-- Redundant Direct Event Listener Fallback -->
   <script>
