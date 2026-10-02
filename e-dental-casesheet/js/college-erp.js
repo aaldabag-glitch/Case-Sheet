@@ -426,9 +426,9 @@ function renderApp() {
   // Populate Header Profile & Logout
   if (authBox) {
     authBox.innerHTML = `
-      <div class="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl border border-slate-300">
-        <span class="text-xs font-bold text-slate-800">${user.name}</span>
-        <button onclick="handleLogout()" class="text-rose-600 hover:text-rose-800 text-xs font-bold border-r border-slate-300 pr-2 mr-1" title="تسجيل الخروج">
+      <div class="flex items-center gap-1.5 sm:gap-2 bg-slate-100 hover:bg-slate-200 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-xl border border-slate-300">
+        <span class="text-[11px] sm:text-xs font-bold text-slate-800 max-w-[90px] sm:max-w-xs truncate">${user.name}</span>
+        <button onclick="handleLogout()" class="text-rose-600 hover:text-rose-800 text-[11px] sm:text-xs font-bold border-r border-slate-300 pr-1.5 sm:pr-2 mr-0.5 sm:mr-1 cursor-pointer py-0.5" title="تسجيل الخروج">
           خروج 🚪
         </button>
       </div>
@@ -573,38 +573,38 @@ function renderSuperAdminColleges() {
 
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[170px]">
           <strong class="text-slate-900 block text-sm font-black">${c.name}</strong>
           <span class="text-[11px] text-slate-500 font-semibold">📍 ${c.city || 'العراق'}</span>
         </td>
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[100px]">
           <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 font-latin font-bold text-slate-700">${c.code}</span>
         </td>
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[130px]">
           <span class="font-bold text-slate-800">${c.deanName}</span>
         </td>
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[140px]">
           <div class="text-[11px] space-y-0.5">
             <span class="block text-slate-600">يوزر: <strong class="font-latin text-teal-800">${c.adminUsername}</strong></span>
             <span class="block text-slate-500">رمز: <strong class="font-latin text-slate-700">${c.adminPassword}</strong></span>
           </div>
         </td>
-        <td class="p-3.5 text-center">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
           <span class="font-latin font-black text-emerald-700 text-sm">$${fee.toLocaleString()}</span>
           <span class="block text-[10px] text-slate-400">سنوي مدفوع</span>
         </td>
-        <td class="p-3.5 text-center font-latin font-semibold text-slate-700 text-xs">
+        <td class="p-3.5 text-center font-latin font-semibold text-slate-700 text-xs whitespace-nowrap min-w-[100px]">
           ${subEnd}
         </td>
-        <td class="p-3.5 text-center">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
           ${statusBadge}
         </td>
-        <td class="p-3.5 text-center">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[260px]">
           <div class="flex items-center justify-center gap-1.5 flex-wrap">
             <button 
               type="button"
               onclick="loginAsDeanNewTab('${c.id}')"
-              class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+              class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
               title="دخول بتبويب جديد مستقل كعميد للكلية دون إغلاق السوبر أدمن"
             >
               <span>دخول كعميد 🏛️</span>
@@ -613,7 +613,7 @@ function renderSuperAdminColleges() {
             <button 
               type="button"
               onclick="openPrintReceiptModal('${c.id}')"
-              class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs"
+              class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs"
               title="طباعة سند تجديد واشتراك الكلية الرسمي"
             >
               وصل 🧾
@@ -621,7 +621,7 @@ function renderSuperAdminColleges() {
             <button 
               type="button"
               onclick="openRenewSubModal('${c.id}')"
-              class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs"
+              class="px-2.5 py-1.5 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs"
               title="تجديد الاشتراك وتمديد الصلاحية"
             >
               تجديد 💳
@@ -629,14 +629,14 @@ function renderSuperAdminColleges() {
             <button 
               type="button"
               onclick="toggleCollegeStatus('${c.id}')"
-              class="px-2 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${isPaused ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100'}"
+              class="px-2.5 py-1.5 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${isPaused ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100'}"
             >
               ${isPaused ? 'تفعيل' : 'إيقاف'}
             </button>
             <button 
               type="button"
               onclick="deleteCollege('${c.id}')"
-              class="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded text-xs font-bold cursor-pointer"
+              class="p-1.5 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded text-xs font-bold cursor-pointer"
               title="حذف الكلية نهائياً"
             >
               🗑️
@@ -905,22 +905,22 @@ function renderCollegeStudents() {
 
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="p-3">
+        <td class="p-3 whitespace-nowrap min-w-[150px]">
           <strong class="font-bold text-slate-900 block">${s.name}</strong>
           <span class="text-[10px] text-slate-400 font-latin">#ID-${s.id}</span>
         </td>
-        <td class="p-3">
+        <td class="p-3 whitespace-nowrap min-w-[130px]">
           <span class="px-2 py-0.5 rounded text-[11px] font-bold ${s.stage === '5th' ? 'bg-sky-100 text-sky-800' : 'bg-teal-100 text-teal-800'}">
             ${s.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)'}
           </span>
         </td>
-        <td class="p-3 font-latin font-semibold text-slate-600">${s.group || 'Group A'}</td>
-        <td class="p-3 font-latin font-bold text-teal-800">${s.username}</td>
-        <td class="p-3 font-latin font-bold text-slate-600">${s.password}</td>
-        <td class="p-3 text-center font-black font-latin text-slate-800">${studentCases.length}</td>
-        <td class="p-3 text-center font-bold text-emerald-700 font-latin">${avgScore}</td>
-        <td class="p-3 text-center">
-          <button onclick="deleteStudent('${s.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-[11px]">حذف 🗑️</button>
+        <td class="p-3 font-latin font-semibold text-slate-600 whitespace-nowrap min-w-[100px]">${s.group || 'Group A'}</td>
+        <td class="p-3 font-latin font-bold text-teal-800 whitespace-nowrap min-w-[120px]">${s.username}</td>
+        <td class="p-3 font-latin font-bold text-slate-600 whitespace-nowrap min-w-[100px]">${s.password}</td>
+        <td class="p-3 text-center font-black font-latin text-slate-800 whitespace-nowrap min-w-[90px]">${studentCases.length}</td>
+        <td class="p-3 text-center font-bold text-emerald-700 font-latin whitespace-nowrap min-w-[110px]">${avgScore}</td>
+        <td class="p-3 text-center whitespace-nowrap min-w-[80px]">
+          <button onclick="deleteStudent('${s.id}')" class="px-2.5 py-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg font-bold text-[11px] transition-all cursor-pointer">حذف 🗑️</button>
         </td>
       </tr>
     `;
@@ -946,24 +946,24 @@ function renderCollegeInstructors() {
 
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="p-3">
+        <td class="p-3 whitespace-nowrap min-w-[150px]">
           <strong class="font-bold text-slate-900 block">${inst.name}</strong>
           <span class="text-[11px] text-slate-500 font-latin">${inst.email || ''}</span>
         </td>
-        <td class="p-3 font-semibold text-slate-700">${inst.title}</td>
-        <td class="p-3 font-bold text-teal-800">${inst.department}</td>
-        <td class="p-3 font-latin font-bold text-slate-800">${inst.username}</td>
-        <td class="p-3 font-latin font-bold text-slate-600">${inst.password}</td>
-        <td class="p-3 text-center font-black font-latin text-teal-700">${evalCount}</td>
-        <td class="p-3 text-center">
+        <td class="p-3 font-semibold text-slate-700 whitespace-nowrap min-w-[120px]">${inst.title}</td>
+        <td class="p-3 font-bold text-teal-800 whitespace-nowrap min-w-[150px]">${inst.department}</td>
+        <td class="p-3 font-latin font-bold text-slate-800 whitespace-nowrap min-w-[120px]">${inst.username}</td>
+        <td class="p-3 font-latin font-bold text-slate-600 whitespace-nowrap min-w-[100px]">${inst.password}</td>
+        <td class="p-3 text-center font-black font-latin text-teal-700 whitespace-nowrap min-w-[90px]">${evalCount}</td>
+        <td class="p-3 text-center whitespace-nowrap min-w-[80px]">
           <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">نشط</span>
         </td>
-        <td class="p-3 text-center">
+        <td class="p-3 text-center whitespace-nowrap min-w-[180px]">
           <div class="flex items-center justify-center gap-1.5 flex-wrap">
             <button 
               type="button"
               onclick="loginAsInstructorNewTab('${inst.id}')"
-              class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+              class="px-2.5 py-1.5 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
               title="دخول بتبويب جديد مستقل كتدريسي دون إغلاق لوحة العميد"
             >
               <span>دخول كتدريسي 👨‍🏫</span>
@@ -972,7 +972,7 @@ function renderCollegeInstructors() {
             <button 
               type="button"
               onclick="deleteInstructor('${inst.id}')" 
-              class="p-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded font-bold text-[11px] cursor-pointer"
+              class="p-1.5 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded-lg font-bold text-[11px] cursor-pointer"
               title="حذف التدريسي"
             >
               حذف 🗑️
@@ -1002,22 +1002,22 @@ function renderCollegeEvaluations() {
     const isPending = item.status === 'Pending';
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="p-3 font-latin font-bold text-slate-700">${item.id}</td>
-        <td class="p-3 font-bold text-slate-900">${item.studentName}</td>
-        <td class="p-3">
+        <td class="p-3 font-latin font-bold text-slate-700 whitespace-nowrap min-w-[80px]">${item.id}</td>
+        <td class="p-3 font-bold text-slate-900 whitespace-nowrap min-w-[140px]">${item.studentName}</td>
+        <td class="p-3 whitespace-nowrap min-w-[80px]">
           <span class="px-1.5 py-0.5 rounded text-[10px] font-bold ${item.stage === '5th' ? 'bg-sky-100 text-sky-800' : 'bg-teal-100 text-teal-800'}">
             مرحلة ${item.stage === '5th' ? '5' : '4'}
           </span>
         </td>
-        <td class="p-3 font-semibold text-slate-700">${item.type}</td>
-        <td class="p-3 font-bold text-teal-800">${item.instructorName || 'بانتظار التوزيع'}</td>
-        <td class="p-3 text-center">
+        <td class="p-3 font-semibold text-slate-700 whitespace-nowrap min-w-[120px]">${item.type}</td>
+        <td class="p-3 font-bold text-teal-800 whitespace-nowrap min-w-[140px]">${item.instructorName || 'بانتظار التوزيع'}</td>
+        <td class="p-3 text-center whitespace-nowrap min-w-[100px]">
           <span class="px-2 py-0.5 rounded text-xs font-black font-latin ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
             ${isPending ? 'قيد التقييم' : item.assignedMark + ' / 10'}
           </span>
         </td>
-        <td class="p-3 text-slate-500 font-latin text-[11px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
-        <td class="p-3 text-center">
+        <td class="p-3 text-slate-500 font-latin text-[11px] whitespace-nowrap min-w-[90px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
+        <td class="p-3 text-center whitespace-nowrap min-w-[90px]">
           <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
             ${isPending ? 'بانتظار التدريسي' : 'معتمدة'}
           </span>
@@ -1262,32 +1262,33 @@ function renderInstructorDashboard() {
         const isPending = item.status === 'Pending';
         return `
           <tr class="hover:bg-slate-50/80 transition-colors">
-            <td class="p-3 font-latin font-bold text-slate-800">${item.id}</td>
-            <td class="p-3">
+            <td class="p-3 font-latin font-bold text-slate-800 whitespace-nowrap min-w-[80px]">${item.id}</td>
+            <td class="p-3 whitespace-nowrap min-w-[150px]">
               <strong class="font-bold text-slate-900 block">${item.studentName}</strong>
               <span class="text-[11px] text-teal-700 font-semibold">مرحلة ${item.stage === '5th' ? 'خامسة' : 'رابعة'} BDS</span>
             </td>
-            <td class="p-3 font-semibold text-slate-700">${item.type}</td>
-            <td class="p-3">
+            <td class="p-3 font-semibold text-slate-700 whitespace-nowrap min-w-[120px]">${item.type}</td>
+            <td class="p-3 whitespace-nowrap min-w-[150px]">
               <span class="block font-bold text-slate-800">${item.patientName}</span>
               <span class="text-[11px] text-slate-500">${item.chiefComplaint || ''}</span>
             </td>
-            <td class="p-3 text-slate-500 font-latin text-[11px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
-            <td class="p-3 text-center">
+            <td class="p-3 text-slate-500 font-latin text-[11px] whitespace-nowrap min-w-[90px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
+            <td class="p-3 text-center whitespace-nowrap min-w-[100px]">
               <span class="px-2 py-0.5 rounded text-xs font-black font-latin ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
                 ${isPending ? 'قيد التقييم' : item.assignedMark + ' / 10'}
               </span>
             </td>
-            <td class="p-3 text-center">
+            <td class="p-3 text-center whitespace-nowrap min-w-[90px]">
               <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
                 ${isPending ? 'بانتظار التقييم' : 'معتمدة'}
               </span>
             </td>
-            <td class="p-3 text-center">
-              <div class="flex items-center justify-center gap-1.5">
+            <td class="p-3 text-center whitespace-nowrap min-w-[200px]">
+              <div class="flex items-center justify-center gap-1.5 flex-wrap">
                 <button 
+                  type="button"
                   onclick="openEvalCaseModal('${item.id}')"
-                  class="px-3 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-1 cursor-pointer"
+                  class="px-3 py-1.5 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-1 cursor-pointer"
                 >
                   <span>رصد الدرجة (Mark)</span>
                   <span>✍️</span>
@@ -1295,7 +1296,7 @@ function renderInstructorDashboard() {
                 <a 
                   href="${item.sheetUrl || 'periodontics-page4.html'}" 
                   target="_blank"
-                  class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg font-bold text-xs"
+                  class="px-2.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg font-bold text-xs inline-flex items-center"
                 >
                   فتح الطبلة 📄
                 </a>
@@ -1316,18 +1317,18 @@ function renderInstructorDashboard() {
       studentsTbody.innerHTML = collegeStudents.map(s => {
         return `
           <tr class="hover:bg-slate-50/80 transition-colors">
-            <td class="p-3">
+            <td class="p-3 whitespace-nowrap min-w-[150px]">
               <strong class="font-bold text-slate-900 block">${s.name}</strong>
               <span class="text-[10px] text-slate-400 font-latin">#ID-${s.id}</span>
             </td>
-            <td class="p-3">
+            <td class="p-3 whitespace-nowrap min-w-[130px]">
               <span class="px-2 py-0.5 rounded text-[11px] font-bold ${s.stage === '5th' ? 'bg-sky-100 text-sky-800' : 'bg-teal-100 text-teal-800'}">
                 ${s.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)'}
               </span>
             </td>
-            <td class="p-3 font-latin font-semibold text-slate-700">${s.group || 'Group A'}</td>
-            <td class="p-3 font-latin font-bold text-teal-800">${s.username}</td>
-            <td class="p-3 text-center">
+            <td class="p-3 font-latin font-semibold text-slate-700 whitespace-nowrap min-w-[100px]">${s.group || 'Group A'}</td>
+            <td class="p-3 font-latin font-bold text-teal-800 whitespace-nowrap min-w-[120px]">${s.username}</td>
+            <td class="p-3 text-center whitespace-nowrap min-w-[90px]">
               <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">طالب مسجل</span>
             </td>
           </tr>
@@ -1409,23 +1410,23 @@ function renderStudentDashboard() {
     const isPending = item.status === 'Pending';
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="p-3 font-latin font-bold text-slate-800">${item.id}</td>
-        <td class="p-3 font-semibold text-slate-800">${item.type}</td>
-        <td class="p-3 font-bold text-slate-900">${item.patientName}</td>
-        <td class="p-3 text-slate-500 font-latin text-[11px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
-        <td class="p-3 font-bold text-teal-800">${item.instructorName || 'بانتظار المشرف'}</td>
-        <td class="p-3 text-center">
+        <td class="p-3 font-latin font-bold text-slate-800 whitespace-nowrap min-w-[80px]">${item.id}</td>
+        <td class="p-3 font-semibold text-slate-800 whitespace-nowrap min-w-[120px]">${item.type}</td>
+        <td class="p-3 font-bold text-slate-900 whitespace-nowrap min-w-[140px]">${item.patientName}</td>
+        <td class="p-3 text-slate-500 font-latin text-[11px] whitespace-nowrap min-w-[90px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
+        <td class="p-3 font-bold text-teal-800 whitespace-nowrap min-w-[140px]">${item.instructorName || 'بانتظار المشرف'}</td>
+        <td class="p-3 text-center whitespace-nowrap min-w-[100px]">
           <span class="px-2.5 py-1 rounded text-xs font-black font-latin ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
             ${isPending ? 'قيد التقييم' : item.assignedMark + ' / 10'}
           </span>
         </td>
-        <td class="p-3 text-center">
+        <td class="p-3 text-center whitespace-nowrap min-w-[90px]">
           <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
             ${isPending ? 'مرسلة للأستاذ' : 'معتمدة وموقعة'}
           </span>
         </td>
-        <td class="p-3 text-center">
-          <a href="${item.sheetUrl || 'periodontics-page4.html'}" target="_blank" class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-xs">
+        <td class="p-3 text-center whitespace-nowrap min-w-[100px]">
+          <a href="${item.sheetUrl || 'periodontics-page4.html'}" target="_blank" class="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-xs inline-flex items-center">
             عرض الطبلة 📄
           </a>
         </td>
@@ -2426,43 +2427,43 @@ function renderSuperAdminApplications() {
 
     return `
       <tr class="hover:bg-amber-50/40 transition-colors">
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[100px]">
           <span class="font-latin font-bold text-slate-900 block">${app.requestId || app.id}</span>
           <span class="text-[10px] text-slate-400 font-latin">${new Date(app.createdAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
         </td>
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[160px]">
           <strong class="text-slate-900 block text-sm font-black">${app.collegeName}</strong>
           <span class="text-[11px] text-slate-500 font-semibold">📍 ${app.city || 'العراق'}</span>
           ${app.notes ? `<span class="block text-[10px] text-slate-400 mt-0.5 font-sans">${app.notes}</span>` : ''}
         </td>
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[120px]">
           <strong class="font-bold text-slate-800">${app.deanName}</strong>
           <span class="block text-[11px] text-slate-500">الممثل المعتمد</span>
         </td>
-        <td class="p-3.5">
+        <td class="p-3.5 whitespace-nowrap min-w-[140px]">
           <div class="text-[11px] space-y-0.5">
             <span class="block font-latin font-bold text-teal-800" dir="ltr">${app.phone}</span>
             <span class="block font-latin text-slate-600" dir="ltr">${app.email}</span>
           </div>
         </td>
-        <td class="p-3.5 text-center">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
           <span class="px-2 py-0.5 rounded text-[10px] font-black bg-emerald-100 text-emerald-800 border border-emerald-200">
             مؤكد بالـ OTP 🟢 (${app.otpCode || 'OK'})
           </span>
         </td>
-        <td class="p-3.5 text-center font-latin text-xs text-slate-600 font-semibold">
+        <td class="p-3.5 text-center font-latin text-xs text-slate-600 font-semibold whitespace-nowrap min-w-[90px]">
           ${new Date(app.createdAt).toLocaleDateString('ar-EG')}
         </td>
-        <td class="p-3.5 text-center">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
           ${statusHtml}
         </td>
-        <td class="p-3.5 text-center">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[180px]">
           <div class="flex items-center justify-center gap-1.5 flex-wrap">
             ${isPending ? `
               <button 
                 type="button"
                 onclick="openApproveApplicationModal('${app.id}')"
-                class="px-2.5 py-1 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
                 title="قبول الطلب واعتماد الكلية فوراً"
               >
                 <span>قبول واعتماد ✅</span>
@@ -2470,7 +2471,7 @@ function renderSuperAdminApplications() {
               <button 
                 type="button"
                 onclick="rejectApplication('${app.id}')"
-                class="px-2 py-1 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer"
+                class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer"
                 title="رفض هذا الطلب"
               >
                 رفض ❌
@@ -2479,7 +2480,7 @@ function renderSuperAdminApplications() {
             <button 
               type="button"
               onclick="deleteApplication('${app.id}')"
-              class="p-1 text-slate-400 hover:text-rose-600 rounded text-xs font-bold cursor-pointer"
+              class="p-1.5 text-slate-400 hover:text-rose-600 rounded text-xs font-bold cursor-pointer"
               title="حذف الطلب نهائياً"
             >
               🗑️

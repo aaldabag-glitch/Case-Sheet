@@ -66,6 +66,25 @@
       background: #cbd5e1;
       border-radius: 4px;
     }
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    .table-scroll-container {
+      -webkit-overflow-scrolling: touch;
+    }
+    /* Mobile-first ergonomics & data entry improvements */
+    @media screen and (max-width: 640px) {
+      input:not([type="checkbox"]):not([type="radio"]), 
+      select, 
+      textarea {
+        font-size: 16px !important; /* Prevents auto zoom-in on iPhone and iPad browsers */
+        min-height: 44px; /* Touch target accessibility standard */
+      }
+    }
     @media print {
       body * {
         visibility: hidden !important;
@@ -89,36 +108,36 @@
 <body class="bg-slate-100/80 text-slate-900 min-h-screen flex flex-col selection:bg-teal-100 selection:text-teal-900 custom-scrollbar">
 
   <!-- ========================================================================
-       TOP ACADEMIC GLOBAL NAVBAR
+       TOP ACADEMIC GLOBAL NAVBAR (RESPONSIVE FOR PHONE, IPAD, LAPTOP)
        ======================================================================== -->
   <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-slate-200 shadow-xs">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-      <div class="flex items-center justify-between h-20 gap-4">
+    <div class="max-w-7xl mx-auto px-3 sm:px-6 lg:px-8">
+      <div class="flex items-center justify-between min-h-[4rem] sm:min-h-[5rem] py-2 gap-2 sm:gap-4">
         
-        <!-- College Identity Logo -->
-        <div class="flex items-center gap-3">
-          <div class="w-12 h-12 rounded-2xl bg-gradient-to-tr from-teal-700 via-teal-600 to-emerald-500 p-0.5 shadow-md shadow-teal-700/20 flex items-center justify-center text-white shrink-0">
-            <i data-lucide="graduation-cap" class="w-7 h-7"></i>
+        <!-- College Identity Logo & Title -->
+        <div class="flex items-center gap-2.5 sm:gap-3 min-w-0">
+          <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xl bg-gradient-to-tr from-teal-700 via-teal-600 to-emerald-500 p-0.5 shadow-md shadow-teal-700/20 flex items-center justify-center text-white shrink-0">
+            <i data-lucide="graduation-cap" class="w-5 h-5 sm:w-7 sm:h-7"></i>
           </div>
-          <div>
-            <div class="flex items-center gap-2">
-              <h1 id="navbar-brand-title" class="text-base sm:text-lg font-black text-slate-900 tracking-tight">منظومة كلية طب الأسنان لإدارة العيادات التعليمية للطلاب</h1>
-              <span id="role-badge" class="px-2 py-0.5 rounded text-[11px] font-bold bg-teal-100 text-teal-800 border border-teal-200">
+          <div class="min-w-0">
+            <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+              <h1 id="navbar-brand-title" class="text-xs sm:text-base lg:text-lg font-black text-slate-900 tracking-tight leading-snug line-clamp-1 sm:line-clamp-none">منظومة كلية طب الأسنان لإدارة العيادات التعليمية للطلاب</h1>
+              <span id="role-badge" class="px-2 py-0.5 rounded text-[10px] sm:text-[11px] font-bold bg-teal-100 text-teal-800 border border-teal-200 shrink-0">
                 بوابة الدخول
               </span>
             </div>
-            <p id="top-college-name" class="text-xs text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5">
-              <span>النظام الأكاديمي الموحد للتدريب السريري والتقييم العملي</span>
-              <span class="text-slate-300">•</span>
+            <p id="top-college-name" class="text-[11px] sm:text-xs text-slate-500 font-semibold flex items-center gap-1.5 mt-0.5 truncate">
+              <span class="hidden sm:inline">النظام الأكاديمي الموحد للتدريب السريري والتقييم العملي</span>
+              <span class="text-slate-300 hidden sm:inline">•</span>
               <span class="text-teal-700 font-bold">المرحلة الرابعة والخامسة BDS</span>
             </p>
           </div>
         </div>
 
         <!-- Right Header Actions (Clean, only Auth / Logout) -->
-        <div class="flex items-center gap-2 sm:gap-3">
+        <div class="flex items-center gap-1.5 sm:gap-3 shrink-0">
           <!-- User Profile & Logout Box (Dynamic) -->
-          <div id="auth-actions-box" class="flex items-center gap-2">
+          <div id="auth-actions-box" class="flex items-center gap-1.5 sm:gap-2">
             <!-- Will be populated by JS -->
           </div>
         </div>
@@ -130,20 +149,20 @@
   <!-- ========================================================================
        MAIN APP CONTAINER (DYNAMIC VIEWS)
        ======================================================================== -->
-  <main class="flex-1 max-w-7xl w-full mx-auto p-4 sm:p-6 lg:p-8">
+  <main class="flex-1 max-w-7xl w-full mx-auto p-3 sm:p-6 lg:p-8">
 
     <!-- ====================================================================
          VIEW 1: UNIFIED LOGIN PORTAL
          ==================================================================== -->
-    <section id="view-login" class="max-w-md mx-auto my-10">
-      <div class="glass-card rounded-3xl p-6 sm:p-8 shadow-xl border border-slate-200/90 relative overflow-hidden bg-white">
+    <section id="view-login" class="max-w-md mx-auto my-4 sm:my-10 px-1 sm:px-0">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-5 sm:p-8 shadow-xl border border-slate-200/90 relative overflow-hidden bg-white">
         
         <!-- Header Banner Decor -->
         <div class="absolute top-0 right-0 left-0 h-2 bg-gradient-to-r from-teal-600 via-teal-500 to-emerald-500"></div>
 
-        <div class="text-center mb-6 pt-2">
-          <div class="w-16 h-16 rounded-2xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center mx-auto mb-3 shadow-inner">
-            <i data-lucide="shield-check" class="w-9 h-9"></i>
+        <div class="text-center mb-5 sm:mb-6 pt-1 sm:pt-2">
+          <div class="w-14 h-14 sm:w-16 sm:h-16 rounded-2xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center mx-auto mb-3 shadow-inner">
+            <i data-lucide="shield-check" class="w-8 h-8 sm:w-9 sm:h-9"></i>
           </div>
           <h2 class="text-xl sm:text-2xl font-black text-slate-900">تسجيل الدخول للمنظومة</h2>
         </div>
@@ -180,7 +199,7 @@
                 id="login-username"
                 required
                 placeholder="أدخل اسم المستخدم..."
-                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 focus:border-teal-600 focus:bg-white rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all font-latin text-right"
+                class="w-full px-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-300 focus:border-teal-600 focus:bg-white rounded-xl text-base sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all font-latin text-right"
               >
             </div>
           </div>
@@ -196,7 +215,7 @@
                 id="login-password"
                 required
                 placeholder="••••••••"
-                class="w-full px-3.5 py-2.5 bg-slate-50 border border-slate-300 focus:border-teal-600 focus:bg-white rounded-xl text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all font-latin text-left"
+                class="w-full px-3.5 py-3 sm:py-2.5 bg-slate-50 border border-slate-300 focus:border-teal-600 focus:bg-white rounded-xl text-base sm:text-sm font-semibold text-slate-800 focus:outline-none focus:ring-2 focus:ring-teal-500/20 transition-all font-latin text-left"
                 dir="ltr"
               >
             </div>
@@ -212,7 +231,7 @@
 
           <button 
             type="submit" 
-            class="w-full py-3 bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-700/25 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
+            class="w-full py-3.5 sm:py-3 bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-bold rounded-xl shadow-lg shadow-teal-700/25 transition-all flex items-center justify-center gap-2 text-sm cursor-pointer"
           >
             <i data-lucide="log-in" class="w-4 h-4"></i>
             <span>دخول إلى لوحة التحكم</span>
@@ -230,7 +249,7 @@
           <button 
             type="button" 
             onclick="openCollegeApplicationModal()"
-            class="w-full py-3 px-4 bg-gradient-to-r from-amber-50 to-amber-100/90 hover:from-amber-100 hover:to-amber-200 text-amber-950 border-2 border-amber-300 hover:border-amber-400 font-black rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-xs cursor-pointer group"
+            class="w-full py-3.5 sm:py-3 px-4 bg-gradient-to-r from-amber-50 to-amber-100/90 hover:from-amber-100 hover:to-amber-200 text-amber-950 border-2 border-amber-300 hover:border-amber-400 font-black rounded-xl shadow-sm transition-all flex items-center justify-center gap-2 text-xs sm:text-sm cursor-pointer group"
           >
             <i data-lucide="file-signature" class="w-4 h-4 text-amber-700 group-hover:scale-110 transition-transform"></i>
             <span>تقديم طلب لكلية جديدة 📝</span>
@@ -243,25 +262,25 @@
     <!-- ====================================================================
          VIEW 2: SUPER ADMIN DASHBOARD (إدارة الكليات العامة والاشتراكات)
          ==================================================================== -->
-    <section id="view-super-admin" class="hidden space-y-6">
+    <section id="view-super-admin" class="hidden space-y-4 sm:space-y-6">
       
       <!-- Top Overview Banner -->
-      <div class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl relative overflow-hidden">
+      <div class="bg-gradient-to-r from-slate-900 via-teal-950 to-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-xl relative overflow-hidden">
         <div class="relative z-10 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
-            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold mb-3">
+            <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-400/20 text-amber-300 border border-amber-400/30 text-xs font-bold mb-2 sm:mb-3">
               <i data-lucide="crown" class="w-3.5 h-3.5"></i>
               <span>لوحة التحكم الرئيسية للسوبر أدمن • Super Admin Master Portal</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black">إدارة كليات طب الأسنان والجامعات</h2>
-            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl font-semibold">
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-black">إدارة كليات طب الأسنان والجامعات</h2>
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 max-w-2xl font-semibold leading-relaxed">
               إضافة كليات جديدة، تفعيل التراخيص، إنشاء حسابات العمداء، والتحكم الشامل مع تطبيق العزل الصارم التام بين بيانات كل كلية.
             </p>
           </div>
           <button 
             type="button" 
             onclick="openAddCollegeModal()"
-            class="px-5 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-2xl shadow-lg shadow-amber-500/20 flex items-center gap-2 text-sm transition-all shrink-0"
+            class="w-full md:w-auto justify-center px-5 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-2xl shadow-lg shadow-amber-500/20 flex items-center gap-2 text-sm transition-all shrink-0 cursor-pointer"
           >
             <i data-lucide="plus-circle" class="w-5 h-5"></i>
             <span>إضافة كلية جديدة + حساب العميد</span>
@@ -270,49 +289,49 @@
       </div>
 
       <!-- Quick Stats: College Subscriptions & Financials (نفس نظام العيادات) -->
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
-          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-2.5 sm:gap-4">
+        <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-1.5 sm:mb-2">
             <span>الكليات المرخصة</span>
             <i data-lucide="building-2" class="w-4 h-4 text-teal-600"></i>
           </div>
-          <div id="stat-colleges-count" class="text-2xl sm:text-3xl font-black text-slate-900 font-latin">0</div>
-          <p class="text-[11px] text-teal-700 font-semibold mt-1">كليات معتمدة في النظام</p>
+          <div id="stat-colleges-count" class="text-xl sm:text-2xl md:text-3xl font-black text-slate-900 font-latin">0</div>
+          <p class="text-[10px] sm:text-[11px] text-teal-700 font-semibold mt-0.5 sm:mt-1">كليات معتمدة في النظام</p>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
-          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
+        <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-1.5 sm:mb-2">
             <span>إجمالي إيرادات الاشتراكات</span>
             <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-emerald-600"></i>
           </div>
-          <div id="stat-revenue-total" class="text-2xl sm:text-3xl font-black text-emerald-700 font-latin">$0</div>
-          <p class="text-[11px] text-emerald-800 font-semibold mt-1">المبالغ المسددة بالكامل</p>
+          <div id="stat-revenue-total" class="text-xl sm:text-2xl md:text-3xl font-black text-emerald-700 font-latin">$0</div>
+          <p class="text-[10px] sm:text-[11px] text-emerald-800 font-semibold mt-0.5 sm:mt-1">المبالغ المسددة بالكامل</p>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
-          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
+        <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-1.5 sm:mb-2">
             <span>الاشتراكات السارية والنشطة</span>
             <i data-lucide="shield-check" class="w-4 h-4 text-sky-600"></i>
           </div>
-          <div id="stat-active-subs" class="text-2xl sm:text-3xl font-black text-sky-700 font-latin">0</div>
-          <p class="text-[11px] text-sky-700 font-semibold mt-1">تراخيص أكاديمية سارية</p>
+          <div id="stat-active-subs" class="text-xl sm:text-2xl md:text-3xl font-black text-sky-700 font-latin">0</div>
+          <p class="text-[10px] sm:text-[11px] text-sky-700 font-semibold mt-0.5 sm:mt-1">تراخيص أكاديمية سارية</p>
         </div>
 
-        <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
-          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
+        <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200">
+          <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-1.5 sm:mb-2">
             <span>اشتراكات متوقفة / معلقة</span>
             <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
           </div>
-          <div id="stat-pending-subs" class="text-2xl sm:text-3xl font-black text-amber-600 font-latin">0</div>
-          <p class="text-[11px] text-amber-700 font-semibold mt-1">بانتظار السداد والتجديد</p>
+          <div id="stat-pending-subs" class="text-xl sm:text-2xl md:text-3xl font-black text-amber-600 font-latin">0</div>
+          <p class="text-[10px] sm:text-[11px] text-amber-700 font-semibold mt-0.5 sm:mt-1">بانتظار السداد والتجديد</p>
         </div>
       </div>
 
       <!-- Colleges Table Section -->
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 shadow-sm">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-6">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div>
-            <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
+            <h3 class="text-base sm:text-lg font-black text-slate-900 flex items-center gap-2">
               <i data-lucide="landmark" class="w-5 h-5 text-teal-600"></i>
               <span>دليل كليات طب الأسنان والاشتراكات المالية</span>
             </h3>
@@ -327,24 +346,30 @@
               id="search-colleges" 
               oninput="renderSuperAdminColleges()"
               placeholder="بحث باسم الكلية، المحافظة، أو العميد..."
-              class="w-full px-3.5 py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/20"
+              class="w-full px-3.5 py-2.5 sm:py-2 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none focus:ring-2 focus:ring-teal-500/20"
             >
           </div>
         </div>
 
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-teal-50 border border-teal-200/70 rounded-xl text-[11px] text-teal-900 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً لتصفح كافة البيانات والإجراءات</span>
+          <span>↔️</span>
+        </div>
+
         <!-- Table Container -->
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100/80 text-slate-700 font-bold border-b border-slate-200">
               <tr>
-                <th class="p-3.5">الكلية / الجامعة</th>
-                <th class="p-3.5">الرمز والكود</th>
-                <th class="p-3.5">العميد / المشرف</th>
-                <th class="p-3.5">بيانات الدخول للأدمن</th>
-                <th class="p-3.5 text-center">الاشتراك المالي</th>
-                <th class="p-3.5 text-center">تاريخ الانتهاء</th>
-                <th class="p-3.5 text-center">حالة الاشتراك</th>
-                <th class="p-3.5 text-center">الإجراءات</th>
+                <th class="p-3.5 whitespace-nowrap">الكلية / الجامعة</th>
+                <th class="p-3.5 whitespace-nowrap">الرمز والكود</th>
+                <th class="p-3.5 whitespace-nowrap">العميد / المشرف</th>
+                <th class="p-3.5 whitespace-nowrap">بيانات الدخول للأدمن</th>
+                <th class="p-3.5 text-center whitespace-nowrap">الاشتراك المالي</th>
+                <th class="p-3.5 text-center whitespace-nowrap">تاريخ الانتهاء</th>
+                <th class="p-3.5 text-center whitespace-nowrap">حالة الاشتراك</th>
+                <th class="p-3.5 text-center whitespace-nowrap">الإجراءات</th>
               </tr>
             </thead>
             <tbody id="colleges-table-body" class="divide-y divide-slate-200 bg-white">
@@ -355,15 +380,15 @@
       </div>
 
       <!-- College Applications Section in Super Admin (طلبات الكليات المقدمة) -->
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 shadow-sm space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 shadow-sm space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div class="flex items-center gap-3">
-            <div class="w-11 h-11 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold border border-amber-200">
-              <i data-lucide="inbox" class="w-6 h-6"></i>
+            <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold border border-amber-200 shrink-0">
+              <i data-lucide="inbox" class="w-5 h-5 sm:w-6 sm:h-6"></i>
             </div>
             <div>
-              <div class="flex items-center gap-2">
-                <h3 class="text-base font-black text-slate-900">طلبات تسجيل الكليات الجديدة الواردة (تأكيد OTP)</h3>
+              <div class="flex items-center gap-2 flex-wrap">
+                <h3 class="text-sm sm:text-base font-black text-slate-900">طلبات تسجيل الكليات الجديدة الواردة (تأكيد OTP)</h3>
                 <span id="stat-apps-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-900 border border-amber-300">0 طلبات</span>
               </div>
               <p class="text-xs text-slate-500 font-semibold mt-0.5">
@@ -374,63 +399,64 @@
           <button 
             type="button" 
             onclick="renderSuperAdminApplications()"
-            class="px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+            class="w-full sm:w-auto justify-center px-3.5 py-2 sm:py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all cursor-pointer"
           >
             <i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i>
             <span>تحديث الطلبات</span>
           </button>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-amber-50 border border-amber-200/70 rounded-xl text-[11px] text-amber-950 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً لمراجعة وتأكيد طلبات الانضمام</span>
+          <span>↔️</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-amber-50/80 text-amber-950 font-bold border-b border-amber-200">
               <tr>
-                <th class="p-3.5">رقم الطلب</th>
-                <th class="p-3.5">الكلية / الجامعة</th>
-                <th class="p-3.5">الممثل المعتمد للتواصل</th>
-                <th class="p-3.5">الهاتف والبريد الرسمي</th>
-                <th class="p-3.5 text-center">التحقق بالـ OTP</th>
-                <th class="p-3.5 text-center">تاريخ التقديم</th>
-                <th class="p-3.5 text-center">حالة الطلب</th>
-                <th class="p-3.5 text-center">الإجراءات والاعتماد</th>
+                <th class="p-3.5 whitespace-nowrap">رقم الطلب</th>
+                <th class="p-3.5 whitespace-nowrap">الكلية / الجامعة</th>
+                <th class="p-3.5 whitespace-nowrap">الممثل المعتمد للتواصل</th>
+                <th class="p-3.5 whitespace-nowrap">الهاتف والبريد الرسمي</th>
+                <th class="p-3.5 text-center whitespace-nowrap">التحقق بالـ OTP</th>
+                <th class="p-3.5 text-center whitespace-nowrap">تاريخ التقديم</th>
+                <th class="p-3.5 text-center whitespace-nowrap">حالة الطلب</th>
+                <th class="p-3.5 text-center whitespace-nowrap">الإجراءات والاعتماد</th>
               </tr>
             </thead>
             <tbody id="applications-table-body" class="divide-y divide-slate-200 bg-white">
               <!-- Populated via JS -->
             </tbody>
           </table>
-        </div>
-      </div>
-
-    </section>
-
     <!-- ====================================================================
          VIEW 3: COLLEGE ADMIN / DEAN DASHBOARD (لوحة عمادة الكلية)
          ==================================================================== -->
-    <section id="view-college-admin" class="hidden space-y-6">
+    <section id="view-college-admin" class="hidden space-y-4 sm:space-y-6">
 
       <!-- Dean Header Banner -->
-      <div class="bg-gradient-to-r from-teal-800 via-teal-700 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+      <div class="bg-gradient-to-r from-teal-800 via-teal-700 to-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-xl">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-white/20 text-white text-xs font-bold mb-2">
               <i data-lucide="building" class="w-3.5 h-3.5"></i>
               <span id="dean-banner-college-name">كلية طب الأسنان</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black flex items-center gap-2">
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-black flex items-center gap-2">
               <span>لوحة عمادة الكلية وإدارة الأقسام السريرية</span>
             </h2>
-            <p class="text-teal-100 text-xs sm:text-sm mt-1 font-semibold max-w-2xl">
+            <p class="text-teal-100 text-xs sm:text-sm mt-1 font-semibold max-w-2xl leading-relaxed">
               إضافة وإدارة الكادر التدريسي، تسجيل وتوليد حسابات طلبة المرحلة الرابعة والخامسة، ومتابعة رصد الدرجات السريرية.
             </p>
           </div>
 
           <!-- Quick Action Buttons -->
-          <div class="flex flex-wrap items-center gap-2.5">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full md:w-auto mt-2 md:mt-0">
             <button 
               type="button" 
               onclick="openAddInstructorModal()"
-              class="px-4 py-2.5 bg-white text-teal-900 hover:bg-teal-50 font-bold rounded-xl shadow text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              class="w-full sm:w-auto justify-center px-4 py-2.5 bg-white text-teal-900 hover:bg-teal-50 font-bold rounded-xl shadow text-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <i data-lucide="user-plus" class="w-4 h-4 text-teal-700"></i>
               <span>إضافة تدريسي جديد</span>
@@ -438,7 +464,7 @@
             <button 
               type="button" 
               onclick="openAddStudentModal()"
-              class="px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow text-xs flex items-center gap-1.5 transition-all cursor-pointer"
+              class="w-full sm:w-auto justify-center px-4 py-2.5 bg-emerald-500 hover:bg-emerald-600 text-white font-bold rounded-xl shadow text-xs flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <i data-lucide="user-check" class="w-4 h-4"></i>
               <span>إضافة طالب فردي</span>
@@ -448,10 +474,10 @@
       </div>
 
       <!-- Dean Expiry Date Card (Only Expiry Date is displayed) -->
-      <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/95 shadow-xs">
+      <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4 bg-white/95 shadow-xs">
         <div class="flex items-center gap-3">
-          <div class="w-11 h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200">
-            <i data-lucide="calendar" class="w-6 h-6"></i>
+          <div class="w-10 h-10 sm:w-11 sm:h-11 rounded-2xl bg-teal-50 text-teal-700 flex items-center justify-center font-bold border border-teal-200 shrink-0">
+            <i data-lucide="calendar" class="w-5 h-5 sm:w-6 sm:h-6"></i>
           </div>
           <div>
             <div class="flex items-center gap-2">
@@ -465,12 +491,12 @@
         </div>
       </div>
 
-      <!-- College Admin Tabs -->
-      <div class="flex items-center gap-2 border-b border-slate-200 pb-2">
+      <!-- College Admin Tabs (Horizontally scrollable with smooth touch on mobile & iPad) -->
+      <div class="flex items-center gap-2 border-b border-slate-200 pb-2 overflow-x-auto no-scrollbar scroll-smooth py-1 -mx-2 px-2 sm:mx-0 sm:px-0">
         <button 
           id="tab-btn-students" 
           onclick="switchCollegeTab('students')" 
-          class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 bg-teal-700 text-white shadow-sm"
+          class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 bg-teal-700 text-white shadow-sm cursor-pointer"
         >
           <i data-lucide="graduation-cap" class="w-4 h-4"></i>
           <span>سجل الطلبة (المرحلة 4 و 5)</span>
@@ -480,7 +506,7 @@
         <button 
           id="tab-btn-instructors" 
           onclick="switchCollegeTab('instructors')" 
-          class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 bg-slate-200/80 text-slate-700 hover:bg-slate-300/80"
+          class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 bg-slate-200/80 text-slate-700 hover:bg-slate-300/80 cursor-pointer"
         >
           <i data-lucide="users" class="w-4 h-4"></i>
           <span>الكادر التدريسي والمشرفين</span>
@@ -490,7 +516,7 @@
         <button 
           id="tab-btn-evaluations" 
           onclick="switchCollegeTab('evaluations')" 
-          class="px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 bg-slate-200/80 text-slate-700 hover:bg-slate-300/80"
+          class="shrink-0 whitespace-nowrap px-4 sm:px-5 py-2.5 rounded-xl font-bold text-xs sm:text-sm transition-all flex items-center gap-2 bg-slate-200/80 text-slate-700 hover:bg-slate-300/80 cursor-pointer"
         >
           <i data-lucide="award" class="w-4 h-4"></i>
           <span>سجل الدرجات السريرية (من 10)</span>
@@ -499,13 +525,13 @@
       </div>
 
       <!-- TAB 1 CONTENT: STUDENTS -->
-      <div id="tab-content-students" class="glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
-        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="text-xs font-bold text-slate-600">تصفية حسب المرحلة:</span>
-            <button onclick="filterStudentsByStage('ALL')" class="stage-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-700 text-white">الكل</button>
-            <button onclick="filterStudentsByStage('4th')" class="stage-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">المرحلة الرابعة (4th Year BDS)</button>
-            <button onclick="filterStudentsByStage('5th')" class="stage-filter-btn px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200">المرحلة الخامسة (5th Year BDS)</button>
+      <div id="tab-content-students" class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 sm:gap-4">
+          <div class="flex items-center gap-1.5 sm:gap-2 flex-wrap">
+            <span class="text-xs font-bold text-slate-600 block sm:inline">تصفية حسب المرحلة:</span>
+            <button onclick="filterStudentsByStage('ALL')" class="stage-filter-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold bg-teal-700 text-white cursor-pointer">الكل</button>
+            <button onclick="filterStudentsByStage('4th')" class="stage-filter-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">المرحلة الرابعة (4th)</button>
+            <button onclick="filterStudentsByStage('5th')" class="stage-filter-btn px-2.5 sm:px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700 hover:bg-slate-200 cursor-pointer">المرحلة الخامسة (5th)</button>
           </div>
           <div class="w-full sm:w-64">
             <input 
@@ -513,23 +539,29 @@
               id="search-students" 
               oninput="renderCollegeStudents()" 
               placeholder="بحث باسم الطالب أو اليوزر..."
-              class="w-full px-3.5 py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none"
+              class="w-full px-3.5 py-2 sm:py-1.5 bg-slate-50 border border-slate-300 rounded-xl text-xs font-semibold focus:outline-none"
             >
           </div>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-teal-50 border border-teal-200/70 rounded-xl text-[11px] text-teal-900 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً للاطلاع على سجل الطلبة وحساباتهم</span>
+          <span>↔️</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
-                <th class="p-3">اسم الطالب الكامل</th>
-                <th class="p-3">المرحلة الدراسية</th>
-                <th class="p-3">الكروپ / المجموعة</th>
-                <th class="p-3">اسم المستخدم (Username)</th>
-                <th class="p-3">كلمة المرور</th>
-                <th class="p-3 text-center">الحالات المنجزة</th>
-                <th class="p-3 text-center">معدل الدرجات السريرية</th>
-                <th class="p-3 text-center">الإجراءات</th>
+                <th class="p-3 whitespace-nowrap">اسم الطالب الكامل</th>
+                <th class="p-3 whitespace-nowrap">المرحلة الدراسية</th>
+                <th class="p-3 whitespace-nowrap">الكروپ / المجموعة</th>
+                <th class="p-3 whitespace-nowrap">اسم المستخدم (Username)</th>
+                <th class="p-3 whitespace-nowrap">كلمة المرور</th>
+                <th class="p-3 text-center whitespace-nowrap">الحالات المنجزة</th>
+                <th class="p-3 text-center whitespace-nowrap">معدل الدرجات السريرية</th>
+                <th class="p-3 text-center whitespace-nowrap">الإجراءات</th>
               </tr>
             </thead>
             <tbody id="college-students-tbody" class="divide-y divide-slate-200 bg-white">
@@ -540,27 +572,33 @@
       </div>
 
       <!-- TAB 2 CONTENT: INSTRUCTORS -->
-      <div id="tab-content-instructors" class="hidden glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
-        <div class="flex items-center justify-between">
+      <div id="tab-content-instructors" class="hidden glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <h3 class="text-sm font-bold text-slate-800">قائمة الكادر التدريسي والأطباء المشرفين بالكلية</h3>
-          <button onclick="openAddInstructorModal()" class="px-3.5 py-1.5 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5">
+          <button onclick="openAddInstructorModal()" class="w-full sm:w-auto justify-center px-3.5 py-2 sm:py-1.5 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 cursor-pointer">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>إضافة تدريسي</span>
           </button>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-teal-50 border border-teal-200/70 rounded-xl text-[11px] text-teal-900 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً لتصفح بيانات التدريسيين</span>
+          <span>↔️</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
-                <th class="p-3">اسم التدريسي / المشرف</th>
-                <th class="p-3">اللقب العلمي</th>
-                <th class="p-3">القسم التخصصي</th>
-                <th class="p-3">اسم المستخدم</th>
-                <th class="p-3">كلمة المرور</th>
-                <th class="p-3 text-center">الحالات المقيمة</th>
-                <th class="p-3 text-center">الحالة</th>
-                <th class="p-3 text-center">الإجراءات</th>
+                <th class="p-3 whitespace-nowrap">اسم التدريسي / المشرف</th>
+                <th class="p-3 whitespace-nowrap">اللقب العلمي</th>
+                <th class="p-3 whitespace-nowrap">القسم التخصصي</th>
+                <th class="p-3 whitespace-nowrap">اسم المستخدم</th>
+                <th class="p-3 whitespace-nowrap">كلمة المرور</th>
+                <th class="p-3 text-center whitespace-nowrap">الحالات المقيمة</th>
+                <th class="p-3 text-center whitespace-nowrap">الحالة</th>
+                <th class="p-3 text-center whitespace-nowrap">الإجراءات</th>
               </tr>
             </thead>
             <tbody id="college-instructors-tbody" class="divide-y divide-slate-200 bg-white">
@@ -571,30 +609,36 @@
       </div>
 
       <!-- TAB 3 CONTENT: EVALUATIONS & MARKS -->
-      <div id="tab-content-evaluations" class="hidden glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
-        <div class="flex items-center justify-between">
+      <div id="tab-content-evaluations" class="hidden glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 sm:gap-4">
           <div>
             <h3 class="text-sm font-bold text-slate-800">سجل التقييمات والدرجات السريرية المعتمدة</h3>
             <p class="text-xs text-slate-500">متابعة دقيقة لكل كيس شيت والدرجة الممنوحة من التدريسي (من 10)</p>
           </div>
-          <button onclick="exportClinicalGradesCSV()" class="px-3.5 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 border border-slate-300">
+          <button onclick="exportClinicalGradesCSV()" class="w-full sm:w-auto justify-center px-3.5 py-2 sm:py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold rounded-xl text-xs flex items-center gap-1.5 border border-slate-300 cursor-pointer">
             <i data-lucide="download" class="w-4 h-4"></i>
             <span>تصدير الدرجات (Excel / CSV)</span>
           </button>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-teal-50 border border-teal-200/70 rounded-xl text-[11px] text-teal-900 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً للاطلاع على كافة التقييمات والدرجات</span>
+          <span>↔️</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
-                <th class="p-3">رقم الاستمارة</th>
-                <th class="p-3">اسم الطالب</th>
-                <th class="p-3">المرحلة</th>
-                <th class="p-3">نوع الكيس شيت</th>
-                <th class="p-3">التدريسي المشرف</th>
-                <th class="p-3 text-center">الدرجة الممنوحة</th>
-                <th class="p-3">التاريخ</th>
-                <th class="p-3 text-center">الحالة</th>
+                <th class="p-3 whitespace-nowrap">رقم الاستمارة</th>
+                <th class="p-3 whitespace-nowrap">اسم الطالب</th>
+                <th class="p-3 whitespace-nowrap">المرحلة</th>
+                <th class="p-3 whitespace-nowrap">نوع الكيس شيت</th>
+                <th class="p-3 whitespace-nowrap">التدريسي المشرف</th>
+                <th class="p-3 text-center whitespace-nowrap">الدرجة الممنوحة</th>
+                <th class="p-3 whitespace-nowrap">التاريخ</th>
+                <th class="p-3 text-center whitespace-nowrap">الحالة</th>
               </tr>
             </thead>
             <tbody id="college-evaluations-tbody" class="divide-y divide-slate-200 bg-white">
@@ -609,40 +653,40 @@
     <!-- ====================================================================
          VIEW 4: INSTRUCTOR / SUPERVISOR DASHBOARD (لوحة التدريسي والمشرف)
          ==================================================================== -->
-    <section id="view-instructor" class="hidden space-y-6">
+    <section id="view-instructor" class="hidden space-y-4 sm:space-y-6">
       
       <!-- Instructor Banner -->
-      <div class="bg-gradient-to-r from-teal-900 via-sky-950 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+      <div class="bg-gradient-to-r from-teal-900 via-sky-950 to-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-xl">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-teal-500/20 text-teal-300 text-xs font-bold mb-2 border border-teal-500/30">
               <i data-lucide="stethoscope" class="w-3.5 h-3.5"></i>
               <span id="inst-college-tag">بوابة التدريسي والمشرف السريري</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black">
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-black">
               أهلاً د. <span id="inst-doctor-name">المشرف</span>
             </h2>
-            <p class="text-slate-300 text-xs sm:text-sm mt-1 font-semibold max-w-xl">
+            <p class="text-slate-300 text-xs sm:text-sm mt-1 font-semibold max-w-xl leading-relaxed">
               استعراض ومراجعة استمارات الكيس شيت المرفوعة من طلبة المرحلة الرابعة والخامسة، ورصد الدرجات والتقييم السريري والاعتماد.
             </p>
           </div>
 
-          <div class="flex items-center gap-3">
-            <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/15 text-center">
-              <span class="text-xs text-slate-300 block font-bold">طلبة كليتي (4 و 5)</span>
-              <span id="inst-students-count" class="text-2xl font-black text-sky-400 font-latin">0</span>
+          <div class="grid grid-cols-2 gap-2 sm:gap-3 w-full md:w-auto mt-2 md:mt-0">
+            <div class="bg-white/10 backdrop-blur-md px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-white/15 text-center">
+              <span class="text-[11px] sm:text-xs text-slate-300 block font-bold">طلبة كليتي (4 و 5)</span>
+              <span id="inst-students-count" class="text-xl sm:text-2xl font-black text-sky-400 font-latin">0</span>
             </div>
-            <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/15 text-center">
-              <span class="text-xs text-slate-300 block font-bold">حالات بانتظار تقييمك</span>
-              <span id="inst-pending-badge" class="text-2xl font-black text-amber-400 font-latin">0</span>
+            <div class="bg-white/10 backdrop-blur-md px-3.5 sm:px-4 py-2.5 sm:py-3 rounded-2xl border border-white/15 text-center">
+              <span class="text-[11px] sm:text-xs text-slate-300 block font-bold">حالات بانتظار تقييمك</span>
+              <span id="inst-pending-badge" class="text-xl sm:text-2xl font-black text-amber-400 font-latin">0</span>
             </div>
           </div>
         </div>
       </div>
 
       <!-- Section 1: Cases Pending Evaluation -->
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
-        <div class="flex items-center justify-between">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4">
           <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
             <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
             <span>طلبات وحالات الطلاب الواردة للتقييم ورصد الدرجة (من 10)</span>
@@ -650,18 +694,24 @@
           <span class="text-xs text-slate-500 font-semibold">استمارات الكيس شيت المرفوعة</span>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-amber-50 border border-amber-200/70 rounded-xl text-[11px] text-amber-950 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً لرصد الدرجات وفتح الاستمارات</span>
+          <span>↔️</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
-                <th class="p-3">رقم الكيس شيت</th>
-                <th class="p-3">اسم الطالب والمرحلة</th>
-                <th class="p-3">العيادة / النوع</th>
-                <th class="p-3">المريض / الشكوى الرئيسية</th>
-                <th class="p-3">تاريخ الإرسال</th>
-                <th class="p-3 text-center">الدرجة المقيدة</th>
-                <th class="p-3 text-center">الحالة</th>
-                <th class="p-3 text-center">الإجراء والتقييم</th>
+                <th class="p-3 whitespace-nowrap">رقم الكيس شيت</th>
+                <th class="p-3 whitespace-nowrap">اسم الطالب والمرحلة</th>
+                <th class="p-3 whitespace-nowrap">العيادة / النوع</th>
+                <th class="p-3 whitespace-nowrap">المريض / الشكوى الرئيسية</th>
+                <th class="p-3 whitespace-nowrap">تاريخ الإرسال</th>
+                <th class="p-3 text-center whitespace-nowrap">الدرجة المقيدة</th>
+                <th class="p-3 text-center whitespace-nowrap">الحالة</th>
+                <th class="p-3 text-center whitespace-nowrap">الإجراء والتقييم</th>
               </tr>
             </thead>
             <tbody id="instructor-cases-tbody" class="divide-y divide-slate-200 bg-white">
@@ -672,7 +722,7 @@
       </div>
 
       <!-- Section 2: College Students Directory (دليل طلبة كليتي) -->
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 space-y-3 sm:space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
             <i data-lucide="graduation-cap" class="w-4 h-4 text-teal-600"></i>
@@ -681,15 +731,21 @@
           <span class="text-xs text-slate-500 font-semibold">قائمة الطلبة المسجلين بالكلية</span>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-teal-50 border border-teal-200/70 rounded-xl text-[11px] text-teal-900 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً للاطلاع على كافة الطلبة ومجموعاتهم</span>
+          <span>↔️</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
-                <th class="p-3">اسم الطالب</th>
-                <th class="p-3">المرحلة الأكاديمية</th>
-                <th class="p-3">المجموعة / كرسي العيادة</th>
-                <th class="p-3">اسم المستخدم</th>
-                <th class="p-3 text-center">الحالة</th>
+                <th class="p-3 whitespace-nowrap">اسم الطالب</th>
+                <th class="p-3 whitespace-nowrap">المرحلة الأكاديمية</th>
+                <th class="p-3 whitespace-nowrap">المجموعة / كرسي العيادة</th>
+                <th class="p-3 whitespace-nowrap">اسم المستخدم</th>
+                <th class="p-3 text-center whitespace-nowrap">الحالة</th>
               </tr>
             </thead>
             <tbody id="instructor-students-tbody" class="divide-y divide-slate-200 bg-white">
@@ -704,49 +760,49 @@
     <!-- ====================================================================
          VIEW 5: STUDENT DASHBOARD (لوحة الطالب السريرية - مرحلة 4 و 5)
          ==================================================================== -->
-    <section id="view-student" class="hidden space-y-6">
+    <section id="view-student" class="hidden space-y-4 sm:space-y-6">
 
       <!-- Student Banner -->
-      <div class="bg-gradient-to-r from-indigo-950 via-teal-900 to-slate-900 rounded-3xl p-6 sm:p-8 text-white shadow-xl">
+      <div class="bg-gradient-to-r from-indigo-950 via-teal-900 to-slate-900 rounded-2xl sm:rounded-3xl p-5 sm:p-8 text-white shadow-xl">
         <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div>
             <div class="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-indigo-500/20 text-indigo-300 border border-indigo-400/30 text-xs font-bold mb-2">
               <i data-lucide="graduation-cap" class="w-3.5 h-3.5"></i>
               <span id="student-stage-badge">طالب المرحلة السريرية</span>
             </div>
-            <h2 class="text-2xl sm:text-3xl font-black">
+            <h2 class="text-xl sm:text-2xl md:text-3xl font-black">
               أهلاً بالطالب: <span id="student-name-display">الطالب</span>
             </h2>
-            <p id="student-info-sub" class="text-slate-300 text-xs sm:text-sm mt-1 font-semibold">
+            <p id="student-info-sub" class="text-slate-300 text-xs sm:text-sm mt-1 font-semibold leading-relaxed">
               المرحلة BDS • كلية طب الأسنان
             </p>
           </div>
 
           <!-- Quick Case Sheet Actions -->
-          <div class="flex items-center gap-2">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 sm:gap-2.5 w-full md:w-auto mt-2 md:mt-0">
             <button 
               type="button" 
               onclick="launchStudentCaseSheet('perio')"
-              class="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow text-xs flex items-center gap-1.5 transition-all"
+              class="w-full sm:w-auto justify-center px-4 py-3 sm:py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <i data-lucide="file-plus" class="w-4 h-4"></i>
-              <span>طبلة أمراض اللثة (رابعة)</span>
+              <span>طبلة أمراض اللثة (رابعة) 🦷</span>
             </button>
             <button 
               type="button" 
               onclick="launchStudentCaseSheet('surgery')"
-              class="px-4 py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow text-xs flex items-center gap-1.5 transition-all"
+              class="w-full sm:w-auto justify-center px-4 py-3 sm:py-2.5 bg-sky-600 hover:bg-sky-700 text-white font-bold rounded-xl shadow text-xs sm:text-sm flex items-center gap-1.5 transition-all cursor-pointer"
             >
               <i data-lucide="file-plus" class="w-4 h-4"></i>
-              <span>طبلة جراحة الفم (خامسة)</span>
+              <span>طبلة جراحة الفم (خامسة) 🏥</span>
             </button>
           </div>
         </div>
       </div>
 
       <!-- Student Cases Record -->
-      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
-        <div class="flex items-center justify-between">
+      <div class="glass-card rounded-2xl sm:rounded-3xl p-4 sm:p-6 border border-slate-200 space-y-3 sm:space-y-4">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-4">
           <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
             <i data-lucide="folder-check" class="w-4 h-4 text-teal-600"></i>
             <span>سجل حالاتي السريرية والدرجات الممنوحة</span>
@@ -754,18 +810,24 @@
           <span class="text-xs text-slate-500 font-semibold">التقييمات الأكاديمية والدرجات من 10</span>
         </div>
 
-        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+        <!-- Mobile Scroll Indicator Hint -->
+        <div class="sm:hidden p-2 bg-indigo-50 border border-indigo-200/70 rounded-xl text-[11px] text-indigo-950 font-bold flex items-center justify-between">
+          <span>👉 اسحب الجدول أفقياً لمتابعة الدرجات وحالة الاعتماد</span>
+          <span>↔️</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-xl sm:rounded-2xl border border-slate-200 table-scroll-container custom-scrollbar">
           <table class="w-full text-right text-xs">
             <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
               <tr>
-                <th class="p-3">رقم الحالة</th>
-                <th class="p-3">نوع الاستمارة</th>
-                <th class="p-3">اسم المريض</th>
-                <th class="p-3">التاريخ</th>
-                <th class="p-3">الأستاذ المشرف</th>
-                <th class="p-3 text-center">الدرجة الممنوحة</th>
-                <th class="p-3 text-center">الحالة</th>
-                <th class="p-3 text-center">فتح الاستمارة</th>
+                <th class="p-3 whitespace-nowrap">رقم الحالة</th>
+                <th class="p-3 whitespace-nowrap">نوع الاستمارة</th>
+                <th class="p-3 whitespace-nowrap">اسم المريض</th>
+                <th class="p-3 whitespace-nowrap">التاريخ</th>
+                <th class="p-3 whitespace-nowrap">الأستاذ المشرف</th>
+                <th class="p-3 text-center whitespace-nowrap">الدرجة الممنوحة</th>
+                <th class="p-3 text-center whitespace-nowrap">الحالة</th>
+                <th class="p-3 text-center whitespace-nowrap">فتح الاستمارة</th>
               </tr>
             </thead>
             <tbody id="student-cases-tbody" class="divide-y divide-slate-200 bg-white">
@@ -784,23 +846,23 @@
        ======================================================================== -->
 
   <!-- MODAL: ADD COLLEGE (SUPER ADMIN) -->
-  <div id="modal-add-college" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 relative">
+  <div id="modal-add-college" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 relative max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
           <i data-lucide="plus-circle" class="w-5 h-5 text-teal-600"></i>
           <span>إضافة كلية طب أسنان جديدة للنظام</span>
         </h3>
-        <button onclick="closeAddCollegeModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeAddCollegeModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <form onsubmit="handleCreateCollegeSubmit(event)" class="space-y-3.5 text-xs">
         <div>
           <label class="block font-bold text-slate-700 mb-1">اسم الكلية / الجامعة الكامل *</label>
-          <input type="text" id="new-college-name" required placeholder="مثال: كلية طب الأسنان - جامعة الموصل" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
+          <input type="text" id="new-college-name" required placeholder="مثال: كلية طب الأسنان - جامعة الموصل" class="w-full p-2.5 sm:p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">رمز الكلية الفريد (Code) *</label>
             <input type="text" id="new-college-code" required placeholder="DENT-MOSUL-03" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin uppercase" dir="ltr">
@@ -840,7 +902,7 @@
           <input type="text" id="new-college-dean" required placeholder="أ.د. محمد حسن العبيدي" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">اسم مستخدم الأدمن (Username) *</label>
             <input type="text" id="new-dean-username" required placeholder="dean.college@gmail.com أو dean.name" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
@@ -854,10 +916,10 @@
         <!-- Financial Subscription Details -->
         <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2">
           <span class="block font-bold text-emerald-900 text-xs">بيانات اشتراك الكلية المالي (للسوبر أدمن فقط):</span>
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 mb-1">قيمة الاشتراك السنوي ($) *</label>
-              <input type="number" id="new-college-fee" required value="1500" placeholder="1500" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+              <input type="number" inputmode="numeric" id="new-college-fee" required value="1500" placeholder="1500" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص *</label>
@@ -866,23 +928,23 @@
           </div>
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeAddCollegeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow">حفظ وإنشاء الكلية والاشتراك</button>
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeAddCollegeModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+          <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow cursor-pointer">حفظ وإنشاء الكلية والاشتراك</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL: ADD INSTRUCTOR (COLLEGE ADMIN) -->
-  <div id="modal-add-instructor" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+  <div id="modal-add-instructor" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
           <i data-lucide="user-plus" class="w-5 h-5 text-teal-600"></i>
           <span>إضافة تدريسي جديد للكلية</span>
         </h3>
-        <button onclick="closeAddInstructorModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeAddInstructorModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <form onsubmit="handleCreateInstructorSubmit(event)" class="space-y-3 text-xs">
@@ -891,10 +953,10 @@
           <input type="text" id="new-inst-name" required placeholder="د. حسام عادل الشمري" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">اللقب العلمي</label>
-            <select id="new-inst-title" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
+            <select id="new-inst-title" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold cursor-pointer">
               <option value="أستاذ دكتور (Prof.)">أستاذ دكتور (Prof.)</option>
               <option value="أستاذ مساعد (Asst. Prof.)">أستاذ مساعد (Asst. Prof.)</option>
               <option value="مدرس دكتور (Lecturer)" selected>مدرس دكتور (Lecturer)</option>
@@ -904,7 +966,7 @@
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">القسم التخصصي</label>
-            <select id="new-inst-dept" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
+            <select id="new-inst-dept" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold cursor-pointer">
               <option value="جراحة الفم والوجه والفكين (OMFS)">جراحة الفم والوجه والفكين (OMFS)</option>
               <option value="أمراض وجراحة اللثة (Periodontics)">أمراض وجراحة اللثة (Periodontics)</option>
               <option value="معالجة وترميم الأسنان (Conservative)">معالجة وترميم الأسنان (Conservative)</option>
@@ -914,7 +976,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">اسم المستخدم (Username) *</label>
             <input type="text" id="new-inst-username" required placeholder="dr.hussam" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
@@ -925,23 +987,23 @@
           </div>
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeAddInstructorModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow">حفظ التدريسي</button>
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeAddInstructorModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+          <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow cursor-pointer">حفظ التدريسي</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL: ADD SINGLE STUDENT -->
-  <div id="modal-add-student" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+  <div id="modal-add-student" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
           <i data-lucide="user-check" class="w-5 h-5 text-emerald-600"></i>
           <span>إضافة طالب سريري جديد</span>
         </h3>
-        <button onclick="closeAddStudentModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeAddStudentModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <form onsubmit="handleCreateStudentSubmit(event)" class="space-y-3 text-xs">
@@ -950,10 +1012,10 @@
           <input type="text" id="new-std-name" required placeholder="علي كريم جاسم الدليمي" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">المرحلة الدراسية *</label>
-            <select id="new-std-stage" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold">
+            <select id="new-std-stage" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold cursor-pointer">
               <option value="4th" selected>المرحلة الرابعة (4th Year)</option>
               <option value="5th">المرحلة الخامسة (5th Year)</option>
             </select>
@@ -964,7 +1026,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">اسم المستخدم *</label>
             <input type="text" id="new-std-username" required placeholder="std.ali.karim" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
@@ -975,42 +1037,42 @@
           </div>
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeAddStudentModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow">تسجيل الطالب</button>
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeAddStudentModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+          <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow cursor-pointer">تسجيل الطالب</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL: BULK STUDENTS GENERATOR (توليد 50 أو 100 طالب بنقرة واحدة) -->
-  <div id="modal-bulk-students" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
+  <div id="modal-bulk-students" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center">
+          <div class="w-9 h-9 rounded-xl bg-amber-100 text-amber-800 flex items-center justify-center shrink-0">
             <i data-lucide="sparkles" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="text-base font-black text-slate-900">توليد حسابات الطلبة دفعة واحدة (Bulk Students)</h3>
+            <h3 class="text-sm sm:text-base font-black text-slate-900">توليد حسابات الطلبة دفعة واحدة (Bulk Students)</h3>
             <p class="text-[11px] text-slate-500 font-semibold">توليد سريع لـ 50 أو 100 حساب مع أسماء المستخدمين وكلمات المرور</p>
           </div>
         </div>
-        <button onclick="closeBulkStudentsModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeBulkStudentsModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <form onsubmit="handleBulkStudentsSubmit(event)" class="space-y-3.5 text-xs">
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">المرحلة الدراسية للدفعة *</label>
-            <select id="bulk-stage" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold">
+            <select id="bulk-stage" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold cursor-pointer">
               <option value="4th" selected>المرحلة الرابعة (4th Year BDS)</option>
               <option value="5th">المرحلة الخامسة (5th Year BDS)</option>
             </select>
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">عدد الطلبة المطلوب توليدهم *</label>
-            <select id="bulk-count" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold font-latin">
+            <select id="bulk-count" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-bold font-latin cursor-pointer">
               <option value="10">10 طلاب (تجريبي سريع)</option>
               <option value="25">25 طالب (شعبة واحدة)</option>
               <option value="50" selected>50 طالب (دفعة اعتيادية)</option>
@@ -1029,9 +1091,9 @@
           ⚡ ملاحظة: فور التوليد، سيتم إدراج الطلبة في قاعدة بيانات الكلية فوراً مع إمكانية تصدير قائمة الأسماء واليوزرات والباسوردات بملف Excel لتوزيعها على الطلبة.
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeBulkStudentsModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 rounded-xl font-black shadow">
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeBulkStudentsModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+          <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 rounded-xl font-black shadow cursor-pointer">
             توليد الحسابات الآن
           </button>
         </div>
@@ -1040,29 +1102,29 @@
   </div>
 
   <!-- MODAL: INSTRUCTOR EVALUATE CASE (رصد الدرجة من 10) -->
-  <div id="modal-eval-case" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4">
+  <div id="modal-eval-case" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-lg w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
           <i data-lucide="award" class="w-5 h-5 text-teal-600"></i>
           <span>تقييم الكيس شيت ورصد الدرجة الأكاديمية (من 10)</span>
         </h3>
-        <button onclick="closeEvalCaseModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeEvalCaseModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <form onsubmit="handleSaveEvaluationSubmit(event)" class="space-y-3.5 text-xs">
         <input type="hidden" id="eval-case-id">
         
         <div class="p-3 bg-slate-50 rounded-xl border border-slate-200 space-y-1">
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="font-bold text-slate-700">اسم الطالب:</span>
             <span id="eval-modal-student" class="font-bold text-teal-900">-</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="font-bold text-slate-700">المرحلة ونوع الكيس:</span>
             <span id="eval-modal-type" class="font-semibold text-slate-600">-</span>
           </div>
-          <div class="flex justify-between">
+          <div class="flex justify-between items-center">
             <span class="font-bold text-slate-700">المريض:</span>
             <span id="eval-modal-patient" class="font-semibold text-slate-600">-</span>
           </div>
@@ -1070,7 +1132,7 @@
 
         <div>
           <label class="block font-bold text-slate-700 mb-1">الدرجة السريرية الممنوحة (من 10 علامات) *</label>
-          <select id="eval-assigned-mark" class="w-full p-2.5 bg-teal-50 border border-teal-300 rounded-xl font-black text-sm text-teal-950 font-latin">
+          <select id="eval-assigned-mark" class="w-full p-2.5 bg-teal-50 border border-teal-300 rounded-xl font-black text-sm text-teal-950 font-latin cursor-pointer">
             <option value="10.0">10.0 / 10 (امتياز - Excellent)</option>
             <option value="9.5">9.5 / 10</option>
             <option value="9.0" selected>9.0 / 10 (جيد جداً مرتفع)</option>
@@ -1089,9 +1151,9 @@
           <textarea id="eval-feedback-text" rows="2.5" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold resize-none" placeholder="اكتب ملاحظاتك على التشخيص، خطوات العمل، التخدير، والتعقيم..."></textarea>
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeEvalCaseModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow">
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeEvalCaseModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+          <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow cursor-pointer">
             اعتماد الدرجة والتوقيع ✍️
           </button>
         </div>
@@ -1100,35 +1162,35 @@
   </div>
 
   <!-- MODAL: PRINT SUBSCRIPTION RECEIPT / CERTIFICATE (سند تجديد واشتراك الكلية) -->
-  <div id="modal-print-receipt" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-slate-200 space-y-4 max-h-[95vh] overflow-y-auto custom-scrollbar">
+  <div id="modal-print-receipt" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-2xl w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div class="flex items-center gap-2">
-          <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
-            <i data-lucide="receipt" class="w-6 h-6"></i>
+          <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center shrink-0">
+            <i data-lucide="receipt" class="w-5 h-5 sm:w-6 sm:h-6"></i>
           </div>
           <div>
-            <h3 class="text-base font-black text-slate-900">سند تجديد واشتراك الكلية الرسمي</h3>
+            <h3 class="text-sm sm:text-base font-black text-slate-900">سند تجديد واشتراك الكلية الرسمي</h3>
             <p class="text-[11px] text-slate-500 font-semibold">وثيقة اعتماد وترخيص أكاديمي صادرة من منظومة كليات طب الأسنان</p>
           </div>
         </div>
-        <button onclick="closePrintReceiptModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closePrintReceiptModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <!-- Printable Voucher Content -->
-      <div id="printable-voucher-area" class="p-6 bg-slate-50 rounded-2xl border-2 border-teal-800/30 text-slate-900 space-y-5">
+      <div id="printable-voucher-area" class="p-4 sm:p-6 bg-slate-50 rounded-2xl border-2 border-teal-800/30 text-slate-900 space-y-4 sm:space-y-5">
         <!-- Voucher Header -->
-        <div class="text-center border-b-2 border-teal-800 pb-4">
-          <h2 class="text-base sm:text-lg font-black text-slate-900">جمهورية العراق • وزارة التعليم العالي والبحث العلمي</h2>
-          <h3 class="text-xl sm:text-2xl font-black text-teal-800 mt-1">منظومة كليات طب الأسنان المعتمدة للتدريب السريري</h3>
-          <p class="text-xs text-slate-500 font-bold mt-1 font-latin">E-Dental Academic College ERP • Official Subscription Voucher</p>
-          <div class="mt-3 inline-flex items-center gap-2 px-4 py-1 bg-teal-800 text-white rounded-full text-xs font-bold">
+        <div class="text-center border-b-2 border-teal-800 pb-3 sm:pb-4">
+          <h2 class="text-sm sm:text-lg font-black text-slate-900">جمهورية العراق • وزارة التعليم العالي والبحث العلمي</h2>
+          <h3 class="text-lg sm:text-2xl font-black text-teal-800 mt-1">منظومة كليات طب الأسنان المعتمدة للتدريب السريري</h3>
+          <p class="text-[11px] sm:text-xs text-slate-500 font-bold mt-1 font-latin">E-Dental Academic College ERP • Official Subscription Voucher</p>
+          <div class="mt-2.5 sm:mt-3 inline-flex items-center gap-2 px-3 sm:px-4 py-1 bg-teal-800 text-white rounded-full text-[11px] sm:text-xs font-bold">
             <span>سند قبض وتأكيد تجديد اشتراك سنوي معتمد</span>
           </div>
         </div>
 
         <!-- Voucher Details Grid -->
-        <div class="grid grid-cols-2 gap-4 text-xs">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 text-xs">
           <div class="space-y-1">
             <span class="text-slate-500 block font-bold">رقم السند المالي:</span>
             <strong id="receipt-number" class="text-slate-900 font-latin text-sm font-black">REC-2026-0000</strong>
@@ -1153,26 +1215,26 @@
             <span class="text-slate-500 block font-bold">عميد الكلية / المشرف العام:</span>
             <strong id="receipt-college-dean" class="text-slate-900 text-sm font-bold">أ.د. ...</strong>
           </div>
-          <div class="space-y-1 col-span-2">
+          <div class="space-y-1 col-span-1 sm:col-span-2">
             <span class="text-slate-500 block font-bold">فترة الصلاحية والترخيص الأكاديمي:</span>
-            <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between font-bold text-emerald-900 text-xs">
+            <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-1 sm:gap-2 font-bold text-emerald-900 text-xs">
               <span>سنة أكاديمية كاملة (مرخص وساري المفعول)</span>
               <span>ينتهي بتاريخ: <span id="receipt-valid-until" class="font-latin text-sm font-black">2027-10-02</span></span>
             </div>
           </div>
-          <div id="receipt-amount-row" class="col-span-2 flex items-center justify-between p-3 bg-white border border-slate-300 rounded-xl">
+          <div id="receipt-amount-row" class="col-span-1 sm:col-span-2 flex items-center justify-between p-3 bg-white border border-slate-300 rounded-xl">
             <span class="text-slate-700 font-bold">مبلغ الاشتراك السنوي المسدد:</span>
-            <strong id="receipt-amount" class="text-slate-900 font-latin text-base font-black">$1,500 USD (مدفوع بالكامل)</strong>
+            <strong id="receipt-amount" class="text-slate-900 font-latin text-sm sm:text-base font-black">$1,500 USD (مدفوع بالكامل)</strong>
           </div>
         </div>
 
         <!-- Voucher Footer Signatures & Stamp -->
-        <div class="pt-4 border-t border-slate-300 flex items-center justify-between text-[11px]">
+        <div class="pt-4 border-t border-slate-300 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-0 text-[11px]">
           <div class="text-center space-y-1">
             <span class="block text-slate-500 font-bold">إدارة المنظومة المركزية (Super Admin)</span>
             <span class="block text-slate-800 font-bold">قسم الحسابات والتراخيص الأكاديمية</span>
           </div>
-          <div class="w-20 h-20 rounded-full border-4 border-dashed border-teal-700 flex flex-col items-center justify-center text-teal-800 rotate-[-12deg] p-1 font-bold text-[9px] shadow-xs bg-teal-50">
+          <div class="w-18 h-18 sm:w-20 sm:h-20 rounded-full border-4 border-dashed border-teal-700 flex flex-col items-center justify-center text-teal-800 rotate-[-12deg] p-1 font-bold text-[9px] shadow-xs bg-teal-50">
             <span>معتمد رسمياً</span>
             <span class="text-[8px] font-latin font-bold">VERIFIED</span>
             <i data-lucide="check-circle" class="w-4 h-4 text-teal-700"></i>
@@ -1185,9 +1247,9 @@
       </div>
 
       <!-- Action Buttons -->
-      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
-        <button type="button" onclick="closePrintReceiptModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">إغلاق</button>
-        <button type="button" onclick="window.print()" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold text-xs shadow flex items-center gap-1.5 cursor-pointer">
+      <div class="flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closePrintReceiptModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer">إغلاق</button>
+        <button type="button" onclick="window.print()" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold text-xs shadow flex items-center gap-1.5 cursor-pointer">
           <i data-lucide="printer" class="w-4 h-4"></i>
           <span>طباعة السند / حفظ PDF 🖨️</span>
         </button>
@@ -1196,14 +1258,14 @@
   </div>
 
   <!-- MODAL: RENEW SUBSCRIPTION (تجديد اشتراك كلية) -->
-  <div id="modal-renew-sub" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+  <div id="modal-renew-sub" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
           <i data-lucide="credit-card" class="w-5 h-5 text-teal-600"></i>
           <span>تجديد اشتراك وترخيص الكلية</span>
         </h3>
-        <button onclick="closeRenewSubModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeRenewSubModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <form onsubmit="handleRenewSubscriptionSubmit(event)" class="space-y-3.5 text-xs">
@@ -1214,36 +1276,36 @@
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">قيمة رسوم التجديد ($) *</label>
-          <input type="number" id="renew-amount" required value="1500" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+          <input type="number" inputmode="numeric" id="renew-amount" required value="1500" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص الجديد *</label>
           <input type="date" id="renew-new-date" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
         </div>
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeRenewSubModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow">تأكيد التجديد وتحديث السند 💳</button>
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeRenewSubModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+          <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow cursor-pointer">تأكيد التجديد وتحديث السند 💳</button>
         </div>
       </form>
     </div>
   </div>
 
   <!-- MODAL: NEW COLLEGE APPLICATION (تقديم طلب لكلية جديدة مع رمز التحقق OTP) -->
-  <div id="modal-college-application" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-xl w-full shadow-2xl border border-slate-200 space-y-4 max-h-[95vh] overflow-y-auto custom-scrollbar">
+  <div id="modal-college-application" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-xl w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       
       <!-- Modal Header -->
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold border border-amber-200">
+          <div class="w-10 h-10 rounded-2xl bg-amber-50 text-amber-800 flex items-center justify-center font-bold border border-amber-200 shrink-0">
             <i data-lucide="file-signature" class="w-5 h-5"></i>
           </div>
           <div>
-            <h3 class="text-base font-black text-slate-900">تقديم طلب تسجيل كلية جديدة</h3>
+            <h3 class="text-sm sm:text-base font-black text-slate-900">تقديم طلب تسجيل كلية جديدة</h3>
             <p class="text-[11px] text-slate-500 font-semibold">بوابة اعتماد وتسجيل الكليات والجامعات الطبية مع التحقق الفوري بالـ OTP</p>
           </div>
         </div>
-        <button type="button" onclick="closeCollegeApplicationModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none">&times;</button>
+        <button type="button" onclick="closeCollegeApplicationModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <!-- Application Form -->
@@ -1262,7 +1324,7 @@
             >
           </div>
 
-          <div class="grid grid-cols-2 gap-3">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
               <label class="block font-bold text-slate-700 mb-1">المحافظة / المقر *</label>
               <select 
@@ -1319,6 +1381,7 @@
               <label class="block font-bold text-slate-700 mb-1">رقم الهاتف المعتمد للتواصل *</label>
               <input 
                 type="tel" 
+                inputmode="tel"
                 id="app-phone" 
                 required 
                 placeholder="07701234567" 
@@ -1330,6 +1393,7 @@
               <label class="block font-bold text-slate-700 mb-1">البريد الإلكتروني المعتمد *</label>
               <input 
                 type="email" 
+                inputmode="email"
                 id="app-email" 
                 required 
                 placeholder="dean.college@gmail.com" 
@@ -1346,17 +1410,18 @@
                 type="button" 
                 id="btn-send-otp"
                 onclick="handleSendOtpCode()"
-                class="px-4 py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all shrink-0 cursor-pointer"
+                class="w-full sm:w-auto px-4 py-3 sm:py-2.5 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-600 hover:to-amber-700 text-slate-950 font-black rounded-xl text-xs flex items-center justify-center gap-1.5 shadow-sm transition-all shrink-0 cursor-pointer"
               >
                 <i data-lucide="send" class="w-3.5 h-3.5"></i>
                 <span id="btn-send-otp-text">إرسال رمز التحقق OTP 📩</span>
               </button>
 
-              <div class="flex-1 flex items-center gap-2">
+              <div class="flex items-center gap-2">
                 <input 
                   type="text" 
                   id="app-otp-input" 
                   maxlength="6"
+                  inputmode="numeric"
                   placeholder="رمز التحقق (6 أرقام)" 
                   class="flex-1 p-2.5 bg-white border border-slate-300 rounded-xl font-black font-latin text-center text-sm tracking-widest focus:border-teal-500 focus:outline-none"
                   dir="ltr"
@@ -1365,7 +1430,7 @@
                   type="button" 
                   id="btn-verify-otp"
                   onclick="handleVerifyOtpCode()"
-                  class="px-4 py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-all shrink-0 cursor-pointer"
+                  class="px-4 py-3 sm:py-2.5 bg-teal-700 hover:bg-teal-800 text-white font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-all shrink-0 cursor-pointer"
                 >
                   <i data-lucide="check" class="w-3.5 h-3.5"></i>
                   <span>تأكيد الرمز ✅</span>
@@ -1408,12 +1473,12 @@
         </div>
 
         <!-- Actions -->
-        <div class="pt-2 flex items-center justify-end gap-2 border-t border-slate-100">
-          <button type="button" onclick="closeCollegeApplicationModal()" class="px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer">إلغاء</button>
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeCollegeApplicationModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs cursor-pointer">إلغاء</button>
           <button 
             type="submit" 
             id="btn-submit-app"
-            class="px-6 py-2.5 bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-black rounded-xl text-xs shadow-md shadow-teal-700/20 flex items-center gap-2 cursor-pointer transition-all"
+            class="w-full sm:w-auto justify-center px-6 py-2.5 bg-gradient-to-r from-teal-700 to-teal-600 hover:from-teal-800 hover:to-teal-700 text-white font-black rounded-xl text-xs shadow-md shadow-teal-700/20 flex items-center gap-2 cursor-pointer transition-all"
           >
             <i data-lucide="check-circle" class="w-4 h-4"></i>
             <span>تأكيد حجز التسجيل وتقديم الطلب 🚀</span>
@@ -1425,14 +1490,14 @@
   </div>
 
   <!-- MODAL: APPROVE COLLEGE APPLICATION (اعتماد وقبول الكلية من السوبر أدمن) -->
-  <div id="modal-approve-application" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+  <div id="modal-approve-application" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-2.5 sm:p-4 overflow-y-auto">
+    <div class="bg-white rounded-2xl sm:rounded-3xl p-4 sm:p-6 md:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4 max-h-[92vh] overflow-y-auto custom-scrollbar my-auto">
       <div class="flex items-center justify-between border-b border-slate-100 pb-3">
-        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+        <h3 class="text-sm sm:text-base font-black text-slate-900 flex items-center gap-2">
           <i data-lucide="check-check" class="w-5 h-5 text-emerald-600"></i>
           <span>اعتماد وقبول طلب الكلية وإنشاء حسابها</span>
         </h3>
-        <button type="button" onclick="closeApproveApplicationModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+        <button type="button" onclick="closeApproveApplicationModal()" class="text-slate-400 hover:text-slate-600 text-2xl font-bold leading-none cursor-pointer">&times;</button>
       </div>
 
       <form onsubmit="handleApproveApplicationSubmit(event)" class="space-y-3 text-xs">
@@ -1442,7 +1507,7 @@
           <strong id="approve-app-college-name" class="text-sm font-black text-teal-900 block">-</strong>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">رمز الكلية الفريد (Code) *</label>
             <input type="text" id="approve-college-code" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin uppercase" dir="ltr">
@@ -1453,10 +1518,10 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-2 gap-3">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">قيمة الاشتراك السنوي ($) *</label>
-            <input type="number" id="approve-subscription-fee" required value="1500" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <input type="number" inputmode="numeric" id="approve-subscription-fee" required value="1500" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص *</label>
@@ -1469,13 +1534,15 @@
           <input type="text" id="approve-dean-password" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
         </div>
 
-        <div class="pt-2 flex items-center justify-end gap-2">
-          <button type="button" onclick="closeApproveApplicationModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow">اعتماد وإنشاء الكلية فوراً ✅</button>
+        <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
+          <button type="button" onclick="closeApproveApplicationModal()" class="w-full sm:w-auto justify-center px-4 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold cursor-pointer">إلغاء</button>
+          <button type="submit" class="w-full sm:w-auto justify-center px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl font-bold shadow cursor-pointer">اعتماد وإنشاء الكلية فوراً ✅</button>
         </div>
       </form>
-    </div>
   </div>
+
+  <!-- ========================================================================
+       FOOTER
        ======================================================================== -->
   <footer class="mt-auto border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500 font-semibold">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">
