@@ -142,7 +142,7 @@ exports.handler = async function (event, context) {
       let currentItems = await getCloudApplications(blobKey);
       if (!Array.isArray(currentItems)) currentItems = [];
 
-      if (action === 'clear_all' || action === 'clear_students') {
+      if (action === 'clear_all' || action === 'clear_students' || action === 'clear_colleges') {
         currentItems = [];
         await setCloudApplications([], blobKey);
         return {

@@ -12,97 +12,12 @@ const SAVED_USERS_KEY = 'cosmo_dental_saved_accounts';
 // DEFAULT ACCREDITED IRAQI DENTAL COLLEGES (قائمة الكليات والجامعات العراقية المعتمدة)
 // ============================================================================
 function getDefaultCollegesList() {
-  return [
-    {
-      id: 'clg_uob',
-      name: 'جامعة بغداد - كلية طب الأسنان',
-      code: 'UOB-DENT',
-      city: 'بغداد',
-      deanName: 'أ.د. رغد الهاشمي',
-      adminUsername: 'dean.baghdad',
-      adminPassword: 'Dean123#',
-      status: 'Active',
-      plan: 'ANNUAL_ACCREDITED',
-      subscriptionFee: 1500,
-      subscriptionEnd: '2027-10-01',
-      createdAt: '2026-01-01T00:00:00.000Z'
-    },
-    {
-      id: 'clg_uom',
-      name: 'جامعة الموصل - كلية طب الأسنان',
-      code: 'UOM-DENT',
-      city: 'الموصل',
-      deanName: 'أ.د. ريان سالم حامد',
-      adminUsername: 'dean.mosul',
-      adminPassword: 'Dean123#',
-      status: 'Active',
-      plan: 'ANNUAL_ACCREDITED',
-      subscriptionFee: 1500,
-      subscriptionEnd: '2027-10-01',
-      createdAt: '2026-01-01T00:00:00.000Z'
-    },
-    {
-      id: 'clg_mustansiriya',
-      name: 'الجامعة المستنصرية - كلية طب الأسنان',
-      code: 'UOMUST-DENT',
-      city: 'بغداد',
-      deanName: 'أ.د. مها جمال عباس',
-      adminUsername: 'dean.mustansiriya',
-      adminPassword: 'Dean123#',
-      status: 'Active',
-      plan: 'ANNUAL_ACCREDITED',
-      subscriptionFee: 1500,
-      subscriptionEnd: '2027-10-01',
-      createdAt: '2026-01-01T00:00:00.000Z'
-    },
-    {
-      id: 'clg_basrah',
-      name: 'جامعة البصرة - كلية طب الأسنان',
-      code: 'UOBAS-DENT',
-      city: 'البصرة',
-      deanName: 'أ.د. فاتح الخاقاني',
-      adminUsername: 'dean.basrah',
-      adminPassword: 'Dean123#',
-      status: 'Active',
-      plan: 'ANNUAL_ACCREDITED',
-      subscriptionFee: 1500,
-      subscriptionEnd: '2027-10-01',
-      createdAt: '2026-01-01T00:00:00.000Z'
-    },
-    {
-      id: 'clg_kufa',
-      name: 'جامعة الكوفة - كلية طب الأسنان',
-      code: 'UOKUF-DENT',
-      city: 'النجف',
-      deanName: 'أ.د. علي طارق خضير',
-      adminUsername: 'dean.kufa',
-      adminPassword: 'Dean123#',
-      status: 'Active',
-      plan: 'ANNUAL_ACCREDITED',
-      subscriptionFee: 1500,
-      subscriptionEnd: '2027-10-01',
-      createdAt: '2026-01-01T00:00:00.000Z'
-    },
-    {
-      id: 'clg_babylon',
-      name: 'جامعة بابل - كلية طب الأسنان',
-      code: 'UOBAB-DENT',
-      city: 'بابل',
-      deanName: 'أ.د. وسام وهاب صاحب',
-      adminUsername: 'dean.babylon',
-      adminPassword: 'Dean123#',
-      status: 'Active',
-      plan: 'ANNUAL_ACCREDITED',
-      subscriptionFee: 1500,
-      subscriptionEnd: '2027-10-01',
-      createdAt: '2026-01-01T00:00:00.000Z'
-    }
-  ];
+  return [];
 }
 window.getDefaultCollegesList = getDefaultCollegesList;
 
 // ============================================================================
-// INITIAL SEED DATABASE (CLEAN SLATE + ACCREDITED COLLEGES)
+// INITIAL SEED DATABASE (CLEAN SLATE)
 // ============================================================================
 function getInitialSeedDatabase() {
   return {
@@ -114,7 +29,7 @@ function getInitialSeedDatabase() {
       name: 'مدير المنظومة العام (Super Admin)',
       role: 'SUPER_ADMIN'
     },
-    colleges: getDefaultCollegesList(),
+    colleges: [],
     instructors: [],
     students: [],
     cases: [],
@@ -163,6 +78,11 @@ function initSavedAccountsIfEmpty() {
   let list = getSavedAccounts();
   if (!Array.isArray(list)) list = [];
 
+  // Filter out any mock deans from saved accounts
+  const initialLen = list.length;
+  list = list.filter(a => a.username !== 'dean.baghdad' && a.username !== 'dean.mosul');
+  let changed = list.length !== initialLen;
+
   const defaultAccounts = [
     {
       username: 'superadmin',
@@ -170,26 +90,9 @@ function initSavedAccountsIfEmpty() {
       name: 'مدير المنظومة العام (Super Admin)',
       role: 'SUPER_ADMIN',
       collegeName: 'الإدارة المركزية'
-    },
-    {
-      username: 'dean.baghdad',
-      password: 'Dean123#',
-      name: 'أ.د. رغد الهاشمي (عميد جامعة بغداد)',
-      role: 'COLLEGE_ADMIN',
-      collegeId: 'clg_uob',
-      collegeName: 'جامعة بغداد - كلية طب الأسنان'
-    },
-    {
-      username: 'dean.mosul',
-      password: 'Dean123#',
-      name: 'أ.د. ريان سالم حامد (عميد جامعة الموصل)',
-      role: 'COLLEGE_ADMIN',
-      collegeId: 'clg_mosul',
-      collegeName: 'جامعة الموصل - كلية طب الأسنان'
     }
   ];
 
-  let changed = false;
   defaultAccounts.forEach(acc => {
     if (!list.some(item => item.username.toLowerCase() === acc.username.toLowerCase())) {
       list.push(acc);
@@ -330,15 +233,12 @@ function readErpDb() {
       return data;
     }
     data = JSON.parse(raw);
-    if (!data.colleges || !Array.isArray(data.colleges) || data.colleges.length === 0) {
-      data.colleges = getDefaultCollegesList();
+    if (!data.colleges || !Array.isArray(data.colleges)) {
+      data.colleges = [];
     } else {
-      const defaults = getDefaultCollegesList();
-      defaults.forEach(def => {
-        if (!data.colleges.some(c => c.id === def.id || c.name === def.name)) {
-          data.colleges.push(def);
-        }
-      });
+      // Purge obsolete mock colleges
+      const mockIds = new Set(['clg_uob', 'clg_uom', 'clg_mustansiriya', 'clg_basrah', 'clg_kufa', 'clg_babylon']);
+      data.colleges = data.colleges.filter(c => !mockIds.has(c.id));
     }
     if (!data.instructors) data.instructors = [];
     if (!data.students) data.students = [];
@@ -554,6 +454,8 @@ function handleLogout() {
   setCurrentSession(null);
   renderApp();
 }
+window.handleLogout = handleLogout;
+window.logout = handleLogout;
 
 // ============================================================================
 // MAIN APP RENDERER & ROUTER
@@ -771,17 +673,8 @@ function renderSuperAdminColleges() {
         <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
           ${statusBadge}
         </td>
-        <td class="p-3.5 text-center whitespace-nowrap min-w-[260px]">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[200px]">
           <div class="flex items-center justify-center gap-1.5 flex-wrap">
-            <button 
-              type="button"
-              onclick="loginAsDeanNewTab('${c.id}')"
-              class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
-              title="دخول بتبويب جديد مستقل كعميد للكلية دون إغلاق السوبر أدمن"
-            >
-              <span>دخول كعميد 🏛️</span>
-              <span class="text-[9px] text-teal-600 font-latin font-normal">(تبويب جديد)</span>
-            </button>
             <button 
               type="button"
               onclick="openPrintReceiptModal('${c.id}')"
@@ -921,6 +814,25 @@ function deleteCollege(collegeId) {
 }
 
 async function syncDeleteCollege(collegeId) {
+  const candidateEndpoints = [
+    `/api/colleges`,
+    `/.netlify/functions/applications?type=colleges`,
+    `https://dental-casesheet-erp.netlify.app/api/colleges`,
+    `https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=colleges`
+  ];
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'delete', type: 'colleges', id: collegeId })
+      });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync delete college notice:', ep, e);
+    }
+  }
+
   const client = getErpSupabaseClient();
   if (!client) return;
   try {
@@ -3101,23 +3013,12 @@ async function syncPullCollegesFromCloud() {
       if (res.ok) {
         const data = await res.json();
         const cloudColleges = data.colleges || data.applications || [];
-        if (Array.isArray(cloudColleges) && cloudColleges.length > 0) {
+        if (Array.isArray(cloudColleges)) {
           const db = readErpDb();
-          let changed = false;
-          cloudColleges.forEach(col => {
-            const idx = db.colleges.findIndex(c => c.id === col.id || c.name === col.name);
-            if (idx > -1) {
-              db.colleges[idx] = { ...db.colleges[idx], ...col };
-            } else {
-              db.colleges.push(col);
-              changed = true;
-            }
-          });
-          if (changed) {
-            writeErpDb(db);
-            if (getCurrentSession()?.role === 'SUPER_ADMIN') {
-              renderSuperAdminDashboard();
-            }
+          db.colleges = cloudColleges;
+          writeErpDb(db);
+          if (getCurrentSession()?.role === 'SUPER_ADMIN') {
+            renderSuperAdminDashboard();
           }
           return true;
         }
@@ -3154,13 +3055,13 @@ function openStudentApplicationModal() {
       }
 
       if (!colleges || colleges.length === 0) {
-        colleges = typeof getDefaultCollegesList === 'function' ? getDefaultCollegesList() : [];
+        select.innerHTML = '<option value="" disabled selected>-- لا توجد كليات معتمدة متاحة للتقديم حالياً --</option>';
+      } else {
+        select.innerHTML = '<option value="" disabled selected>-- اختر كليتك من القائمة المعتمدة --</option>' +
+          colleges.map(c => `
+            <option value="${c.id}">${c.name} (${c.city || 'العراق'})</option>
+          `).join('');
       }
-
-      select.innerHTML = '<option value="" disabled selected>-- اختر كليتك من القائمة المعتمدة --</option>' +
-        colleges.map(c => `
-          <option value="${c.id}">${c.name} (${c.city || 'العراق'})</option>
-        `).join('');
     }
 
     // Clear form
@@ -3615,7 +3516,6 @@ window.addEventListener('DOMContentLoaded', () => {
   initSavedAccountsIfEmpty();
   checkImpersonation();
   updateSupabaseStatusUI();
-  syncPullFromSupabase();
   syncPullCollegesFromCloud();
   syncPullApplicationsFromCloud();
   syncPullStudentApplicationsFromCloud();
