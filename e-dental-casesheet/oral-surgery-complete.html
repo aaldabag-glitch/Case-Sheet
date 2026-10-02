@@ -5,17 +5,29 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Oral & Maxillofacial Surgery Examination • Complete 2-Page Case Sheet - Al-Qabas Private College</title>
   
-  <!-- Student / Academic Session Guard -->
+  <!-- Academic Session Guard: Restricted exclusively to active accredited students -->
   <script>
     (function() {
       try {
         const raw = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
         const session = raw ? JSON.parse(raw) : null;
-        if (!session) {
-          alert('هذه الطبلة السريرية مخصصة للطلبة والمشرفين المسجلين فقط. يرجى تسجيل الدخول أولاً.');
+        if (!session || (session.role !== 'STUDENT' && session.role !== 'INSTRUCTOR')) {
+          sessionStorage.removeItem('cosmo_dental_college_session');
+          localStorage.removeItem('cosmo_dental_college_session');
+          window.location.replace('college-portal.html');
+          return;
+        }
+        const dbRaw = localStorage.getItem('cosmo_dental_college_erp_v3');
+        const db = dbRaw ? JSON.parse(dbRaw) : null;
+        const validCollege = db && Array.isArray(db.colleges) && db.colleges.some(c => c.id === session.collegeId && c.status === 'Active');
+        if (!validCollege) {
+          sessionStorage.removeItem('cosmo_dental_college_session');
+          localStorage.removeItem('cosmo_dental_college_session');
           window.location.replace('college-portal.html');
         }
       } catch(e) {
+        sessionStorage.removeItem('cosmo_dental_college_session');
+        localStorage.removeItem('cosmo_dental_college_session');
         window.location.replace('college-portal.html');
       }
     })();

@@ -284,21 +284,6 @@ const DENTAL_DEPARTMENTS = [
   }
 ];
 
-// Student Profile Mock Data
-const STUDENT_SESSION = {
-  name: "د. علي حيدر الموسوي",
-  nameEn: "Dr. Ali H. Al-Mousawi",
-  studentId: "DEN-2022-8419",
-  academicYear: "2026–2027",
-  stageAr: "المرحلة الخامسة - بكالوريوس طب وجراحة الفم والأسنان",
-  stageEn: "5th Year BDS Candidate",
-  clinicRoom: "عيادة د - الكرسي رقم 14",
-  supervisor: "أ.د. عبد الله الصالحي (استشاري جراحة وترميم)",
-  stats: {
-    todayCases: 3,
-    savedDrafts: 2,
-    approvedRequirements: 18,
-    totalRequired: 25,
-    attendanceStreak: "98%"
-  }
-};
+// Student Profile Mock Data (Strictly authenticated via College Portal ERP)
+const STUDENT_SESSION = null;
+

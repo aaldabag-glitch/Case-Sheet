@@ -71,7 +71,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (rawSession) {
         const parsed = JSON.parse(rawSession);
         if (parsed && parsed.role === 'STUDENT') {
-          activeStudent = parsed;
+          const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+          const parsedDb = rawDb ? JSON.parse(rawDb) : null;
+          const hasActiveCollege = parsedDb && Array.isArray(parsedDb.colleges) && parsedDb.colleges.some(c => c.id === parsed.collegeId && c.status === 'Active');
+          if (hasActiveCollege) {
+            activeStudent = parsed;
+          }
         }
       }
       const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
@@ -83,26 +88,22 @@ document.addEventListener('DOMContentLoaded', () => {
       }
     } catch (e) {}
 
+    if (!activeStudent) {
+      window.handleStudentLogout();
+      return;
+    }
+
     const studentNameElem = document.getElementById('student-name-display');
     const stageElem = document.getElementById('student-stage-badge');
 
-    if (activeStudent) {
-      // Clean student name from email suffix if present
-      let displayName = activeStudent.name || activeStudent.username || 'طالب';
-      if (displayName.includes('@')) {
-        displayName = displayName.split('@')[0];
-      }
-      if (studentNameElem) studentNameElem.textContent = displayName;
-      if (stageElem) {
-        stageElem.textContent = activeStudent.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)';
-      }
-    } else {
-      let displayName = STUDENT_SESSION.name;
-      if (displayName.includes('@')) {
-        displayName = displayName.split('@')[0];
-      }
-      if (studentNameElem) studentNameElem.textContent = displayName;
-      if (stageElem) stageElem.textContent = STUDENT_SESSION.stageAr;
+    // Clean student name from email suffix if present
+    let displayName = activeStudent.name || activeStudent.username || 'طالب';
+    if (displayName.includes('@')) {
+      displayName = displayName.split('@')[0];
+    }
+    if (studentNameElem) studentNameElem.textContent = displayName;
+    if (stageElem) {
+      stageElem.textContent = activeStudent.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)';
     }
 
     // Populate instructor lists in case sheet modal

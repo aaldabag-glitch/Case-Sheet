@@ -7,6 +7,22 @@
 const STORAGE_KEY = 'cosmo_dental_college_erp_v3';
 const SESSION_KEY = 'cosmo_dental_college_session';
 const SAVED_USERS_KEY = 'cosmo_dental_saved_accounts';
+const PURGE_FLAG_KEY = 'cosmo_dental_root_purge_v6_final';
+
+// ============================================================================
+// ENFORCE CLEAN SLATE FROM ROOTS: Wipe all legacy colleges, students, and sessions
+// ============================================================================
+(function enforceCleanSlateFromRoots() {
+  try {
+    if (localStorage.getItem(PURGE_FLAG_KEY) !== 'purged') {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
+      localStorage.removeItem(SAVED_USERS_KEY);
+      localStorage.setItem(PURGE_FLAG_KEY, 'purged');
+    }
+  } catch (e) {}
+})();
 
 // ============================================================================
 // DEFAULT ACCREDITED IRAQI DENTAL COLLEGES (قائمة الكليات والجامعات العراقية المعتمدة)
@@ -75,14 +91,6 @@ function clearAllSavedAccounts() {
 }
 
 function initSavedAccountsIfEmpty() {
-  let list = getSavedAccounts();
-  if (!Array.isArray(list)) list = [];
-
-  // Filter out any mock deans from saved accounts
-  const initialLen = list.length;
-  list = list.filter(a => a.username !== 'dean.baghdad' && a.username !== 'dean.mosul');
-  let changed = list.length !== initialLen;
-
   const defaultAccounts = [
     {
       username: 'superadmin',
@@ -92,84 +100,23 @@ function initSavedAccountsIfEmpty() {
       collegeName: 'الإدارة المركزية'
     }
   ];
-
-  defaultAccounts.forEach(acc => {
-    if (!list.some(item => item.username.toLowerCase() === acc.username.toLowerCase())) {
-      list.push(acc);
-      changed = true;
-    }
-  });
-
-  if (changed) {
-    try {
-      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
-    } catch (e) {}
-    renderSavedAccountsList();
-  }
+  try {
+    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(defaultAccounts));
+  } catch (e) {}
+  renderSavedAccountsList();
 }
 
-// فتح حساب العميد أو التدريسي بتبويب جديد مستقل دون تسجيل خروج السوبر أدمن
+// Impersonation disabled per security specification
 function loginAsDeanNewTab(collegeId) {
-  const url = 'college-portal.html?impersonate=dean&collegeId=' + encodeURIComponent(collegeId);
-  window.open(url, '_blank');
+  return;
 }
 
 function loginAsInstructorNewTab(instructorId) {
-  const url = 'college-portal.html?impersonate=instructor&instructorId=' + encodeURIComponent(instructorId);
-  window.open(url, '_blank');
+  return;
 }
 
 function checkImpersonation() {
-  try {
-    const params = new URLSearchParams(window.location.search);
-    const imp = params.get('impersonate');
-    if (!imp) return;
-
-    const db = readErpDb();
-    if (imp === 'dean') {
-      const collegeId = params.get('collegeId');
-      const clg = db.colleges.find(c => c.id === collegeId);
-      if (clg) {
-        const user = {
-          id: 'dean_' + clg.id,
-          collegeId: clg.id,
-          collegeName: clg.name,
-          collegeCode: clg.code,
-          name: clg.deanName,
-          username: clg.adminUsername,
-          role: 'COLLEGE_ADMIN'
-        };
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-        currentSession = user;
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      }
-    } else if (imp === 'instructor') {
-      const instructorId = params.get('instructorId');
-      const inst = db.instructors.find(i => i.id === instructorId);
-      if (inst) {
-        const clg = db.colleges.find(c => c.id === inst.collegeId);
-        const user = {
-          id: inst.id,
-          collegeId: inst.collegeId,
-          collegeName: clg ? clg.name : 'كلية طب الأسنان',
-          name: inst.name,
-          title: inst.title,
-          department: inst.department,
-          username: inst.username,
-          role: 'INSTRUCTOR'
-        };
-        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
-        currentSession = user;
-        if (window.history && window.history.replaceState) {
-          window.history.replaceState({}, document.title, window.location.pathname);
-        }
-      }
-    }
-  } catch (err) {
-    console.warn('Impersonation check notice:', err);
-  }
+  return;
 }
 
 function selectSavedAccount(username, password) {
@@ -240,20 +187,14 @@ function readErpDb() {
       const mockIds = new Set(['clg_uob', 'clg_uom', 'clg_mustansiriya', 'clg_basrah', 'clg_kufa', 'clg_babylon']);
       data.colleges = data.colleges.filter(c => !mockIds.has(c.id));
     }
-    if (!data.instructors) data.instructors = [];
-    if (!data.students) data.students = [];
-    if (!data.cases) data.cases = [];
-    if (!data.applications) data.applications = [];
-    if (!data.studentApplications) data.studentApplications = [];
-    else {
-      // Purge test student applications permanently
-      data.studentApplications = data.studentApplications.filter(a => 
-        !a.id?.startsWith('sapp_179095') && 
-        !a.notes?.includes('تجريبي') && 
-        a.studentName !== 'ff' &&
-        a.email !== 'rrrr@gmail.com'
-      );
-    }
+    // Strict cascade purge: no child record can exist without an accredited parent college
+    const validCollegeIds = new Set((data.colleges || []).map(c => c.id));
+    data.instructors = (data.instructors || []).filter(i => validCollegeIds.has(i.collegeId));
+    data.students = (data.students || []).filter(s => validCollegeIds.has(s.collegeId));
+    data.cases = (data.cases || []).filter(c => validCollegeIds.has(c.collegeId));
+    data.studentApplications = (data.studentApplications || []).filter(a => validCollegeIds.has(a.collegeId));
+    data.applications = (data.applications || []).filter(a => a && a.id);
+
     return data;
   } catch (e) {
     const initial = getInitialSeedDatabase();
@@ -271,15 +212,33 @@ function writeErpDb(data) {
 let currentSession = null;
 
 function getCurrentSession() {
-  if (currentSession) return currentSession;
-  try {
-    const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
-    if (raw) {
-      currentSession = JSON.parse(raw);
-      return currentSession;
-    }
-  } catch (e) {}
-  return null;
+  let session = currentSession;
+  if (!session) {
+    try {
+      const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+      if (raw) session = JSON.parse(raw);
+    } catch (e) {}
+  }
+  if (!session) return null;
+
+  // Strict role check: ONLY Super Admin can exist without a college
+  if (session.role === 'SUPER_ADMIN') {
+    currentSession = session;
+    return currentSession;
+  }
+
+  // Any other user must belong to an active college
+  const db = readErpDb();
+  const validCollege = (db.colleges || []).some(c => c.id === session.collegeId && c.status === 'Active');
+  if (!validCollege) {
+    currentSession = null;
+    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
+    return null;
+  }
+
+  currentSession = session;
+  return currentSession;
 }
 
 function setCurrentSession(user) {
@@ -344,6 +303,12 @@ function handleLoginSubmit(event) {
       username: db.superAdmin.username,
       role: 'SUPER_ADMIN'
     }, passwordInput);
+    return;
+  }
+
+  // Strict Enforcement: If no accredited colleges exist, reject all logins except Super Admin
+  if (!db.colleges || db.colleges.length === 0) {
+    showLoginError('لا توجد أي كليات معتمدة في المنظومة حالياً. يقتصر تسجيل الدخول حصراً على الإدارة المركزية (Super Admin).');
     return;
   }
 
@@ -846,7 +811,7 @@ async function syncDeleteCollege(collegeId) {
 }
 
 function loginAsDean(collegeId) {
-  loginAsDeanNewTab(collegeId);
+  return;
 }
 
 // ============================================================================
