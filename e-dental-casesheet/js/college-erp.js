@@ -160,29 +160,46 @@ function clearAllSavedAccounts() {
 }
 
 function initSavedAccountsIfEmpty() {
-  const list = getSavedAccounts();
-  if (!list || list.length === 0) {
-    saveAccountToDevice({
+  let list = getSavedAccounts();
+  if (!Array.isArray(list)) list = [];
+
+  const defaultAccounts = [
+    {
       username: 'superadmin',
       password: 'admin123',
-      name: 'مدير المنظومة (Super Admin)',
+      name: 'مدير المنظومة العام (Super Admin)',
       role: 'SUPER_ADMIN',
       collegeName: 'الإدارة المركزية'
-    });
-    saveAccountToDevice({
+    },
+    {
       username: 'dean.baghdad',
       password: 'Dean123#',
       name: 'أ.د. رغد الهاشمي (عميد جامعة بغداد)',
       role: 'COLLEGE_ADMIN',
       collegeName: 'جامعة بغداد - كلية طب الأسنان'
-    });
-    saveAccountToDevice({
+    },
+    {
       username: 'dean.mosul',
       password: 'Dean123#',
       name: 'أ.د. ريان سالم حامد (عميد جامعة الموصل)',
       role: 'COLLEGE_ADMIN',
       collegeName: 'جامعة الموصل - كلية طب الأسنان'
-    });
+    }
+  ];
+
+  let changed = false;
+  defaultAccounts.forEach(acc => {
+    if (!list.some(item => item.username.toLowerCase() === acc.username.toLowerCase())) {
+      list.push(acc);
+      changed = true;
+    }
+  });
+
+  if (changed) {
+    try {
+      localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
+    } catch (e) {}
+    renderSavedAccountsList();
   }
 }
 
@@ -661,14 +678,17 @@ function renderSuperAdminDashboard() {
   const statRev = document.getElementById('stat-revenue-total');
   const statActive = document.getElementById('stat-active-subs');
   const statPending = document.getElementById('stat-pending-subs');
+  const statStudentApps = document.getElementById('stat-student-apps-count');
 
   if (statColleges) statColleges.textContent = totalColleges;
   if (statRev) statRev.textContent = '$' + totalRevenue.toLocaleString('en-US');
   if (statActive) statActive.textContent = activeSubs;
   if (statPending) statPending.textContent = pendingSubs;
+  if (statStudentApps) statStudentApps.textContent = (db.studentApplications || []).length;
 
   renderSuperAdminColleges();
   renderSuperAdminApplications();
+  renderSuperAdminStudentApplications();
 }
 
 function renderSuperAdminColleges() {
@@ -2755,6 +2775,161 @@ function renderSuperAdminApplications() {
   if (window.lucide) window.lucide.createIcons();
 }
 
+function renderSuperAdminStudentApplications() {
+  const db = readErpDb();
+  const allApps = db.studentApplications || [];
+  const filterCollege = document.getElementById('super-admin-student-apps-college-filter')?.value || 'ALL';
+  const tbody = document.getElementById('super-admin-student-apps-tbody');
+  const countBadge = document.getElementById('super-admin-student-apps-count');
+  const statBadge = document.getElementById('stat-student-apps-count');
+
+  if (countBadge) countBadge.textContent = `${allApps.length} طلبات`;
+  if (statBadge) statBadge.textContent = allApps.length.toString();
+
+  // Populate college filter dropdown if needed
+  const filterSelect = document.getElementById('super-admin-student-apps-college-filter');
+  if (filterSelect && filterSelect.options.length <= 1) {
+    const colleges = db.colleges || [];
+    colleges.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.id;
+      opt.textContent = c.name;
+      filterSelect.appendChild(opt);
+    });
+  }
+
+  if (!tbody) return;
+
+  const filtered = filterCollege === 'ALL'
+    ? allApps
+    : allApps.filter(a => a.collegeId === filterCollege || a.collegeName?.includes(filterCollege));
+
+  if (filtered.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="9" class="text-center p-8 text-slate-400 font-semibold">لا توجد طلبات انضمام طلاب واردة حالياً. عند تقديم أي طالب لطلب انضمام سيظهر هنا وفي لوحة عمادة كليته فوراً.</td></tr>`;
+    return;
+  }
+
+  tbody.innerHTML = filtered.map(app => {
+    const isPending = app.status === 'Pending';
+    const isApproved = app.status === 'Approved';
+    const isRejected = app.status === 'Rejected';
+
+    let statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-300">قيد التدقيق 🟡</span>';
+    if (isApproved) {
+      statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">معتمد ومقبول 🟢</span>';
+    } else if (isRejected) {
+      statusHtml = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-800 border border-rose-300">مرفوض 🔴</span>';
+    }
+
+    const waLink = getStudentWhatsAppUrl(app.phone, app.studentName, app.collegeName, app.universityId);
+
+    return `
+      <tr class="hover:bg-teal-50/40 transition-colors">
+        <td class="p-3.5 whitespace-nowrap min-w-[100px]">
+          <span class="font-latin font-bold text-slate-900 block">${app.requestId || app.id}</span>
+          <span class="text-[10px] text-slate-400 font-latin">${new Date(app.createdAt).toLocaleTimeString('ar-EG', {hour:'2-digit', minute:'2-digit'})}</span>
+        </td>
+        <td class="p-3.5 whitespace-nowrap min-w-[150px]">
+          <strong class="text-slate-900 block text-sm font-black">${app.studentName}</strong>
+          ${app.notes ? `<span class="block text-[10px] text-slate-500 mt-0.5">${app.notes}</span>` : ''}
+        </td>
+        <td class="p-3.5 whitespace-nowrap min-w-[130px]">
+          <div class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-xl bg-teal-50 border border-teal-300 text-teal-950">
+            <span class="text-xs">🆔</span>
+            <span class="font-latin font-black text-sm tracking-wide" dir="ltr">${app.universityId}</span>
+          </div>
+        </td>
+        <td class="p-3.5 whitespace-nowrap min-w-[150px]">
+          <strong class="text-teal-900 block font-bold">${app.collegeName || 'كلية طب الأسنان'}</strong>
+        </td>
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[100px]">
+          <span class="font-bold text-slate-800 block">${app.stage === '5th' ? 'المرحلة الخامسة' : 'المرحلة الرابعة'}</span>
+          <span class="px-2 py-0.5 rounded bg-slate-100 text-slate-600 font-latin font-semibold text-[11px]">${app.group || 'Group A'}</span>
+        </td>
+        <td class="p-3.5 whitespace-nowrap min-w-[130px]">
+          <a href="${waLink}" target="_blank" class="font-latin font-bold text-emerald-700 hover:text-emerald-900 inline-flex items-center gap-1 hover:underline" title="مراسلة الطالب عبر واتساب" dir="ltr">
+            <span>${app.phone}</span>
+            <span class="text-xs">💬</span>
+          </a>
+        </td>
+        <td class="p-3.5 whitespace-nowrap min-w-[120px]">
+          <span class="font-latin text-slate-600 text-xs" dir="ltr">${app.email}</span>
+        </td>
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[100px]">
+          ${statusHtml}
+        </td>
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[220px]">
+          <div class="flex items-center justify-center gap-1.5 flex-wrap">
+            ${isPending ? `
+              <button 
+                type="button" 
+                onclick="approveStudentApplication('${app.id}')"
+                class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="الموافقة على الطالب واعتماد حسابه"
+              >
+                <span>اعتماد الطالب ✅</span>
+              </button>
+              <button 
+                type="button" 
+                onclick="loginAsDeanNewTab('${app.collegeId}')"
+                class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
+                title="فتح لوحة عميد هذه الكلية بتبويب جديد"
+              >
+                <span>دخول كعميد 🏛️</span>
+              </button>
+              <a 
+                href="${waLink}"
+                target="_blank"
+                class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="مراسلة الطالب عبر واتساب"
+              >
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>واتساب 💬</span>
+              </a>
+              <button 
+                type="button" 
+                onclick="rejectStudentApplication('${app.id}')"
+                class="px-2 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer"
+              >
+                رفض ❌
+              </button>
+            ` : `
+              <button 
+                type="button" 
+                onclick="loginAsDeanNewTab('${app.collegeId}')"
+                class="px-2.5 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1"
+                title="فتح لوحة عميد هذه الكلية بتبويب جديد"
+              >
+                <span>دخول كعميد 🏛️</span>
+              </button>
+              <a 
+                href="${waLink}"
+                target="_blank"
+                class="px-2.5 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
+                title="مراسلة الطالب عبر واتساب"
+              >
+                <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+                <span>واتساب 💬</span>
+              </a>
+            `}
+            <button 
+              type="button" 
+              onclick="deleteStudentApplication('${app.id}')"
+              class="p-1.5 text-slate-400 hover:text-rose-600 rounded text-xs font-bold cursor-pointer"
+              title="حذف الطلب"
+            >
+              🗑️
+            </button>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  if (window.lucide) window.lucide.createIcons();
+}
+window.renderSuperAdminStudentApplications = renderSuperAdminStudentApplications;
+
 function openApproveApplicationModal(appId) {
   const db = readErpDb();
   const app = (db.applications || []).find(a => a.id === appId);
@@ -3141,39 +3316,60 @@ async function handleStudentApplicationSubmit(event) {
     return;
   }
 
-  const db = readErpDb();
-  const college = (db.colleges || []).find(c => c.id === collegeId);
-  const collegeName = college ? college.name : 'كلية طب الأسنان';
+  const submitBtn = document.getElementById('btn-submit-student-app');
+  if (submitBtn) {
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span>جاري إرسال الطلب سحابياً... ⏳</span>';
+  }
 
-  const requestId = 'STU-REQ-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
+  try {
+    const db = readErpDb();
+    const college = (db.colleges || []).find(c => c.id === collegeId);
+    const collegeName = college ? college.name : 'كلية طب الأسنان';
 
-  const application = {
-    id: 'sapp_' + Date.now(),
-    requestId,
-    collegeId,
-    collegeName,
-    studentName,
-    universityId,
-    stage,
-    group,
-    phone,
-    email,
-    proposedPassword,
-    notes,
-    status: 'Pending',
-    createdAt: new Date().toISOString()
-  };
+    const requestId = 'STU-REQ-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
 
-  if (!db.studentApplications) db.studentApplications = [];
-  db.studentApplications.unshift(application);
-  writeErpDb(db);
+    const application = {
+      id: 'sapp_' + Date.now(),
+      requestId,
+      collegeId,
+      collegeName,
+      studentName,
+      universityId,
+      stage,
+      group,
+      phone,
+      email,
+      proposedPassword,
+      notes,
+      status: 'Pending',
+      createdAt: new Date().toISOString()
+    };
 
-  // Sync to Cloud
-  await syncPushStudentApplication(application);
+    if (!db.studentApplications) db.studentApplications = [];
+    db.studentApplications.unshift(application);
+    writeErpDb(db);
 
-  closeStudentApplicationModal();
+    // Sync to Cloud
+    await syncPushStudentApplication(application);
 
-  alert(`🎉 تم تقديم طلب انضمامك بنجاح تام!\n\nرقم حجز ومتابعة الطلب: ${requestId}\nاسم الطالب: ${studentName}\nرقم الهوية الجامعية: ${universityId}\nالكلية: ${collegeName}\n\nتم إرسال الطلب مباشرة إلى عمادة كليتك للمراجعة والاعتماد. سيتم التواصل معك عبر الواتساب فور تفعيل الحساب.`);
+    // Immediate UI updates
+    renderSuperAdminStudentApplications();
+    renderCollegeStudentApplications();
+
+    closeStudentApplicationModal();
+
+    alert(`🎉 تم تقديم طلب انضمامك بنجاح تام وحفظه سحابياً!\n\nرقم حجز ومتابعة الطلب: ${requestId}\nاسم الطالب: ${studentName}\nرقم الهوية الجامعية: ${universityId}\nالكلية: ${collegeName}\n\nتم إرسال الطلب مباشرة إلى عمادة كليتك للمراجعة والاعتماد. سيتم التواصل معك عبر الواتساب فور تفعيل الحساب.`);
+  } catch (err) {
+    console.error('Error submitting student application:', err);
+    alert('حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.');
+  } finally {
+    if (submitBtn) {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i><span>إرسال طلب الانضمام لعمادة الكلية 🚀</span>';
+      if (window.lucide) window.lucide.createIcons();
+    }
+  }
 }
 window.handleStudentApplicationSubmit = handleStudentApplicationSubmit;
 
@@ -3240,6 +3436,7 @@ async function syncPullStudentApplicationsFromCloud(showFeedback = false) {
           if (changed) {
             writeErpDb(db);
             renderCollegeStudentApplications();
+            renderSuperAdminStudentApplications();
             // Also update Dean badge
             const currentCollege = getCurrentUserCollege();
             if (currentCollege) {
@@ -3250,6 +3447,8 @@ async function syncPullStudentApplicationsFromCloud(showFeedback = false) {
           }
 
           if (showFeedback) {
+            renderSuperAdminStudentApplications();
+            renderCollegeStudentApplications();
             alert(`✅ تم تحديث طلبات انضمام الطلبة بنجاح (${data.applications.length} طلبات مسجلة)`);
           }
           return true;
@@ -3475,6 +3674,7 @@ async function approveStudentApplication(appId) {
 
   renderCollegeStudents();
   renderCollegeStudentApplications();
+  renderSuperAdminStudentApplications();
 
   const waUrl = getStudentWhatsAppUrl(app.phone, app.studentName, app.collegeName, app.universityId, username, password);
   if (confirm(`🎉 تمت الموافقة على الطالب (${app.studentName}) واعتماده رسمياً بالكلية!\n\nاسم المستخدم: ${username}\nكلمة المرور: ${password}\n\nهل ترغب في فتح محادثة واتساب الآن لإرسال رسالة التهنئة وبيانات الدخول للطالب فوراً؟`)) {
@@ -3493,6 +3693,7 @@ async function rejectStudentApplication(appId) {
   writeErpDb(db);
   await syncPushStudentApplication(app);
   renderCollegeStudentApplications();
+  renderSuperAdminStudentApplications();
 }
 window.rejectStudentApplication = rejectStudentApplication;
 
@@ -3502,6 +3703,7 @@ async function deleteStudentApplication(appId) {
   db.studentApplications = (db.studentApplications || []).filter(a => a.id !== appId);
   writeErpDb(db);
   renderCollegeStudentApplications();
+  renderSuperAdminStudentApplications();
 }
 window.deleteStudentApplication = deleteStudentApplication;
 
