@@ -200,7 +200,10 @@ window.getCurrentUserCollege = getCurrentUserCollege;
 // ============================================================================
 // AUTHENTICATION & ROUTING
 // ============================================================================
-function handleLoginSubmit(event) {
+// ============================================================================
+// AUTHENTICATION & ROUTING
+// ============================================================================
+async function handleLoginSubmit(event) {
   event.preventDefault();
   const errorAlert = document.getElementById('login-error-alert');
   const errorText = document.getElementById('login-error-text');
@@ -214,31 +217,42 @@ function handleLoginSubmit(event) {
     return;
   }
 
-  const db = readErpDb();
+  let db = readErpDb();
+
+  // Helper: Flexible password comparison (handling @ prefix or suffix variations)
+  const isPassMatch = (storedPass, enteredPass) => {
+    if (!storedPass || !enteredPass) return false;
+    if (storedPass === enteredPass) return true;
+    const cleanStored = storedPass.replace(/^@+|@+$/g, '');
+    const cleanEntered = enteredPass.replace(/^@+|@+$/g, '');
+    return cleanStored === cleanEntered;
+  };
 
   // 1. Check Super Admin
   if (
     (usernameInput === db.superAdmin.username.toLowerCase() || usernameInput === db.superAdmin.email.toLowerCase()) &&
-    passwordInput === db.superAdmin.password
+    db.superAdmin.password === passwordInput
   ) {
     loginSuccess({
       id: db.superAdmin.id,
       name: db.superAdmin.name,
       username: db.superAdmin.username,
       role: 'SUPER_ADMIN'
-    }, passwordInput);
+    });
     return;
   }
 
-  // Strict Enforcement: If no accredited colleges exist, reject all logins except Super Admin
+  // If local colleges list is empty, attempt immediate sync from cloud before deciding
   if (!db.colleges || db.colleges.length === 0) {
-    showLoginError('لا توجد أي كليات معتمدة في المنظومة حالياً. يقتصر تسجيل الدخول حصراً على الإدارة المركزية (Super Admin).');
-    return;
+    try {
+      await syncPullCollegesFromCloud();
+      db = readErpDb();
+    } catch (e) {}
   }
 
   // 2. Check College Admins (Deans)
-  const college = db.colleges.find(
-    c => c.adminUsername.toLowerCase() === usernameInput && c.adminPassword === passwordInput
+  const college = (db.colleges || []).find(
+    c => c.adminUsername && c.adminUsername.toLowerCase() === usernameInput && isPassMatch(c.adminPassword, passwordInput)
   );
   if (college) {
     if (college.status === 'Paused') {
@@ -253,14 +267,20 @@ function handleLoginSubmit(event) {
       name: college.deanName,
       username: college.adminUsername,
       role: 'COLLEGE_ADMIN'
-    }, passwordInput);
+    });
+    return;
+  }
+
+  // Strict Enforcement: If no accredited colleges exist at all, reject other logins
+  if (!db.colleges || db.colleges.length === 0) {
+    showLoginError('لا توجد أي كليات معتمدة في المنظومة حالياً. يقتصر تسجيل الدخول حصراً على الإدارة المركزية (Super Admin).');
     return;
   }
 
   // 3. Check Instructors
-  const instructor = db.instructors.find(
+  const instructor = (db.instructors || []).find(
     inst => (inst.username.toLowerCase() === usernameInput || (inst.email && inst.email.toLowerCase() === usernameInput)) &&
-            inst.password === passwordInput
+            isPassMatch(inst.password, passwordInput)
   );
   if (instructor) {
     const parentCollege = db.colleges.find(c => c.id === instructor.collegeId);
@@ -277,13 +297,13 @@ function handleLoginSubmit(event) {
       department: instructor.department,
       username: instructor.username,
       role: 'INSTRUCTOR'
-    }, passwordInput);
+    });
     return;
   }
 
   // 4. Check Students
-  const student = db.students.find(
-    s => s.username.toLowerCase() === usernameInput && s.password === passwordInput
+  const student = (db.students || []).find(
+    s => s.username.toLowerCase() === usernameInput && isPassMatch(s.password, passwordInput)
   );
   if (student) {
     const parentCollege = db.colleges.find(c => c.id === student.collegeId);
@@ -300,7 +320,7 @@ function handleLoginSubmit(event) {
       group: student.group,
       username: student.username,
       role: 'STUDENT'
-    }, passwordInput);
+    });
     return;
   }
 
@@ -1512,6 +1532,16 @@ async function saveSupabaseSettings() {
 }
 
 async function syncPushCollege(college) {
+  // 1. Always push to Netlify Blobs Cloud Storage first!
+  try {
+    if (typeof syncPushCollegeToCloud === 'function') {
+      await syncPushCollegeToCloud(college);
+    }
+  } catch (err) {
+    console.warn('Netlify cloud blobs push notice:', err);
+  }
+
+  // 2. Also push to Supabase if configured
   const client = getErpSupabaseClient();
   if (!client) return;
   const baseData = {
