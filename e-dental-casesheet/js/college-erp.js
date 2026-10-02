@@ -3027,12 +3027,11 @@ async function syncPullApplicationsFromCloud(showFeedback = false) {
             }
           });
 
-          // Also push any local applications that are not yet in cloud
-          for (const localApp of db.applications) {
-            if (!data.applications.some(a => a.id === localApp.id)) {
-              syncPushApplication(localApp).catch(() => {});
-            }
-          }
+          // Sync local deletions: if an app is not in cloud, remove it locally
+          const cloudIds = new Set(data.applications.map(a => a.id));
+          const initialLen = db.applications.length;
+          db.applications = db.applications.filter(a => cloudIds.has(a.id));
+          if (db.applications.length !== initialLen) changed = true;
 
           if (changed) {
             writeErpDb(db);
@@ -3302,40 +3301,23 @@ async function syncPullStudentApplicationsFromCloud(showFeedback = false) {
         const data = await res.json();
         if (data && Array.isArray(data.applications)) {
           const db = readErpDb();
-          if (!db.studentApplications) db.studentApplications = [];
+          db.studentApplications = data.applications;
+          writeErpDb(db);
 
-          let changed = false;
-          data.applications.forEach(app => {
-            const idx = db.studentApplications.findIndex(a => a.id === app.id);
-            if (idx > -1) {
-              if (JSON.stringify(db.studentApplications[idx]) !== JSON.stringify(app)) {
-                db.studentApplications[idx] = { ...db.studentApplications[idx], ...app };
-                changed = true;
-              }
-            } else {
-              db.studentApplications.unshift(app);
-              changed = true;
-            }
-          });
+          renderCollegeStudentApplications();
+          renderSuperAdminStudentApplications();
 
-          // Also push local to cloud if missing
-          for (const localApp of db.studentApplications) {
-            if (!data.applications.some(a => a.id === localApp.id)) {
-              syncPushStudentApplication(localApp).catch(() => {});
-            }
-          }
-
-          if (changed) {
-            writeErpDb(db);
-            renderCollegeStudentApplications();
-            renderSuperAdminStudentApplications();
-            // Also update Dean badge
-            const currentCollege = getCurrentUserCollege();
-            if (currentCollege) {
-              const myStudentApps = db.studentApplications.filter(a => a.collegeId === currentCollege.id && a.status === 'Pending');
-              const studentAppsBadge = document.getElementById('dean-tab-student-apps-count');
-              if (studentAppsBadge) studentAppsBadge.textContent = myStudentApps.length;
-            }
+          // Also update Dean badge
+          const currentCollege = getCurrentUserCollege();
+          if (currentCollege) {
+            const myStudentApps = db.studentApplications.filter(a => {
+              if (a.status !== 'Pending') return false;
+              if (a.collegeId && currentCollege.id && a.collegeId === currentCollege.id) return true;
+              if (a.collegeName && currentCollege.name && a.collegeName.trim() === currentCollege.name.trim()) return true;
+              return false;
+            });
+            const studentAppsBadge = document.getElementById('dean-tab-student-apps-count');
+            if (studentAppsBadge) studentAppsBadge.textContent = myStudentApps.length;
           }
 
           if (showFeedback) {
@@ -3594,10 +3576,30 @@ async function deleteStudentApplication(appId) {
   const db = readErpDb();
   db.studentApplications = (db.studentApplications || []).filter(a => a.id !== appId);
   writeErpDb(db);
+  syncDeleteStudentApplication(appId);
   renderCollegeStudentApplications();
   renderSuperAdminStudentApplications();
 }
 window.deleteStudentApplication = deleteStudentApplication;
+
+async function syncDeleteStudentApplication(appId) {
+  const candidateEndpoints = [
+    `/api/student-applications?id=${encodeURIComponent(appId)}`,
+    `/.netlify/functions/applications?type=student&id=${encodeURIComponent(appId)}`,
+    `https://dental-casesheet-erp.netlify.app/api/student-applications?id=${encodeURIComponent(appId)}`,
+    `https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=student&id=${encodeURIComponent(appId)}`
+  ];
+
+  for (const ep of candidateEndpoints) {
+    try {
+      const res = await fetch(ep, { method: 'DELETE' });
+      if (res.ok) break;
+    } catch (e) {
+      console.warn('Sync delete student app notice:', ep, e);
+    }
+  }
+}
+window.syncDeleteStudentApplication = syncDeleteStudentApplication;
 
 // Auto init on page load
 window.addEventListener('DOMContentLoaded', () => {
