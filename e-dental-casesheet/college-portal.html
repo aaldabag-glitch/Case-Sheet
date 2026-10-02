@@ -64,6 +64,24 @@
       background: #cbd5e1;
       border-radius: 4px;
     }
+    @media print {
+      body * {
+        visibility: hidden !important;
+      }
+      #printable-voucher-area, #printable-voucher-area * {
+        visibility: visible !important;
+      }
+      #printable-voucher-area {
+        position: fixed !important;
+        left: 0 !important;
+        top: 0 !important;
+        width: 100% !important;
+        background: white !important;
+        border: 2px solid #0f766e !important;
+        box-shadow: none !important;
+        padding: 30px !important;
+      }
+    }
   </style>
 </head>
 <body class="bg-slate-100/80 text-slate-900 min-h-screen flex flex-col selection:bg-teal-100 selection:text-teal-900 custom-scrollbar">
@@ -234,42 +252,42 @@
         </div>
       </div>
 
-      <!-- Quick Stats Counters -->
+      <!-- Quick Stats: College Subscriptions & Financials (نفس نظام العيادات) -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
         <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
           <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
-            <span>الكليات المسجلة</span>
+            <span>الكليات المرخصة</span>
             <i data-lucide="building-2" class="w-4 h-4 text-teal-600"></i>
           </div>
           <div id="stat-colleges-count" class="text-2xl sm:text-3xl font-black text-slate-900 font-latin">0</div>
-          <p class="text-[11px] text-teal-700 font-semibold mt-1">كليات مرخصة بالمنظومة</p>
+          <p class="text-[11px] text-teal-700 font-semibold mt-1">كليات معتمدة في النظام</p>
         </div>
 
         <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
           <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
-            <span>الكادر التدريسي الإجمالي</span>
-            <i data-lucide="users" class="w-4 h-4 text-sky-600"></i>
+            <span>إجمالي إيرادات الاشتراكات</span>
+            <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-emerald-600"></i>
           </div>
-          <div id="stat-instructors-count" class="text-2xl sm:text-3xl font-black text-slate-900 font-latin">0</div>
-          <p class="text-[11px] text-sky-700 font-semibold mt-1">مشرفين وأساتذة سريريين</p>
+          <div id="stat-revenue-total" class="text-2xl sm:text-3xl font-black text-emerald-700 font-latin">$0</div>
+          <p class="text-[11px] text-emerald-800 font-semibold mt-1">المبالغ المسددة بالكامل</p>
         </div>
 
         <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
           <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
-            <span>طلبة المرحلة 4 و 5</span>
-            <i data-lucide="graduation-cap" class="w-4 h-4 text-indigo-600"></i>
+            <span>الاشتراكات السارية والنشطة</span>
+            <i data-lucide="shield-check" class="w-4 h-4 text-sky-600"></i>
           </div>
-          <div id="stat-students-count" class="text-2xl sm:text-3xl font-black text-slate-900 font-latin">0</div>
-          <p class="text-[11px] text-indigo-700 font-semibold mt-1">طالب سريري مسجل</p>
+          <div id="stat-active-subs" class="text-2xl sm:text-3xl font-black text-sky-700 font-latin">0</div>
+          <p class="text-[11px] text-sky-700 font-semibold mt-1">تراخيص أكاديمية سارية</p>
         </div>
 
         <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200">
           <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-2">
-            <span>الحالات والكيس شيت</span>
-            <i data-lucide="file-check" class="w-4 h-4 text-emerald-600"></i>
+            <span>اشتراكات متوقفة / معلقة</span>
+            <i data-lucide="alert-triangle" class="w-4 h-4 text-amber-500"></i>
           </div>
-          <div id="stat-cases-count" class="text-2xl sm:text-3xl font-black text-slate-900 font-latin">0</div>
-          <p class="text-[11px] text-emerald-700 font-semibold mt-1">طبلة سريرية مقيّمة</p>
+          <div id="stat-pending-subs" class="text-2xl sm:text-3xl font-black text-amber-600 font-latin">0</div>
+          <p class="text-[11px] text-amber-700 font-semibold mt-1">بانتظار السداد والتجديد</p>
         </div>
       </div>
 
@@ -279,10 +297,10 @@
           <div>
             <h3 class="text-lg font-black text-slate-900 flex items-center gap-2">
               <i data-lucide="landmark" class="w-5 h-5 text-teal-600"></i>
-              <span>دليل كليات طب الأسنان المعتمدة بالمنظومة</span>
+              <span>دليل كليات طب الأسنان والاشتراكات المالية</span>
             </h3>
             <p class="text-xs text-slate-500 font-semibold mt-0.5">
-              بيانات الكلية، حساب العميد، عدد التدريسيين والطلبة، والتحكم بحالة الاشتراك
+              بيانات الكلية، عمادة الكلية، رسوم الاشتراك السنوي، وتأكيد تجديد التراخيص
             </p>
           </div>
           
@@ -306,9 +324,9 @@
                 <th class="p-3.5">الرمز والكود</th>
                 <th class="p-3.5">العميد / المشرف</th>
                 <th class="p-3.5">بيانات الدخول للأدمن</th>
-                <th class="p-3.5 text-center">التدريسيين</th>
-                <th class="p-3.5 text-center">الطلبة (4 و 5)</th>
-                <th class="p-3.5 text-center">الحالة</th>
+                <th class="p-3.5 text-center">الاشتراك المالي</th>
+                <th class="p-3.5 text-center">تاريخ الانتهاء</th>
+                <th class="p-3.5 text-center">حالة الاشتراك</th>
                 <th class="p-3.5 text-center">الإجراءات</th>
               </tr>
             </thead>
@@ -370,6 +388,36 @@
             </button>
           </div>
         </div>
+      </div>
+
+      <!-- Dean Subscription Expiry Card (Strictly status & expiry date - NO financial amounts) -->
+      <div class="glass-card rounded-2xl p-4 sm:p-5 border border-slate-200 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-white/95 shadow-xs">
+        <div class="flex items-center gap-3">
+          <div class="w-11 h-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center font-bold border border-emerald-200">
+            <i data-lucide="shield-check" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="text-xs font-bold text-slate-500">حالة ترخيص الكلية والاشتراك الأكاديمي:</span>
+              <span id="dean-sub-status-badge" class="px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300">
+                ساري ومفعل 🟢
+              </span>
+            </div>
+            <p class="text-xs text-slate-700 font-semibold mt-0.5 flex items-center gap-2">
+              <span>تاريخ انتهاء الترخيص: <strong id="dean-sub-expiry-date" class="font-bold text-teal-800 font-latin">2027-10-01</strong></span>
+              <span class="text-slate-300">•</span>
+              <span id="dean-sub-days-left" class="text-emerald-700 font-bold">365 يوماً متبقية</span>
+            </p>
+          </div>
+        </div>
+        <button 
+          type="button" 
+          onclick="printCollegeLicenseCertificate()"
+          class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs flex items-center gap-1.5 border border-slate-300 transition-all cursor-pointer"
+        >
+          <i data-lucide="printer" class="w-4 h-4 text-slate-600"></i>
+          <span>طباعة شهادة ترخيص الكلية 📜</span>
+        </button>
       </div>
 
       <!-- College Admin Tabs -->
@@ -534,21 +582,27 @@
             </p>
           </div>
 
-          <div class="bg-white/10 backdrop-blur-md px-5 py-3 rounded-2xl border border-white/15 text-center">
-            <span class="text-xs text-slate-300 block font-bold">الحالات بانتظار تقييمك</span>
-            <span id="inst-pending-badge" class="text-2xl font-black text-amber-400 font-latin">0</span>
+          <div class="flex items-center gap-3">
+            <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/15 text-center">
+              <span class="text-xs text-slate-300 block font-bold">طلبة كليتي (4 و 5)</span>
+              <span id="inst-students-count" class="text-2xl font-black text-sky-400 font-latin">0</span>
+            </div>
+            <div class="bg-white/10 backdrop-blur-md px-4 py-3 rounded-2xl border border-white/15 text-center">
+              <span class="text-xs text-slate-300 block font-bold">حالات بانتظار تقييمك</span>
+              <span id="inst-pending-badge" class="text-2xl font-black text-amber-400 font-latin">0</span>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Cases Pending Evaluation -->
+      <!-- Section 1: Cases Pending Evaluation -->
       <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
             <i data-lucide="clock" class="w-4 h-4 text-amber-600"></i>
-            <span>قائمة الحالات السريرية الواردة من الطلبة</span>
+            <span>طلبات وحالات الطلاب الواردة للتقييم ورصد الدرجة (من 10)</span>
           </h3>
-          <span class="text-xs text-slate-500 font-semibold">عيادات جراحة الفم واللثة</span>
+          <span class="text-xs text-slate-500 font-semibold">استمارات الكيس شيت المرفوعة</span>
         </div>
 
         <div class="overflow-x-auto rounded-2xl border border-slate-200">
@@ -566,6 +620,34 @@
               </tr>
             </thead>
             <tbody id="instructor-cases-tbody" class="divide-y divide-slate-200 bg-white">
+              <!-- Rendered via JS -->
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Section 2: College Students Directory (دليل طلبة كليتي) -->
+      <div class="glass-card rounded-3xl p-6 border border-slate-200 space-y-4">
+        <div class="flex items-center justify-between">
+          <h3 class="text-sm font-black text-slate-900 flex items-center gap-2">
+            <i data-lucide="graduation-cap" class="w-4 h-4 text-teal-600"></i>
+            <span>دليل طلبة كليتي المسجلين (المرحلة الرابعة والخامسة)</span>
+          </h3>
+          <span class="text-xs text-slate-500 font-semibold">قائمة الطلبة المسجلين بالكلية</span>
+        </div>
+
+        <div class="overflow-x-auto rounded-2xl border border-slate-200">
+          <table class="w-full text-right text-xs">
+            <thead class="bg-slate-100 text-slate-700 font-bold border-b border-slate-200">
+              <tr>
+                <th class="p-3">اسم الطالب</th>
+                <th class="p-3">المرحلة الأكاديمية</th>
+                <th class="p-3">المجموعة / كرسي العيادة</th>
+                <th class="p-3">اسم المستخدم</th>
+                <th class="p-3 text-center">الحالة</th>
+              </tr>
+            </thead>
+            <tbody id="instructor-students-tbody" class="divide-y divide-slate-200 bg-white">
               <!-- Rendered via JS -->
             </tbody>
           </table>
@@ -692,17 +774,32 @@
         <div class="grid grid-cols-2 gap-3">
           <div>
             <label class="block font-bold text-slate-700 mb-1">اسم مستخدم الأدمن (Username) *</label>
-            <input type="text" id="new-dean-username" required placeholder="dean.mosul" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <input type="text" id="new-dean-username" required placeholder="dean.college@gmail.com أو dean.name" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">كلمة المرور (Password) *</label>
-            <input type="text" id="new-dean-password" required placeholder="mosul2026@" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <input type="text" id="new-dean-password" required placeholder="dean123" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+          </div>
+        </div>
+
+        <!-- Financial Subscription Details -->
+        <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2">
+          <span class="block font-bold text-emerald-900 text-xs">بيانات اشتراك الكلية المالي (للسوبر أدمن فقط):</span>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">قيمة الاشتراك السنوي ($) *</label>
+              <input type="number" id="new-college-fee" required value="1500" placeholder="1500" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            </div>
+            <div>
+              <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص *</label>
+              <input type="date" id="new-college-sub-end" required class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            </div>
           </div>
         </div>
 
         <div class="pt-2 flex items-center justify-end gap-2">
           <button type="button" onclick="closeAddCollegeModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
-          <button type="submit" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow">حفظ وإنشاء الكلية</button>
+          <button type="submit" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow">حفظ وإنشاء الكلية والاشتراك</button>
         </div>
       </form>
     </div>
@@ -933,10 +1030,134 @@
     </div>
   </div>
 
+  <!-- MODAL: PRINT SUBSCRIPTION RECEIPT / CERTIFICATE (سند تجديد واشتراك الكلية) -->
+  <div id="modal-print-receipt" class="hidden fixed inset-0 z-50 bg-slate-900/70 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-2xl w-full shadow-2xl border border-slate-200 space-y-4 max-h-[95vh] overflow-y-auto custom-scrollbar">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <div class="flex items-center gap-2">
+          <div class="w-10 h-10 rounded-xl bg-teal-50 text-teal-700 flex items-center justify-center">
+            <i data-lucide="receipt" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-black text-slate-900">سند تجديد واشتراك الكلية الرسمي</h3>
+            <p class="text-[11px] text-slate-500 font-semibold">وثيقة اعتماد وترخيص أكاديمي صادرة من منظومة كليات طب الأسنان</p>
+          </div>
+        </div>
+        <button onclick="closePrintReceiptModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
 
+      <!-- Printable Voucher Content -->
+      <div id="printable-voucher-area" class="p-6 bg-slate-50 rounded-2xl border-2 border-teal-800/30 text-slate-900 space-y-5">
+        <!-- Voucher Header -->
+        <div class="text-center border-b-2 border-teal-800 pb-4">
+          <h2 class="text-base sm:text-lg font-black text-slate-900">جمهورية العراق • وزارة التعليم العالي والبحث العلمي</h2>
+          <h3 class="text-xl sm:text-2xl font-black text-teal-800 mt-1">منظومة كليات طب الأسنان المعتمدة للتدريب السريري</h3>
+          <p class="text-xs text-slate-500 font-bold mt-1 font-latin">E-Dental Academic College ERP • Official Subscription Voucher</p>
+          <div class="mt-3 inline-flex items-center gap-2 px-4 py-1 bg-teal-800 text-white rounded-full text-xs font-bold">
+            <span>سند قبض وتأكيد تجديد اشتراك سنوي معتمد</span>
+          </div>
+        </div>
 
-  <!-- ========================================================================
-       FOOTER
+        <!-- Voucher Details Grid -->
+        <div class="grid grid-cols-2 gap-4 text-xs">
+          <div class="space-y-1">
+            <span class="text-slate-500 block font-bold">رقم السند المالي:</span>
+            <strong id="receipt-number" class="text-slate-900 font-latin text-sm font-black">REC-2026-0000</strong>
+          </div>
+          <div class="space-y-1">
+            <span class="text-slate-500 block font-bold">تاريخ الإصدار والتجديد:</span>
+            <strong id="receipt-issue-date" class="text-slate-900 font-latin text-sm font-black">2026-10-02</strong>
+          </div>
+          <div class="space-y-1">
+            <span class="text-slate-500 block font-bold">اسم الكلية / الجامعة:</span>
+            <strong id="receipt-college-name" class="text-teal-900 text-sm font-black">كلية طب الأسنان</strong>
+          </div>
+          <div class="space-y-1">
+            <span class="text-slate-500 block font-bold">رمز الكلية والاعتماد:</span>
+            <strong id="receipt-college-code" class="text-slate-900 font-latin text-sm font-bold">DENT-00</strong>
+          </div>
+          <div class="space-y-1">
+            <span class="text-slate-500 block font-bold">المحافظة / المقر:</span>
+            <strong id="receipt-college-city" class="text-slate-900 text-sm font-bold">بغداد</strong>
+          </div>
+          <div class="space-y-1">
+            <span class="text-slate-500 block font-bold">عميد الكلية / المشرف العام:</span>
+            <strong id="receipt-college-dean" class="text-slate-900 text-sm font-bold">أ.د. ...</strong>
+          </div>
+          <div class="space-y-1 col-span-2">
+            <span class="text-slate-500 block font-bold">فترة الصلاحية والترخيص الأكاديمي:</span>
+            <div class="p-2.5 bg-emerald-50 border border-emerald-200 rounded-xl flex items-center justify-between font-bold text-emerald-900 text-xs">
+              <span>سنة أكاديمية كاملة (مرخص وساري المفعول)</span>
+              <span>ينتهي بتاريخ: <span id="receipt-valid-until" class="font-latin text-sm font-black">2027-10-02</span></span>
+            </div>
+          </div>
+          <div id="receipt-amount-row" class="col-span-2 flex items-center justify-between p-3 bg-white border border-slate-300 rounded-xl">
+            <span class="text-slate-700 font-bold">مبلغ الاشتراك السنوي المسدد:</span>
+            <strong id="receipt-amount" class="text-slate-900 font-latin text-base font-black">$1,500 USD (مدفوع بالكامل)</strong>
+          </div>
+        </div>
+
+        <!-- Voucher Footer Signatures & Stamp -->
+        <div class="pt-4 border-t border-slate-300 flex items-center justify-between text-[11px]">
+          <div class="text-center space-y-1">
+            <span class="block text-slate-500 font-bold">إدارة المنظومة المركزية (Super Admin)</span>
+            <span class="block text-slate-800 font-bold">قسم الحسابات والتراخيص الأكاديمية</span>
+          </div>
+          <div class="w-20 h-20 rounded-full border-4 border-dashed border-teal-700 flex flex-col items-center justify-center text-teal-800 rotate-[-12deg] p-1 font-bold text-[9px] shadow-xs bg-teal-50">
+            <span>معتمد رسمياً</span>
+            <span class="text-[8px] font-latin font-bold">VERIFIED</span>
+            <i data-lucide="check-circle" class="w-4 h-4 text-teal-700"></i>
+          </div>
+          <div class="text-center space-y-1">
+            <span class="block text-slate-500 font-bold">الباركود والختم الرقمي:</span>
+            <span class="font-latin font-mono text-slate-600 block text-[10px]">#E-DENT-ERP-SECURE-2026#</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="flex items-center justify-end gap-2 pt-2 border-t border-slate-100">
+        <button type="button" onclick="closePrintReceiptModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold text-xs">إغلاق</button>
+        <button type="button" onclick="window.print()" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold text-xs shadow flex items-center gap-1.5 cursor-pointer">
+          <i data-lucide="printer" class="w-4 h-4"></i>
+          <span>طباعة السند / حفظ PDF 🖨️</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: RENEW SUBSCRIPTION (تجديد اشتراك كلية) -->
+  <div id="modal-renew-sub" class="hidden fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 sm:p-8 max-w-md w-full shadow-2xl border border-slate-200 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-100 pb-3">
+        <h3 class="text-base font-black text-slate-900 flex items-center gap-2">
+          <i data-lucide="credit-card" class="w-5 h-5 text-teal-600"></i>
+          <span>تجديد اشتراك وترخيص الكلية</span>
+        </h3>
+        <button onclick="closeRenewSubModal()" class="text-slate-400 hover:text-slate-600 text-xl font-bold">&times;</button>
+      </div>
+
+      <form onsubmit="handleRenewSubscriptionSubmit(event)" class="space-y-3.5 text-xs">
+        <input type="hidden" id="renew-college-id">
+        <div>
+          <span class="block font-bold text-slate-500 mb-1">الكلية:</span>
+          <strong id="renew-college-name" class="text-sm font-black text-teal-900 block">-</strong>
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">قيمة رسوم التجديد ($) *</label>
+          <input type="number" id="renew-amount" required value="1500" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+        </div>
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص الجديد *</label>
+          <input type="date" id="renew-new-date" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+        </div>
+        <div class="pt-2 flex items-center justify-end gap-2">
+          <button type="button" onclick="closeRenewSubModal()" class="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl font-bold">إلغاء</button>
+          <button type="submit" class="px-5 py-2 bg-teal-700 hover:bg-teal-800 text-white rounded-xl font-bold shadow">تأكيد التجديد وتحديث السند 💳</button>
+        </div>
+      </form>
+    </div>
+  </div>
        ======================================================================== -->
   <footer class="mt-auto border-t border-slate-200 bg-white py-4 text-center text-xs text-slate-500 font-semibold">
     <div class="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-2">

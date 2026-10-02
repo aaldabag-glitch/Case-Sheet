@@ -64,6 +64,83 @@ function clearAllSavedAccounts() {
   renderSavedAccountsList();
 }
 
+function initSavedAccountsIfEmpty() {
+  const list = getSavedAccounts();
+  if (!list || list.length === 0) {
+    saveAccountToDevice({
+      username: 'superadmin',
+      password: 'admin123',
+      name: 'مدير المنظومة (Super Admin)',
+      role: 'SUPER_ADMIN',
+      collegeName: 'الإدارة المركزية'
+    });
+  }
+}
+
+// فتح حساب العميد أو التدريسي بتبويب جديد مستقل دون تسجيل خروج السوبر أدمن
+function loginAsDeanNewTab(collegeId) {
+  const url = 'college-portal.html?impersonate=dean&collegeId=' + encodeURIComponent(collegeId);
+  window.open(url, '_blank');
+}
+
+function loginAsInstructorNewTab(instructorId) {
+  const url = 'college-portal.html?impersonate=instructor&instructorId=' + encodeURIComponent(instructorId);
+  window.open(url, '_blank');
+}
+
+function checkImpersonation() {
+  try {
+    const params = new URLSearchParams(window.location.search);
+    const imp = params.get('impersonate');
+    if (!imp) return;
+
+    const db = readErpDb();
+    if (imp === 'dean') {
+      const collegeId = params.get('collegeId');
+      const clg = db.colleges.find(c => c.id === collegeId);
+      if (clg) {
+        const user = {
+          id: 'dean_' + clg.id,
+          collegeId: clg.id,
+          collegeName: clg.name,
+          collegeCode: clg.code,
+          name: clg.deanName,
+          username: clg.adminUsername,
+          role: 'COLLEGE_ADMIN'
+        };
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        currentSession = user;
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    } else if (imp === 'instructor') {
+      const instructorId = params.get('instructorId');
+      const inst = db.instructors.find(i => i.id === instructorId);
+      if (inst) {
+        const clg = db.colleges.find(c => c.id === inst.collegeId);
+        const user = {
+          id: inst.id,
+          collegeId: inst.collegeId,
+          collegeName: clg ? clg.name : 'كلية طب الأسنان',
+          name: inst.name,
+          title: inst.title,
+          department: inst.department,
+          username: inst.username,
+          role: 'INSTRUCTOR'
+        };
+        sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+        currentSession = user;
+        if (window.history && window.history.replaceState) {
+          window.history.replaceState({}, document.title, window.location.pathname);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn('Impersonation check notice:', err);
+  }
+}
+
 function selectSavedAccount(username, password) {
   const uInput = document.getElementById('login-username');
   const pInput = document.getElementById('login-password');
@@ -281,7 +358,8 @@ function showLoginError(msg) {
 
 function loginSuccess(user, enteredPassword) {
   const rememberCheck = document.getElementById('remember-device-check');
-  if (rememberCheck && rememberCheck.checked) {
+  // حفظ الحساب على هذا الجهاز للسوبر أدمن والعمداء والتدريسيين فقط (استثناء الطلبة بناء على طلب المستخدم)
+  if (rememberCheck && rememberCheck.checked && user.role !== 'STUDENT') {
     saveAccountToDevice({
       username: user.username,
       password: enteredPassword || '',
@@ -404,12 +482,34 @@ function renderApp() {
 // ============================================================================
 function renderSuperAdminDashboard() {
   const db = readErpDb();
-  
-  // Counters
-  document.getElementById('stat-colleges-count').textContent = db.colleges.length;
-  document.getElementById('stat-instructors-count').textContent = db.instructors.length;
-  document.getElementById('stat-students-count').textContent = db.students.length;
-  document.getElementById('stat-cases-count').textContent = db.cases.length;
+  const totalColleges = db.colleges.length;
+  let totalRevenue = 0;
+  let activeSubs = 0;
+  let pendingSubs = 0;
+
+  const now = new Date();
+  db.colleges.forEach(c => {
+    const fee = parseFloat(c.subscriptionFee) || 1500;
+    totalRevenue += fee;
+    const isPaused = c.status === 'Paused';
+    const endDate = c.subscriptionEnd ? new Date(c.subscriptionEnd) : null;
+    const isExpired = endDate && endDate < now;
+    if (isPaused || isExpired) {
+      pendingSubs++;
+    } else {
+      activeSubs++;
+    }
+  });
+
+  const statColleges = document.getElementById('stat-colleges-count');
+  const statRev = document.getElementById('stat-revenue-total');
+  const statActive = document.getElementById('stat-active-subs');
+  const statPending = document.getElementById('stat-pending-subs');
+
+  if (statColleges) statColleges.textContent = totalColleges;
+  if (statRev) statRev.textContent = '$' + totalRevenue.toLocaleString('en-US');
+  if (statActive) statActive.textContent = activeSubs;
+  if (statPending) statPending.textContent = pendingSubs;
 
   renderSuperAdminColleges();
 }
@@ -422,26 +522,35 @@ function renderSuperAdminColleges() {
 
   const filtered = db.colleges.filter(c => 
     c.name.toLowerCase().includes(search) ||
-    c.city.toLowerCase().includes(search) ||
-    c.deanName.toLowerCase().includes(search) ||
-    c.code.toLowerCase().includes(search)
+    (c.city && c.city.toLowerCase().includes(search)) ||
+    (c.deanName && c.deanName.toLowerCase().includes(search)) ||
+    (c.code && c.code.toLowerCase().includes(search))
   );
 
   if (filtered.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد كليات مطابقة للبحث.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد كليات مسجلة حالياً. اضغط على زر "إضافة كلية جديدة" أعلاه.</td></tr>`;
     return;
   }
 
+  const now = new Date();
   tbody.innerHTML = filtered.map(c => {
-    const instCount = db.instructors.filter(i => i.collegeId === c.id).length;
-    const stdCount = db.students.filter(s => s.collegeId === c.id).length;
     const isPaused = c.status === 'Paused';
+    const fee = parseFloat(c.subscriptionFee) || 1500;
+    const subEnd = c.subscriptionEnd || '2027-10-01';
+    const isExpired = new Date(subEnd) < now;
+
+    let statusBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-200">ساري ونشط 🟢</span>';
+    if (isPaused) {
+      statusBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-rose-100 text-rose-700 border border-rose-200">معلق ⛔</span>';
+    } else if (isExpired) {
+      statusBadge = '<span class="px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-800 border border-amber-200">منتهي الصلاحية ⚠️</span>';
+    }
 
     return `
       <tr class="hover:bg-slate-50/80 transition-colors">
         <td class="p-3.5">
           <strong class="text-slate-900 block text-sm font-black">${c.name}</strong>
-          <span class="text-[11px] text-slate-500 font-semibold">📍 ${c.city}</span>
+          <span class="text-[11px] text-slate-500 font-semibold">📍 ${c.city || 'العراق'}</span>
         </td>
         <td class="p-3.5">
           <span class="px-2 py-0.5 rounded bg-slate-100 border border-slate-300 font-latin font-bold text-slate-700">${c.code}</span>
@@ -455,31 +564,57 @@ function renderSuperAdminColleges() {
             <span class="block text-slate-500">رمز: <strong class="font-latin text-slate-700">${c.adminPassword}</strong></span>
           </div>
         </td>
-        <td class="p-3.5 text-center font-black font-latin text-sky-700 text-sm">
-          ${instCount}
+        <td class="p-3.5 text-center">
+          <span class="font-latin font-black text-emerald-700 text-sm">$${fee.toLocaleString()}</span>
+          <span class="block text-[10px] text-slate-400">سنوي مدفوع</span>
         </td>
-        <td class="p-3.5 text-center font-black font-latin text-indigo-700 text-sm">
-          ${stdCount}
+        <td class="p-3.5 text-center font-latin font-semibold text-slate-700 text-xs">
+          ${subEnd}
         </td>
         <td class="p-3.5 text-center">
-          <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPaused ? 'bg-rose-100 text-rose-700 border border-rose-200' : 'bg-emerald-100 text-emerald-800 border border-emerald-200'}">
-            ${isPaused ? 'معلقة' : 'نشطة ومفعلة'}
-          </span>
+          ${statusBadge}
         </td>
         <td class="p-3.5 text-center">
-          <div class="flex items-center justify-center gap-1.5">
+          <div class="flex items-center justify-center gap-1.5 flex-wrap">
             <button 
-              onclick="loginAsDean('${c.id}')"
-              class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all"
-              title="دخول سريع باسم عميد الكلية"
+              type="button"
+              onclick="loginAsDeanNewTab('${c.id}')"
+              class="px-2.5 py-1 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+              title="دخول بتبويب جديد مستقل كعميد للكلية دون إغلاق السوبر أدمن"
             >
-              دخول كعميد 🏛️
+              <span>دخول كعميد 🏛️</span>
+              <span class="text-[9px] text-teal-600 font-latin font-normal">(تبويب جديد)</span>
             </button>
             <button 
+              type="button"
+              onclick="openPrintReceiptModal('${c.id}')"
+              class="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-800 border border-slate-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs"
+              title="طباعة سند تجديد واشتراك الكلية الرسمي"
+            >
+              وصل 🧾
+            </button>
+            <button 
+              type="button"
+              onclick="openRenewSubModal('${c.id}')"
+              class="px-2 py-1 bg-amber-50 hover:bg-amber-100 text-amber-900 border border-amber-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer shadow-xs"
+              title="تجديد الاشتراك وتمديد الصلاحية"
+            >
+              تجديد 💳
+            </button>
+            <button 
+              type="button"
               onclick="toggleCollegeStatus('${c.id}')"
-              class="px-2 py-1 rounded-lg text-[11px] font-bold border transition-all ${isPaused ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100'}"
+              class="px-2 py-1 rounded-lg text-[11px] font-bold border transition-all cursor-pointer ${isPaused ? 'bg-emerald-50 text-emerald-700 border-emerald-300 hover:bg-emerald-100' : 'bg-rose-50 text-rose-700 border-rose-300 hover:bg-rose-100'}"
             >
               ${isPaused ? 'تفعيل' : 'إيقاف'}
+            </button>
+            <button 
+              type="button"
+              onclick="deleteCollege('${c.id}')"
+              class="p-1 text-rose-500 hover:text-rose-700 hover:bg-rose-50 rounded text-xs font-bold cursor-pointer"
+              title="حذف الكلية نهائياً"
+            >
+              🗑️
             </button>
           </div>
         </td>
@@ -489,6 +624,12 @@ function renderSuperAdminColleges() {
 }
 
 function openAddCollegeModal() {
+  const nextYear = new Date();
+  nextYear.setFullYear(nextYear.getFullYear() + 1);
+  const endInput = document.getElementById('new-college-sub-end');
+  if (endInput && !endInput.value) {
+    endInput.value = nextYear.toISOString().slice(0, 10);
+  }
   document.getElementById('modal-add-college')?.classList.remove('hidden');
 }
 
@@ -506,6 +647,14 @@ function handleCreateCollegeSubmit(event) {
   const deanName = document.getElementById('new-college-dean').value.trim();
   const adminUsername = document.getElementById('new-dean-username').value.trim().toLowerCase();
   const adminPassword = document.getElementById('new-dean-password').value.trim();
+  const subscriptionFee = parseFloat(document.getElementById('new-college-fee')?.value || 1500);
+
+  let subscriptionEnd = document.getElementById('new-college-sub-end')?.value;
+  if (!subscriptionEnd) {
+    const nextYear = new Date();
+    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    subscriptionEnd = nextYear.toISOString().slice(0, 10);
+  }
 
   // Validate unique code & username
   if (db.colleges.some(c => c.code === code)) {
@@ -525,6 +674,9 @@ function handleCreateCollegeSubmit(event) {
     deanName,
     adminUsername,
     adminPassword,
+    subscriptionFee,
+    subscriptionStart: new Date().toISOString().slice(0, 10),
+    subscriptionEnd,
     status: 'Active',
     plan: 'ANNUAL_ACCREDITED',
     createdAt: new Date().toISOString()
@@ -534,9 +686,18 @@ function handleCreateCollegeSubmit(event) {
   writeErpDb(db);
   syncPushCollege(newCollege);
 
+  // Auto save dean account to device
+  saveAccountToDevice({
+    username: adminUsername,
+    password: adminPassword,
+    name: deanName,
+    role: 'COLLEGE_ADMIN',
+    collegeName: name
+  });
+
   closeAddCollegeModal();
   renderSuperAdminDashboard();
-  alert(`تمت إضافة ${name} بنجاح! تم إنشاء حساب العميد (${adminUsername}).`);
+  alert(`تمت إضافة ${name} بنجاح!\nتم حفظ حساب العميد (${adminUsername}) على هذا الجهاز بنجاح.`);
 }
 
 function toggleCollegeStatus(collegeId) {
@@ -546,23 +707,37 @@ function toggleCollegeStatus(collegeId) {
 
   clg.status = clg.status === 'Active' ? 'Paused' : 'Active';
   writeErpDb(db);
+  syncPushCollege(clg);
   renderSuperAdminDashboard();
 }
 
-function loginAsDean(collegeId) {
+function deleteCollege(collegeId) {
+  if (!confirm('هل أنت متأكد من حذف هذه الكلية نهائياً من المنظومة؟\nسيتم حذف جميع التدريسيين والطلبة التابعين لها.')) return;
   const db = readErpDb();
-  const clg = db.colleges.find(c => c.id === collegeId);
-  if (!clg) return;
+  db.colleges = db.colleges.filter(c => c.id !== collegeId);
+  db.instructors = db.instructors.filter(i => i.collegeId !== collegeId);
+  db.students = db.students.filter(s => s.collegeId !== collegeId);
+  db.cases = db.cases.filter(c => c.collegeId !== collegeId);
+  writeErpDb(db);
+  syncDeleteCollege(collegeId);
+  renderSuperAdminDashboard();
+}
 
-  loginSuccess({
-    id: 'dean_' + clg.id,
-    collegeId: clg.id,
-    collegeName: clg.name,
-    collegeCode: clg.code,
-    name: clg.deanName,
-    username: clg.adminUsername,
-    role: 'COLLEGE_ADMIN'
-  });
+async function syncDeleteCollege(collegeId) {
+  const client = getErpSupabaseClient();
+  if (!client) return;
+  try {
+    await client.from('college_colleges').delete().eq('id', collegeId);
+    await client.from('college_instructors').delete().eq('college_id', collegeId);
+    await client.from('college_students').delete().eq('college_id', collegeId);
+    await client.from('college_cases').delete().eq('college_id', collegeId);
+  } catch (e) {
+    console.warn('Supabase delete college error:', e);
+  }
+}
+
+function loginAsDean(collegeId) {
+  loginAsDeanNewTab(collegeId);
 }
 
 // ============================================================================
@@ -580,6 +755,43 @@ function renderCollegeAdminDashboard() {
   // Banner name
   const deanBanner = document.getElementById('dean-banner-college-name');
   if (deanBanner) deanBanner.textContent = user.collegeName;
+
+  // Subscription Details (Strictly Status & Expiry - NO financial figures visible to Dean)
+  const clg = db.colleges.find(c => c.id === user.collegeId);
+  const statusBadge = document.getElementById('dean-sub-status-badge');
+  const expiryDateEl = document.getElementById('dean-sub-expiry-date');
+  const daysLeftEl = document.getElementById('dean-sub-days-left');
+
+  if (clg) {
+    const isPaused = clg.status === 'Paused';
+    const subEnd = clg.subscriptionEnd || '2027-10-01';
+    const endDate = new Date(subEnd);
+    const now = new Date();
+    const diffTime = endDate - now;
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (expiryDateEl) expiryDateEl.textContent = subEnd;
+
+    if (isPaused) {
+      if (statusBadge) {
+        statusBadge.textContent = 'معلق مؤقتاً ⛔';
+        statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black bg-rose-100 text-rose-800 border border-rose-300';
+      }
+      if (daysLeftEl) daysLeftEl.textContent = 'يرجى مراجعة إدارة المنظومة';
+    } else if (diffDays <= 0) {
+      if (statusBadge) {
+        statusBadge.textContent = 'منتهي الصلاحية ⚠️';
+        statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black bg-amber-100 text-amber-800 border border-amber-300';
+      }
+      if (daysLeftEl) daysLeftEl.textContent = 'انتهت فترة الاشتراك';
+    } else {
+      if (statusBadge) {
+        statusBadge.textContent = 'ساري ومفعل 🟢';
+        statusBadge.className = 'px-2.5 py-0.5 rounded-full text-xs font-black bg-emerald-100 text-emerald-800 border border-emerald-300';
+      }
+      if (daysLeftEl) daysLeftEl.textContent = `${diffDays} يوماً متبقية`;
+    }
+  }
 
   // Counts strictly filtered for THIS college
   const myStudents = db.students.filter(s => s.collegeId === user.collegeId);
@@ -700,7 +912,7 @@ function renderCollegeInstructors() {
   const list = db.instructors.filter(i => i.collegeId === user.collegeId);
 
   if (list.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لم يتم إضافة أي تدريسي بعد.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لم يتم إضافة أي تدريسي بعد. اضغط على زر "إضافة تدريسي" أعلاه.</td></tr>`;
     return;
   }
 
@@ -722,7 +934,25 @@ function renderCollegeInstructors() {
           <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">نشط</span>
         </td>
         <td class="p-3 text-center">
-          <button onclick="deleteInstructor('${inst.id}')" class="text-rose-600 hover:text-rose-800 font-bold text-[11px]">حذف 🗑️</button>
+          <div class="flex items-center justify-center gap-1.5 flex-wrap">
+            <button 
+              type="button"
+              onclick="loginAsInstructorNewTab('${inst.id}')"
+              class="px-2.5 py-1 bg-sky-50 hover:bg-sky-100 text-sky-800 border border-sky-300 rounded-lg font-bold text-[11px] transition-all cursor-pointer flex items-center gap-1 shadow-xs"
+              title="دخول بتبويب جديد مستقل كتدريسي دون إغلاق لوحة العميد"
+            >
+              <span>دخول كتدريسي 👨‍🏫</span>
+              <span class="text-[9px] text-sky-600 font-latin font-normal">(تبويب جديد)</span>
+            </button>
+            <button 
+              type="button"
+              onclick="deleteInstructor('${inst.id}')" 
+              class="p-1 text-rose-600 hover:text-rose-800 hover:bg-rose-50 rounded font-bold text-[11px] cursor-pointer"
+              title="حذف التدريسي"
+            >
+              حذف 🗑️
+            </button>
+          </div>
         </td>
       </tr>
     `;
@@ -816,9 +1046,18 @@ function handleCreateInstructorSubmit(event) {
   writeErpDb(db);
   syncPushInstructor(newInst);
 
+  // Auto save instructor to device accounts
+  saveAccountToDevice({
+    username: username,
+    password: password,
+    name: name,
+    role: 'INSTRUCTOR',
+    collegeName: user.collegeName
+  });
+
   closeAddInstructorModal();
   renderCollegeAdminDashboard();
-  alert(`تمت إضافة التدريسي ${name} بنجاح!`);
+  alert(`تمت إضافة التدريسي ${name} بنجاح!\nتم حفظ حساب التدريسي (${username}) على هذا الجهاز.`);
 }
 
 function openAddStudentModal() {
@@ -976,66 +1215,101 @@ function renderInstructorDashboard() {
   document.getElementById('inst-doctor-name').textContent = user.name;
   document.getElementById('inst-college-tag').textContent = `${user.collegeName} • ${user.department}`;
 
-  // Strict college + instructor cases
+  // Count of students strictly for this college
+  const collegeStudents = db.students.filter(s => s.collegeId === user.collegeId);
+  const instStudentsCount = document.getElementById('inst-students-count');
+  if (instStudentsCount) instStudentsCount.textContent = collegeStudents.length;
+
+  // Strict college cases
   const myCases = db.cases.filter(c => c.collegeId === user.collegeId);
   const pendingCases = myCases.filter(c => c.status === 'Pending');
 
-  document.getElementById('inst-pending-badge').textContent = pendingCases.length;
+  const pendingBadge = document.getElementById('inst-pending-badge');
+  if (pendingBadge) pendingBadge.textContent = pendingCases.length;
 
-  const tbody = document.getElementById('instructor-cases-tbody');
-  if (!tbody) return;
-
-  if (myCases.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد حالات مرفوعة حالياً.</td></tr>`;
-    return;
+  // Section 1: Cases Table
+  const casesTbody = document.getElementById('instructor-cases-tbody');
+  if (casesTbody) {
+    if (myCases.length === 0) {
+      casesTbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد حالات مرفوعة حالياً من طلبة الكلية.</td></tr>`;
+    } else {
+      casesTbody.innerHTML = myCases.map(item => {
+        const isPending = item.status === 'Pending';
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="p-3 font-latin font-bold text-slate-800">${item.id}</td>
+            <td class="p-3">
+              <strong class="font-bold text-slate-900 block">${item.studentName}</strong>
+              <span class="text-[11px] text-teal-700 font-semibold">مرحلة ${item.stage === '5th' ? 'خامسة' : 'رابعة'} BDS</span>
+            </td>
+            <td class="p-3 font-semibold text-slate-700">${item.type}</td>
+            <td class="p-3">
+              <span class="block font-bold text-slate-800">${item.patientName}</span>
+              <span class="text-[11px] text-slate-500">${item.chiefComplaint || ''}</span>
+            </td>
+            <td class="p-3 text-slate-500 font-latin text-[11px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
+            <td class="p-3 text-center">
+              <span class="px-2 py-0.5 rounded text-xs font-black font-latin ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800 border border-emerald-300'}">
+                ${isPending ? 'قيد التقييم' : item.assignedMark + ' / 10'}
+              </span>
+            </td>
+            <td class="p-3 text-center">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
+                ${isPending ? 'بانتظار التقييم' : 'معتمدة'}
+              </span>
+            </td>
+            <td class="p-3 text-center">
+              <div class="flex items-center justify-center gap-1.5">
+                <button 
+                  onclick="openEvalCaseModal('${item.id}')"
+                  class="px-3 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-1 cursor-pointer"
+                >
+                  <span>رصد الدرجة (Mark)</span>
+                  <span>✍️</span>
+                </button>
+                <a 
+                  href="${item.sheetUrl || 'periodontics-page4.html'}" 
+                  target="_blank"
+                  class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg font-bold text-xs"
+                >
+                  فتح الطبلة 📄
+                </a>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
   }
 
-  tbody.innerHTML = myCases.map(item => {
-    const isPending = item.status === 'Pending';
-    return `
-      <tr class="hover:bg-slate-50/80 transition-colors">
-        <td class="p-3 font-latin font-bold text-slate-800">${item.id}</td>
-        <td class="p-3">
-          <strong class="font-bold text-slate-900 block">${item.studentName}</strong>
-          <span class="text-[11px] text-teal-700 font-semibold">مرحلة ${item.stage === '5th' ? 'خامسة' : 'رابعة'} BDS</span>
-        </td>
-        <td class="p-3 font-semibold text-slate-700">${item.type}</td>
-        <td class="p-3">
-          <span class="block font-bold text-slate-800">${item.patientName}</span>
-          <span class="text-[11px] text-slate-500">${item.chiefComplaint || ''}</span>
-        </td>
-        <td class="p-3 text-slate-500 font-latin text-[11px]">${new Date(item.createdAt).toLocaleDateString('ar-EG')}</td>
-        <td class="p-3 text-center">
-          <span class="px-2 py-0.5 rounded text-xs font-black font-latin ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
-            ${isPending ? 'قيد التقييم' : item.assignedMark + ' / 10'}
-          </span>
-        </td>
-        <td class="p-3 text-center">
-          <span class="px-2 py-0.5 rounded text-[11px] font-bold ${isPending ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">
-            ${isPending ? 'بانتظار التقييم' : 'معتمدة'}
-          </span>
-        </td>
-        <td class="p-3 text-center">
-          <div class="flex items-center justify-center gap-1.5">
-            <button 
-              onclick="openEvalCaseModal('${item.id}')"
-              class="px-3 py-1 bg-teal-700 hover:bg-teal-800 text-white rounded-lg font-bold text-xs shadow-sm flex items-center gap-1"
-            >
-              <span>رصد الدرجة (Mark)</span>
-              <span>✍️</span>
-            </button>
-            <a 
-              href="${item.sheetUrl || 'periodontics-page4.html'}" 
-              target="_blank"
-              class="px-2.5 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 border border-slate-300 rounded-lg font-bold text-xs"
-            >
-              فتح الطبلة 📄
-            </a>
-          </div>
-        </td>
-      </tr>
-    `;
-  }).join('');
+  // Section 2: College Students Directory Table
+  const studentsTbody = document.getElementById('instructor-students-tbody');
+  if (studentsTbody) {
+    if (collegeStudents.length === 0) {
+      studentsTbody.innerHTML = `<tr><td colspan="5" class="text-center p-8 text-slate-400 font-semibold">لم يتم تسجيل أي طلبة في كليتكم بعد من قبل عمادة الكلية.</td></tr>`;
+    } else {
+      studentsTbody.innerHTML = collegeStudents.map(s => {
+        return `
+          <tr class="hover:bg-slate-50/80 transition-colors">
+            <td class="p-3">
+              <strong class="font-bold text-slate-900 block">${s.name}</strong>
+              <span class="text-[10px] text-slate-400 font-latin">#ID-${s.id}</span>
+            </td>
+            <td class="p-3">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold ${s.stage === '5th' ? 'bg-sky-100 text-sky-800' : 'bg-teal-100 text-teal-800'}">
+                ${s.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)'}
+              </span>
+            </td>
+            <td class="p-3 font-latin font-semibold text-slate-700">${s.group || 'Group A'}</td>
+            <td class="p-3 font-latin font-bold text-teal-800">${s.username}</td>
+            <td class="p-3 text-center">
+              <span class="px-2 py-0.5 rounded text-[11px] font-bold bg-emerald-100 text-emerald-800">طالب مسجل</span>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+  }
 }
 
 function openEvalCaseModal(caseId) {
@@ -1245,25 +1519,38 @@ async function saveSupabaseSettings() {
   }
 }
 
-// Push mutations to Supabase Cloud
 async function syncPushCollege(college) {
   const client = getErpSupabaseClient();
   if (!client) return;
+  const baseData = {
+    id: college.id,
+    name: college.name,
+    code: college.code,
+    city: college.city || '',
+    dean_name: college.deanName || '',
+    admin_username: college.adminUsername,
+    admin_password: college.adminPassword,
+    status: college.status || 'Active',
+    plan: college.plan || 'ANNUAL_ACCREDITED',
+    created_at: college.createdAt || new Date().toISOString()
+  };
+
   try {
-    await client.from('college_colleges').upsert({
-      id: college.id,
-      name: college.name,
-      code: college.code,
-      city: college.city || '',
-      dean_name: college.deanName || '',
-      admin_username: college.adminUsername,
-      admin_password: college.adminPassword,
-      status: college.status || 'Active',
-      plan: college.plan || 'ANNUAL_ACCREDITED',
-      created_at: college.createdAt || new Date().toISOString()
+    const res = await client.from('college_colleges').upsert({
+      ...baseData,
+      subscription_fee: college.subscriptionFee || 1500,
+      subscription_end: college.subscriptionEnd || '2027-10-01'
     });
+    if (res.error) {
+      // Fallback in case columns don't exist yet in Supabase table
+      await client.from('college_colleges').upsert(baseData);
+    }
   } catch (e) {
-    console.warn('Supabase push college error:', e);
+    try {
+      await client.from('college_colleges').upsert(baseData);
+    } catch (err) {
+      console.warn('Supabase push college error:', err);
+    }
   }
 }
 
@@ -1457,10 +1744,15 @@ CREATE TABLE IF NOT EXISTS public.college_colleges (
     dean_name TEXT,
     admin_username TEXT,
     admin_password TEXT,
+    subscription_fee NUMERIC DEFAULT 1500,
+    subscription_end DATE DEFAULT (CURRENT_DATE + INTERVAL '1 year'),
     status TEXT DEFAULT 'Active',
     plan TEXT DEFAULT 'ANNUAL_ACCREDITED',
     created_at TIMESTAMPTZ DEFAULT NOW()
 );
+
+ALTER TABLE public.college_colleges ADD COLUMN IF NOT EXISTS subscription_fee NUMERIC DEFAULT 1500;
+ALTER TABLE public.college_colleges ADD COLUMN IF NOT EXISTS subscription_end DATE DEFAULT (CURRENT_DATE + INTERVAL '1 year');
 
 -- 2. Instructors Table
 CREATE TABLE IF NOT EXISTS public.college_instructors (
@@ -1589,9 +1881,11 @@ async function syncPullFromSupabase() {
           adminPassword: item.admin_password,
           status: item.status || 'Active',
           plan: item.plan || 'ANNUAL_ACCREDITED',
+          subscriptionFee: item.subscription_fee ? parseFloat(item.subscription_fee) : 1500,
+          subscriptionEnd: item.subscription_end || '2027-10-01',
           createdAt: item.created_at
         };
-        if (idx > -1) db.colleges[idx] = mapped;
+        if (idx > -1) db.colleges[idx] = { ...db.colleges[idx], ...mapped };
         else db.colleges.push(mapped);
       });
       hasChanges = true;
@@ -1675,8 +1969,115 @@ async function syncPullFromSupabase() {
   }
 }
 
+// ============================================================================
+// RECEIPT & RENEWAL FUNCTIONS (سند التجديد والاشتراك المالي)
+// ============================================================================
+function openPrintReceiptModal(collegeId, hideAmount = false) {
+  const db = readErpDb();
+  const clg = db.colleges.find(c => c.id === collegeId);
+  if (!clg) return;
+
+  const numEl = document.getElementById('receipt-number');
+  const dateEl = document.getElementById('receipt-issue-date');
+  const nameEl = document.getElementById('receipt-college-name');
+  const codeEl = document.getElementById('receipt-college-code');
+  const cityEl = document.getElementById('receipt-college-city');
+  const deanEl = document.getElementById('receipt-college-dean');
+  const validEl = document.getElementById('receipt-valid-until');
+  const amtEl = document.getElementById('receipt-amount');
+  const amtRow = document.getElementById('receipt-amount-row');
+
+  if (numEl) numEl.textContent = `REC-${new Date().getFullYear()}-${clg.code || '001'}`;
+  if (dateEl) dateEl.textContent = new Date().toISOString().slice(0, 10);
+  if (nameEl) nameEl.textContent = clg.name;
+  if (codeEl) codeEl.textContent = clg.code;
+  if (cityEl) cityEl.textContent = clg.city || 'العراق';
+  if (deanEl) deanEl.textContent = clg.deanName;
+  if (validEl) validEl.textContent = clg.subscriptionEnd || '2027-10-01';
+  
+  const fee = parseFloat(clg.subscriptionFee) || 1500;
+  if (amtEl) amtEl.textContent = `$${fee.toLocaleString()} USD (مدفوع بالكامل)`;
+
+  if (amtRow) {
+    if (hideAmount) {
+      amtRow.classList.add('hidden');
+    } else {
+      amtRow.classList.remove('hidden');
+    }
+  }
+
+  document.getElementById('modal-print-receipt')?.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function closePrintReceiptModal() {
+  document.getElementById('modal-print-receipt')?.classList.add('hidden');
+}
+
+function printCollegeLicenseCertificate() {
+  const user = getCurrentSession();
+  if (!user || user.role !== 'COLLEGE_ADMIN') return;
+  openPrintReceiptModal(user.collegeId, true);
+}
+
+function openRenewSubModal(collegeId) {
+  const db = readErpDb();
+  const clg = db.colleges.find(c => c.id === collegeId);
+  if (!clg) return;
+
+  const idInput = document.getElementById('renew-college-id');
+  const nameEl = document.getElementById('renew-college-name');
+  const amtInput = document.getElementById('renew-amount');
+  const dateInput = document.getElementById('renew-new-date');
+
+  if (idInput) idInput.value = clg.id;
+  if (nameEl) nameEl.textContent = `${clg.name} (${clg.code})`;
+  if (amtInput) amtInput.value = clg.subscriptionFee || 1500;
+
+  // Next renewal date: 1 year after current expiry or 1 year from now
+  const baseDate = (clg.subscriptionEnd && new Date(clg.subscriptionEnd) > new Date()) 
+    ? new Date(clg.subscriptionEnd) 
+    : new Date();
+  baseDate.setFullYear(baseDate.getFullYear() + 1);
+  if (dateInput) dateInput.value = baseDate.toISOString().slice(0, 10);
+
+  document.getElementById('modal-renew-sub')?.classList.remove('hidden');
+  if (window.lucide) window.lucide.createIcons();
+}
+
+function closeRenewSubModal() {
+  document.getElementById('modal-renew-sub')?.classList.add('hidden');
+}
+
+function handleRenewSubscriptionSubmit(event) {
+  event.preventDefault();
+  const db = readErpDb();
+  const collegeId = document.getElementById('renew-college-id')?.value;
+  const newAmount = parseFloat(document.getElementById('renew-amount')?.value || 1500);
+  const newDate = document.getElementById('renew-new-date')?.value;
+
+  const clg = db.colleges.find(c => c.id === collegeId);
+  if (!clg) return;
+
+  clg.subscriptionFee = newAmount;
+  clg.subscriptionEnd = newDate;
+  clg.status = 'Active';
+
+  writeErpDb(db);
+  syncPushCollege(clg);
+
+  closeRenewSubModal();
+  renderSuperAdminDashboard();
+
+  if (confirm(`✅ تم تجديد ترخيص ${clg.name} حتى ${newDate} بنجاح!\nهل ترغب في طباعة سند التجديد الآن؟`)) {
+    openPrintReceiptModal(clg.id, false);
+  }
+}
+
 // Auto init on page load
 window.addEventListener('DOMContentLoaded', () => {
+  initSavedAccountsIfEmpty();
+  checkImpersonation();
   updateSupabaseStatusUI();
   syncPullFromSupabase();
   renderApp();
