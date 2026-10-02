@@ -371,6 +371,13 @@ function loginSuccess(user, enteredPassword) {
     });
   }
   setCurrentSession(user);
+
+  // إذا كان المستخدم طالب، يتم توجيهه مباشرة إلى منصة الكيس شيت (واجهة الطالب)
+  if (user.role === 'STUDENT') {
+    window.location.href = 'index.html';
+    return;
+  }
+
   renderApp();
 }
 

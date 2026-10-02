@@ -87,12 +87,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const stageElem = document.getElementById('student-stage-badge');
 
     if (activeStudent) {
-      if (studentNameElem) studentNameElem.textContent = activeStudent.name;
+      // Clean student name from email suffix if present
+      let displayName = activeStudent.name || activeStudent.username || 'طالب';
+      if (displayName.includes('@')) {
+        displayName = displayName.split('@')[0];
+      }
+      if (studentNameElem) studentNameElem.textContent = displayName;
       if (stageElem) {
         stageElem.textContent = activeStudent.stage === '5th' ? 'المرحلة الخامسة (5th Year)' : 'المرحلة الرابعة (4th Year)';
       }
     } else {
-      if (studentNameElem) studentNameElem.textContent = STUDENT_SESSION.name;
+      let displayName = STUDENT_SESSION.name;
+      if (displayName.includes('@')) {
+        displayName = displayName.split('@')[0];
+      }
+      if (studentNameElem) studentNameElem.textContent = displayName;
       if (stageElem) stageElem.textContent = STUDENT_SESSION.stageAr;
     }
 
@@ -100,41 +109,95 @@ document.addEventListener('DOMContentLoaded', () => {
     populateSupervisorsDropdown(activeStudent, erpInstructors);
   }
 
-  function populateSupervisorsDropdown(activeStudent, erpInstructors) {
+  // Global logout handler for student
+  window.handleStudentLogout = function() {
+    sessionStorage.removeItem('cosmo_dental_college_session');
+    localStorage.removeItem('cosmo_dental_college_session');
+    window.location.href = 'college-portal.html';
+  };
+
+  function populateSupervisorsDropdown(activeStudent, erpInstructors, targetDeptId) {
     const footerSelect = document.getElementById('footer-instructor-select');
     const caseSelect = document.getElementById('case-selected-supervisor');
     if (!footerSelect && !caseSelect) return;
 
+    // Determine target department filter if provided or selected in main dropdown
+    const currentDeptId = targetDeptId || deptSelect?.value || state.selectedDeptId;
+    const currentDeptObj = DENTAL_DEPARTMENTS.find(d => d.id === currentDeptId);
+    const deptKeywords = [];
+    if (currentDeptObj) {
+      deptKeywords.push(currentDeptObj.code.toLowerCase());
+      if (currentDeptId === 'omfs') {
+        deptKeywords.push('جراحة', 'omfs', 'قلع', 'فكين');
+      } else if (currentDeptId === 'perio') {
+        deptKeywords.push('لثة', 'perio', 'تقليح', 'periodontics');
+      } else if (currentDeptId === 'cons') {
+        deptKeywords.push('ترميم', 'معالجة', 'حشوات', 'conservative');
+      } else if (currentDeptId === 'endo') {
+        deptKeywords.push('عصب', 'جذور', 'endo', 'endodontics');
+      } else if (currentDeptId === 'prostho') {
+        deptKeywords.push('صناعة', 'prostho', 'تعويضات', 'prosthodontics');
+      } else if (currentDeptId === 'ortho') {
+        deptKeywords.push('تقويم', 'ortho', 'orthodontics');
+      } else if (currentDeptId === 'pedodontics') {
+        deptKeywords.push('أطفال', 'pedodontics', 'pedo');
+      } else if (currentDeptId === 'oral-med') {
+        deptKeywords.push('تشخيص', 'طب الفم', 'oral medicine');
+      }
+    }
+
     let instructorsList = [];
-    if (activeStudent && erpInstructors.length > 0) {
-      instructorsList = erpInstructors
-        .filter(inst => inst.collegeId === activeStudent.collegeId)
-        .map(inst => `${inst.title || 'د.'} ${inst.name} (${inst.department || 'العيادات التعليمية'})`);
+    if (activeStudent && erpInstructors && erpInstructors.length > 0) {
+      // 1. Strict Isolation: Only instructors registered in THIS college
+      let collegeInsts = erpInstructors.filter(inst => inst.collegeId === activeStudent.collegeId);
+
+      // 2. Specialty/Department Filter: Only instructors teaching this specialty
+      if (deptKeywords.length > 0) {
+        const matchingInsts = collegeInsts.filter(inst => {
+          const instDept = (inst.department || '').toLowerCase();
+          return deptKeywords.some(kw => instDept.includes(kw));
+        });
+        if (matchingInsts.length > 0) {
+          collegeInsts = matchingInsts;
+        }
+      }
+
+      instructorsList = collegeInsts.map(inst => `${inst.title || 'د.'} ${inst.name} (${inst.department || 'مشرف العيادة التعليمية'})`);
     }
 
     if (instructorsList.length === 0) {
-      instructorsList = [
-        'أ.د. عبد الله الصالحي (مشرف العيادة الرئيسي)',
-        'د. وسام كاظم (أستاذ مساعد)',
-        'د. زينب الموسوي (مدرس سريري)',
-        'د. حيدر الشمري (مشرف سريري)',
-        'د. سارة خليل (مشرفة تدريب)'
-      ];
+      // Fallback: Default instructors for the selected department
+      if (currentDeptId === 'omfs') {
+        instructorsList = [
+          'أ.د. عبد الله الصالحي (أستاذ جراحة الفم والوجه والفكين)',
+          'د. وسام كاظم (مدرس جراحة الفم والقلع)'
+        ];
+      } else if (currentDeptId === 'perio') {
+        instructorsList = [
+          'د. زينب الموسوي (مدرس طب وجراحة اللثة)',
+          'د. سارة خليل (مشرفة عيادة التقليح)'
+        ];
+      } else {
+        instructorsList = [
+          'أ.د. عبد الله الصالحي (مشرف العيادة الأكاديمي)',
+          'د. وسام كاظم (مشرف تدريب سريري)',
+          'د. زينب الموسوي (مشرفة سريرية)'
+        ];
+      }
     }
 
     const htmlOptions = instructorsList.map(name => `<option value="${name}">${name}</option>`).join('');
     if (footerSelect) {
       footerSelect.innerHTML = htmlOptions;
-      // sync with caseSelect
-      footerSelect.addEventListener('change', () => {
+      footerSelect.onchange = () => {
         if (caseSelect) caseSelect.value = footerSelect.value;
-      });
+      };
     }
     if (caseSelect) {
       caseSelect.innerHTML = htmlOptions;
-      caseSelect.addEventListener('change', () => {
+      caseSelect.onchange = () => {
         if (footerSelect) footerSelect.value = caseSelect.value;
-      });
+      };
     }
   }
 
@@ -182,6 +245,17 @@ document.addEventListener('DOMContentLoaded', () => {
       state.selectedDeptId = e.target.value;
       state.selectedSheetId = '';
       updateSheetDropdown(state.selectedDeptId);
+
+      // Dynamically filter supervisors for the newly selected academic department
+      let activeStudent = null;
+      let erpInstructors = [];
+      try {
+        const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+        if (rawSession) activeStudent = JSON.parse(rawSession);
+        const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+        if (rawDb) erpInstructors = JSON.parse(rawDb).instructors || [];
+      } catch (err) {}
+      populateSupervisorsDropdown(activeStudent, erpInstructors, state.selectedDeptId);
     });
 
     // Dropdown 2: Case Sheet Change
