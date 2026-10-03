@@ -42,7 +42,7 @@ function getInitialSeedDatabase() {
       username: 'superadmin',
       email: 'superadmin@college.edu',
       password: 'admin123',
-      name: 'مدير المنظومة العام (Super Admin)',
+      name: 'الإدارة المركزية العامة',
       role: 'SUPER_ADMIN'
     },
     colleges: [
@@ -79,7 +79,9 @@ function getSavedAccounts() {
   try {
     const raw = localStorage.getItem(SAVED_USERS_KEY);
     let list = raw ? JSON.parse(raw) : [];
-    if (!Array.isArray(list) || list.length === 0) {
+    // Strict Isolation & Privacy: Never expose or leak master super admin in public saved accounts
+    list = (Array.isArray(list) ? list : []).filter(acc => acc && acc.role !== 'SUPER_ADMIN' && acc.username !== 'superadmin');
+    if (list.length === 0) {
       list = [
         {
           username: 'abdulhameednateq',
@@ -87,13 +89,6 @@ function getSavedAccounts() {
           name: 'أ.د. عبد الحميد ناطق (عميد كلية طب الأسنان)',
           role: 'COLLEGE_ADMIN',
           collegeName: 'كلية طب الأسنان'
-        },
-        {
-          username: 'superadmin',
-          password: 'admin123',
-          name: 'مدير المنظومة العام (Super Admin)',
-          role: 'SUPER_ADMIN',
-          collegeName: 'الإدارة المركزية'
         }
       ];
       try { localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list)); } catch (e) {}
@@ -106,6 +101,8 @@ function getSavedAccounts() {
 
 function saveAccountToDevice(accountData) {
   if (!accountData || !accountData.username) return;
+  // Strictly prevent saving super admin to device accounts
+  if (accountData.role === 'SUPER_ADMIN' || accountData.username.toLowerCase() === 'superadmin') return;
   let list = getSavedAccounts();
   const existingIdx = list.findIndex(a => a.username.toLowerCase() === accountData.username.toLowerCase());
   if (existingIdx > -1) {
@@ -206,16 +203,12 @@ function renderSavedAccountsList() {
     return;
   }
 
-  listEl.innerHTML = accounts.map(acc => {
+  listEl.innerHTML = accounts.filter(acc => acc && acc.role !== 'SUPER_ADMIN' && acc.username !== 'superadmin').map(acc => {
     let roleBadge = 'طالب';
     let roleBg = 'bg-indigo-100 text-indigo-800 border-indigo-200';
     let avatarBg = 'bg-indigo-600 text-white';
 
-    if (acc.role === 'SUPER_ADMIN') {
-      roleBadge = '👑 سوبر أدمن';
-      roleBg = 'bg-amber-100 text-amber-900 border-amber-200';
-      avatarBg = 'bg-amber-600 text-white shadow-amber-600/30';
-    } else if (acc.role === 'COLLEGE_ADMIN') {
+    if (acc.role === 'COLLEGE_ADMIN') {
       roleBadge = '🏛️ عميد الكلية';
       roleBg = 'bg-teal-100 text-teal-900 border-teal-200';
       avatarBg = 'bg-teal-700 text-white shadow-teal-700/30';
@@ -700,7 +693,7 @@ function checkGlobalUniqueness(params = {}) {
   const pName = (params.personName || params.name || params.deanName || '').trim().toLowerCase();
   if (pName && pName.length > 1) {
     if (db.superAdmin && (db.superAdmin.name || '').trim().toLowerCase() === pName && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
-      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مطابق لاسم مدير المنظومة (Super Admin)! لا يمكن تكرار الأسماء مرتين.` };
+      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مسجل مسبقاً في المنظومة! لا يمكن تكرار الأسماء مرتين.` };
     }
     const matchCollegeDean = (db.colleges || []).find(c => c.id !== excludeId && (c.deanName || '').trim().toLowerCase() === pName);
     if (matchCollegeDean) {
@@ -729,7 +722,7 @@ function checkGlobalUniqueness(params = {}) {
     const email = params.email.trim().toLowerCase();
     if (email.length > 2) {
       if (db.superAdmin && (db.superAdmin.email || '').trim().toLowerCase() === email && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
-        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مستخدم مسبقاً في حساب السوبر أدمن! لا يمكن تكرار البريد مرتين.` };
+        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مستخدم مسبقاً في المنظومة! لا يمكن تكرار البريد مرتين.` };
       }
       const matchCollege = (db.colleges || []).find(c => c.id !== excludeId && (c.email || '').trim().toLowerCase() === email);
       if (matchCollege) {
@@ -759,7 +752,7 @@ function checkGlobalUniqueness(params = {}) {
     const pwd = params.password.trim();
     if (pwd.length > 0) {
       if (db.superAdmin && db.superAdmin.password === pwd && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
-        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً في حساب السوبر أدمن! من أجل الأمان والعزل الصارم، لا يمكن تكرار كلمة المرور مرتين.` };
+        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً في المنظومة! من أجل الأمان والعزل الصارم، لا يمكن تكرار كلمة المرور.` };
       }
       const matchCollege = (db.colleges || []).find(c => c.id !== excludeId && c.adminPassword === pwd);
       if (matchCollege) {
@@ -789,7 +782,7 @@ function checkGlobalUniqueness(params = {}) {
     const uname = params.username.trim().toLowerCase();
     if (uname.length > 0) {
       if (db.superAdmin && (db.superAdmin.username || '').trim().toLowerCase() === uname && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
-        return { valid: false, message: `⚠️ اسم المستخدم (${params.username}) محجوز لمدير المنظومة (Super Admin)!` };
+        return { valid: false, message: `⚠️ اسم المستخدم (${params.username}) محجوز ومسجل مسبقاً في المنظومة!` };
       }
       const matchCollege = (db.colleges || []).find(c => c.id !== excludeId && (c.adminUsername || '').trim().toLowerCase() === uname);
       if (matchCollege) {
@@ -1091,16 +1084,18 @@ function showLoginError(msg) {
 function loginSuccess(user, enteredUsername, enteredPassword) {
   setCurrentSession(user);
 
-  // Save account to device saved accounts list
-  try {
-    saveAccountToDevice({
-      username: enteredUsername || user.username,
-      password: enteredPassword || '',
-      name: user.name || enteredUsername,
-      role: user.role,
-      collegeName: user.collegeName || ''
-    });
-  } catch (e) {}
+  // Save account to device saved accounts list (Strict Privacy: never save super admin)
+  if (user && user.role !== 'SUPER_ADMIN' && user.username !== 'superadmin') {
+    try {
+      saveAccountToDevice({
+        username: enteredUsername || user.username,
+        password: enteredPassword || '',
+        name: user.name || enteredUsername,
+        role: user.role,
+        collegeName: user.collegeName || ''
+      });
+    } catch (e) {}
+  }
 
   // Modern Browser Password Credential Registration (Chrome, Edge, Safari)
   if (window.PasswordCredential && navigator.credentials && enteredUsername && enteredPassword) {
@@ -1198,11 +1193,11 @@ function renderApp() {
   switch (user.role) {
     case 'SUPER_ADMIN':
       if (roleBadge) {
-        roleBadge.textContent = '👑 سوبر أدمن المنظومة';
+        roleBadge.textContent = '🏛️ الإدارة المركزية العامة';
         roleBadge.className = 'px-2 py-0.5 rounded text-[11px] font-bold bg-amber-100 text-amber-900 border border-amber-300';
       }
       if (topCollegeName) {
-        topCollegeName.innerHTML = `<span>التحكم العام في كافة الجامعات والكليات</span>`;
+        topCollegeName.innerHTML = `<span>التحكم المركزي في التراخيص والكليات المعتمدة</span>`;
       }
       viewSuperAdmin?.classList.remove('hidden');
       renderSuperAdminDashboard();
@@ -3475,7 +3470,7 @@ function handleCollegeApplicationSubmit(event) {
   renderSuperAdminApplications();
   unlockBtn();
 
-  alert(`🎉 تم تقديم طلب تسجيل الكلية بنجاح تام!\n\nرقم حجز ومتابعة الطلب: ${requestId}\nاسم الكلية: ${collegeName}\nالبريد: ${email}\n\nسيقوم مدير المنظومة (Super Admin) بمراجعة الطلب واعتماده وتفعيل الكلية فوراً.`);
+  alert(`🎉 تم تقديم طلب تسجيل الكلية بنجاح تام!\n\nرقم حجز ومتابعة الطلب: ${requestId}\nاسم الكلية: ${collegeName}\nالبريد: ${email}\n\nستتم مراجعة الطلب واعتماد الكلية وتفعيل الحساب والتراخيص فوراً.`);
 }
 
 // ============================================================================
