@@ -7,16 +7,19 @@
 const STORAGE_KEY = 'cosmo_dental_college_erp_v3';
 const SESSION_KEY = 'cosmo_dental_college_session';
 const SAVED_USERS_KEY = 'cosmo_dental_saved_accounts';
-const PURGE_FLAG_KEY = 'cosmo_dental_root_purge_v7_device_isolation';
+const PURGE_FLAG_KEY = 'cosmo_dental_root_purge_v8_clean_slate_all';
 
 // ============================================================================
-// ENFORCE STRICT PER-DEVICE ISOLATION: Wipe legacy auto-seeded accounts so each PC is 100% isolated
+// ENFORCE CLEAN SLATE FROM ROOTS: Wipe all legacy colleges, students, and sessions
 // ============================================================================
 (function enforceCleanSlateFromRoots() {
   try {
-    if (localStorage.getItem(PURGE_FLAG_KEY) !== 'isolated_v7') {
+    if (localStorage.getItem(PURGE_FLAG_KEY) !== 'purged_v8') {
+      localStorage.removeItem(STORAGE_KEY);
+      localStorage.removeItem(SESSION_KEY);
+      sessionStorage.removeItem(SESSION_KEY);
       localStorage.removeItem(SAVED_USERS_KEY);
-      localStorage.setItem(PURGE_FLAG_KEY, 'isolated_v7');
+      localStorage.setItem(PURGE_FLAG_KEY, 'purged_v8');
     }
   } catch (e) {}
 })();
@@ -30,7 +33,7 @@ function getDefaultCollegesList() {
 window.getDefaultCollegesList = getDefaultCollegesList;
 
 // ============================================================================
-// INITIAL SEED DATABASE (CLEAN SLATE WITH ACCREDITED COLLEGE)
+// INITIAL SEED DATABASE (100% CLEAN SLATE FROM ROOTS)
 // ============================================================================
 function getInitialSeedDatabase() {
   return {
@@ -42,25 +45,7 @@ function getInitialSeedDatabase() {
       name: 'الإدارة المركزية العامة',
       role: 'SUPER_ADMIN'
     },
-    colleges: [
-      {
-        id: 'clg_dent_baghdad',
-        name: 'كلية طب الأسنان',
-        code: 'DENT-BAGHDAD-01',
-        city: 'بغداد',
-        deanName: 'أ.د. عبد الحميد ناطق',
-        email: 'abdulhameednateq@gmail.com',
-        phone: '07722887654',
-        adminUsername: 'abdulhameednateq',
-        adminPassword: 'Dean7934@#',
-        subscriptionFee: 1500,
-        subscriptionStart: '2026-01-01',
-        subscriptionEnd: '2027-12-31',
-        status: 'Active',
-        plan: 'ANNUAL_ACCREDITED',
-        createdAt: '2026-10-02T12:00:00.000Z'
-      }
-    ],
+    colleges: [],
     instructors: [],
     students: [],
     cases: [],
@@ -541,15 +526,12 @@ function readErpDb() {
       return data;
     }
     data = JSON.parse(raw);
-    if (!data.colleges || !Array.isArray(data.colleges) || data.colleges.length === 0) {
-      data.colleges = getInitialSeedDatabase().colleges;
+    if (!data.colleges || !Array.isArray(data.colleges)) {
+      data.colleges = [];
     } else {
       // Purge obsolete mock colleges
       const mockIds = new Set(['clg_uob', 'clg_uom', 'clg_mustansiriya', 'clg_basrah', 'clg_kufa', 'clg_babylon']);
       data.colleges = data.colleges.filter(c => !mockIds.has(c.id));
-      if (data.colleges.length === 0) {
-        data.colleges = getInitialSeedDatabase().colleges;
-      }
     }
     // Strict cascade purge: no child record can exist without an accredited parent college
     const validCollegeIds = new Set((data.colleges || []).map(c => c.id));
@@ -833,7 +815,66 @@ function checkGlobalUniqueness(params = {}) {
 }
 window.checkGlobalUniqueness = checkGlobalUniqueness;
 
-function generateUniquePassword(prefix = 'Dent') {
+function generateCleanRandomPassword(length = 8) {
+  // Letters and numbers ONLY (no @, #, !, or special characters)
+  // Non-sequential, thoroughly scrambled (مخربطة وغير متتالية)
+  const upper = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
+  const lower = 'abcdefghijkmnpqrstuvwxyz';
+  const digits = '23456789';
+  const allChars = upper + lower + digits;
+
+  function isSequentialOrRepetitive(str) {
+    for (let i = 0; i < str.length - 2; i++) {
+      const c1 = str.charCodeAt(i);
+      const c2 = str.charCodeAt(i + 1);
+      const c3 = str.charCodeAt(i + 2);
+      // Increasing sequence: e.g. abc, 123
+      if (c2 === c1 + 1 && c3 === c2 + 1) return true;
+      // Decreasing sequence: e.g. cba, 321
+      if (c2 === c1 - 1 && c3 === c2 - 1) return true;
+      // Repetition: e.g. aaa, 111
+      if (str[i] === str[i + 1] && str[i + 1] === str[i + 2]) return true;
+    }
+    // Also prevent adjacent double identical characters (e.g. aa, 99)
+    for (let i = 0; i < str.length - 1; i++) {
+      if (str[i] === str[i + 1]) return true;
+    }
+    return false;
+  }
+
+  for (let attempt = 0; attempt < 500; attempt++) {
+    // Balanced distribution: 3 uppercase, 3 lowercase, 2 digits
+    let chars = [
+      upper[Math.floor(Math.random() * upper.length)],
+      upper[Math.floor(Math.random() * upper.length)],
+      upper[Math.floor(Math.random() * upper.length)],
+      lower[Math.floor(Math.random() * lower.length)],
+      lower[Math.floor(Math.random() * lower.length)],
+      lower[Math.floor(Math.random() * lower.length)],
+      digits[Math.floor(Math.random() * digits.length)],
+      digits[Math.floor(Math.random() * digits.length)]
+    ];
+    while (chars.length < length) {
+      chars.push(allChars[Math.floor(Math.random() * allChars.length)]);
+    }
+
+    // Fisher-Yates shuffle
+    for (let i = chars.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [chars[i], chars[j]] = [chars[j], chars[i]];
+    }
+
+    const candidate = chars.join('');
+    if (!isSequentialOrRepetitive(candidate)) {
+      return candidate;
+    }
+  }
+
+  return 'K7m9X2p4';
+}
+window.generateCleanRandomPassword = generateCleanRandomPassword;
+
+function generateUniquePassword() {
   const db = readErpDb();
   const allPasswords = new Set([
     db.superAdmin?.password,
@@ -845,14 +886,25 @@ function generateUniquePassword(prefix = 'Dent') {
   ].filter(Boolean));
 
   for (let attempt = 0; attempt < 1000; attempt++) {
-    const candidate = `${prefix}${Math.floor(100000 + Math.random() * 900000)}#@`;
+    const candidate = generateCleanRandomPassword(8);
     if (!allPasswords.has(candidate)) {
       return candidate;
     }
   }
-  return `${prefix}${Date.now()}!#`;
+  return generateCleanRandomPassword(10);
 }
 window.generateUniquePassword = generateUniquePassword;
+
+function regeneratePasswordField(inputId) {
+  const el = document.getElementById(inputId);
+  if (el) {
+    el.value = generateUniquePassword();
+    el.focus();
+    el.classList.add('ring-2', 'ring-teal-500');
+    setTimeout(() => el.classList.remove('ring-2', 'ring-teal-500'), 400);
+  }
+}
+window.regeneratePasswordField = regeneratePasswordField;
 
 function generateUniqueCollegeCode(collegeName = '', city = '') {
   const db = readErpDb();
@@ -949,42 +1001,6 @@ async function handleLoginSubmit(event) {
     return;
   }
 
-  // 2. Direct Recognition for Dean Abdulhameed Nateq (أ.د. عبد الحميد ناطق)
-  if (
-    usernameInput === 'abdulhameednateq' ||
-    usernameInput === 'abdulhameednateq@gmail.com' ||
-    usernameInput.includes('abdulhameed')
-  ) {
-    let college = (db.colleges || []).find(c => c.id === 'clg_dent_baghdad' || (c.adminUsername && c.adminUsername.toLowerCase() === 'abdulhameednateq'));
-    if (!college) {
-      college = {
-        id: 'clg_dent_baghdad',
-        name: 'كلية طب الأسنان',
-        code: 'DENT-BAGHDAD-01',
-        city: 'بغداد',
-        deanName: 'أ.د. عبد الحميد ناطق',
-        email: 'abdulhameednateq@gmail.com',
-        phone: '07722887654',
-        adminUsername: 'abdulhameednateq',
-        adminPassword: passwordInput || 'Dean7934@#',
-        status: 'Active'
-      };
-      if (!Array.isArray(db.colleges)) db.colleges = [];
-      db.colleges.push(college);
-      writeErpDb(db);
-    }
-    loginSuccess({
-      id: 'dean_' + college.id,
-      collegeId: college.id,
-      collegeName: college.name,
-      collegeCode: college.code,
-      name: college.deanName,
-      username: 'abdulhameednateq',
-      role: 'COLLEGE_ADMIN'
-    }, usernameInput, passwordInput);
-    return;
-  }
-
   // If local colleges list is empty, attempt immediate sync from cloud before deciding
   if (!db.colleges || db.colleges.length === 0) {
     try {
@@ -993,9 +1009,10 @@ async function handleLoginSubmit(event) {
     } catch (e) {}
   }
 
-  // 3. Check College Admins (Deans)
+  // 2. Check College Admins (Deans) - Supports login via username or Gmail/email
   const college = (db.colleges || []).find(
-    c => c.adminUsername && c.adminUsername.toLowerCase() === usernameInput && isPassMatch(c.adminPassword, passwordInput)
+    c => ((c.adminUsername && c.adminUsername.toLowerCase() === usernameInput) || (c.email && c.email.toLowerCase() === usernameInput)) &&
+         isPassMatch(c.adminPassword, passwordInput)
   );
   if (college) {
     if (college.status === 'Paused') {
@@ -1014,9 +1031,9 @@ async function handleLoginSubmit(event) {
     return;
   }
 
-  // 4. Check Instructors
+  // 3. Check Instructors - Supports login via username or Gmail/email
   const instructor = (db.instructors || []).find(
-    inst => (inst.username.toLowerCase() === usernameInput || (inst.email && inst.email.toLowerCase() === usernameInput)) &&
+    inst => ((inst.username && inst.username.toLowerCase() === usernameInput) || (inst.email && inst.email.toLowerCase() === usernameInput)) &&
             isPassMatch(inst.password, passwordInput)
   );
   if (instructor) {
@@ -1038,9 +1055,10 @@ async function handleLoginSubmit(event) {
     return;
   }
 
-  // 5. Check Students
+  // 4. Check Students - Supports login via username or Gmail/email
   const student = (db.students || []).find(
-    s => s.username.toLowerCase() === usernameInput && isPassMatch(s.password, passwordInput)
+    s => ((s.username && s.username.toLowerCase() === usernameInput) || (s.email && s.email.toLowerCase() === usernameInput)) &&
+         isPassMatch(s.password, passwordInput)
   );
   if (student) {
     const parentCollege = db.colleges.find(c => c.id === student.collegeId);
@@ -1382,6 +1400,10 @@ function openAddCollegeModal() {
   const endInput = document.getElementById('new-college-sub-end');
   if (endInput && !endInput.value) {
     endInput.value = nextYear.toISOString().slice(0, 10);
+  }
+  const pwdInput = document.getElementById('new-dean-password');
+  if (pwdInput) {
+    pwdInput.value = generateUniquePassword();
   }
   document.getElementById('modal-add-college')?.classList.remove('hidden');
 }
@@ -1813,6 +1835,10 @@ function renderCollegeEvaluations() {
 
 // College Modals
 function openAddInstructorModal() {
+  const pwdInput = document.getElementById('new-inst-password');
+  if (pwdInput) {
+    pwdInput.value = generateUniquePassword();
+  }
   document.getElementById('modal-add-instructor')?.classList.remove('hidden');
 }
 function closeAddInstructorModal() {
@@ -1904,6 +1930,10 @@ function handleCreateInstructorSubmit(event) {
 }
 
 function openAddStudentModal() {
+  const pwdInput = document.getElementById('new-std-password');
+  if (pwdInput) {
+    pwdInput.value = generateUniquePassword();
+  }
   document.getElementById('modal-add-student')?.classList.remove('hidden');
 }
 function closeAddStudentModal() {
@@ -3147,7 +3177,7 @@ function openCollegeApplicationModal() {
     otpInput.disabled = false;
     otpInput.classList.remove('border-emerald-500', 'bg-emerald-50');
   }
-  if (pwdInput) pwdInput.value = 'Dean' + Math.floor(1000 + Math.random() * 9000) + '@#';
+  if (pwdInput) pwdInput.value = generateUniquePassword();
   if (notesInput) notesInput.value = '';
   if (liveBanner) liveBanner.classList.add('hidden');
   if (badge) {
@@ -3675,7 +3705,7 @@ function openApproveApplicationModal(appId) {
   nextYear.setFullYear(nextYear.getFullYear() + 1);
   if (endInput) endInput.value = nextYear.toISOString().slice(0, 10);
 
-  // Generate unique password (no duplicate passwords across system)
+  // Generate unique password (no duplicate passwords across system, alphanumeric only)
   let candidatePassword = app.proposedPassword;
   const existingPasswords = new Set([
     db.superAdmin?.password,
@@ -3683,8 +3713,8 @@ function openApproveApplicationModal(appId) {
     ...(db.instructors || []).map(i => i.password),
     ...(db.students || []).map(s => s.password)
   ].filter(Boolean));
-  if (!candidatePassword || existingPasswords.has(candidatePassword)) {
-    candidatePassword = generateUniquePassword('Dean');
+  if (!candidatePassword || existingPasswords.has(candidatePassword) || /[^a-zA-Z0-9]/.test(candidatePassword)) {
+    candidatePassword = generateUniquePassword();
   }
   if (pwdInput) pwdInput.value = candidatePassword;
 
@@ -4332,10 +4362,14 @@ function openStudentApplicationModal() {
     }
 
     // Clear form
-    ['sapp-student-name', 'sapp-university-id', 'sapp-group', 'sapp-phone', 'sapp-email', 'sapp-password', 'sapp-notes'].forEach(id => {
+    ['sapp-student-name', 'sapp-university-id', 'sapp-group', 'sapp-phone', 'sapp-email', 'sapp-notes'].forEach(id => {
       const el = document.getElementById(id);
       if (el) el.value = '';
     });
+    const sappPwd = document.getElementById('sapp-password');
+    if (sappPwd) {
+      sappPwd.value = generateUniquePassword();
+    }
 
     const stageEl = document.getElementById('sapp-stage');
     if (stageEl) stageEl.value = '4th';
@@ -4769,8 +4803,8 @@ async function approveStudentApplication(appId) {
   ].filter(Boolean));
 
   let password = app.proposedPassword;
-  if (!password || existingPasswords.has(password)) {
-    password = generateUniquePassword('Stu');
+  if (!password || existingPasswords.has(password) || /[^a-zA-Z0-9]/.test(password)) {
+    password = generateUniquePassword();
   }
 
   // Strict global uniqueness check across platform

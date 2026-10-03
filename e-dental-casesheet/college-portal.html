@@ -1032,8 +1032,14 @@
             <input type="text" id="new-dean-username" required placeholder="dean.college@gmail.com أو dean.name" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">كلمة المرور (Password) *</label>
-            <input type="text" id="new-dean-password" required placeholder="dean123" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <label class="block font-bold text-slate-700 mb-1">كلمة المرور (أرقام وحروف مخربطة) *</label>
+            <div class="flex gap-2">
+              <input type="text" id="new-dean-password" required placeholder="أرقام وحروف مخربطة" class="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+              <button type="button" onclick="regeneratePasswordField('new-dean-password')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1" title="توليد كلمة مرور جديدة">
+                <span>توليد</span>
+                <span>🎲</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1121,8 +1127,14 @@
             <input type="text" id="new-inst-username" required placeholder="dr.hussam" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">كلمة المرور (Password) *</label>
-            <input type="text" id="new-inst-password" required placeholder="hussam123@" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <label class="block font-bold text-slate-700 mb-1">كلمة المرور (أرقام وحروف مخربطة) *</label>
+            <div class="flex gap-2">
+              <input type="text" id="new-inst-password" required placeholder="أرقام وحروف مخربطة" class="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+              <button type="button" onclick="regeneratePasswordField('new-inst-password')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1" title="توليد كلمة مرور جديدة">
+                <span>توليد</span>
+                <span>🎲</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1171,8 +1183,14 @@
             <input type="text" id="new-std-username" required placeholder="std.ali.karim" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
           </div>
           <div>
-            <label class="block font-bold text-slate-700 mb-1">كلمة المرور *</label>
-            <input type="text" id="new-std-password" required placeholder="pass2026#" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <label class="block font-bold text-slate-700 mb-1">كلمة المرور (أرقام وحروف مخربطة) *</label>
+            <div class="flex gap-2">
+              <input type="text" id="new-std-password" required placeholder="أرقام وحروف مخربطة" class="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+              <button type="button" onclick="regeneratePasswordField('new-std-password')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1" title="توليد كلمة مرور جديدة">
+                <span>توليد</span>
+                <span>🎲</span>
+              </button>
+            </div>
           </div>
         </div>
 
@@ -1602,15 +1620,21 @@
         <!-- Proposed Password & Notes -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 mb-1">كلمة المرور المقترحة لحساب الأدمن *</label>
-            <input 
-              type="text" 
-              id="app-proposed-password" 
-              required 
-              placeholder="مثال: Dean2026#Secure" 
-              class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin focus:border-amber-500 focus:bg-white focus:outline-none" 
-              dir="ltr"
-            >
+            <label class="block font-bold text-slate-700 mb-1">كلمة المرور المقترحة (أرقام وحروف مخربطة) *</label>
+            <div class="flex gap-2">
+              <input 
+                type="text" 
+                id="app-proposed-password" 
+                required 
+                placeholder="أرقام وحروف مخربطة" 
+                class="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin focus:border-amber-500 focus:bg-white focus:outline-none" 
+                dir="ltr"
+              >
+              <button type="button" onclick="regeneratePasswordField('app-proposed-password')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1" title="توليد كلمة مرور جديدة">
+                <span>توليد</span>
+                <span>🎲</span>
+              </button>
+            </div>
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">ملاحظات إضافية أو تفاصيل</label>
@@ -1675,8 +1699,14 @@
         </div>
 
         <div>
-          <label class="block font-bold text-slate-700 mb-1">كلمة المرور لحساب العميد *</label>
-          <input type="text" id="approve-dean-password" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+          <label class="block font-bold text-slate-700 mb-1">كلمة المرور لحساب العميد (أرقام وحروف مخربطة) *</label>
+          <div class="flex gap-2">
+            <input type="text" id="approve-dean-password" required class="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <button type="button" onclick="regeneratePasswordField('approve-dean-password')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1" title="توليد كلمة مرور جديدة">
+              <span>توليد</span>
+              <span>🎲</span>
+            </button>
+          </div>
         </div>
 
         <div class="pt-2 flex flex-col-reverse sm:flex-row items-stretch sm:items-center justify-end gap-2 border-t border-slate-100">
@@ -1816,15 +1846,21 @@
 
         <!-- Proposed Password -->
         <div>
-          <label class="block font-bold text-slate-700 mb-1">كلمة المرور المقترحة لحسابك *</label>
-          <input 
-            type="text" 
-            id="sapp-password" 
-            required 
-            placeholder="مثال: Stu2026#Secure" 
-            class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin focus:border-teal-500 focus:bg-white focus:outline-none"
-            dir="ltr"
-          >
+          <label class="block font-bold text-slate-700 mb-1">كلمة المرور المقترحة لحسابك (أرقام وحروف مخربطة) *</label>
+          <div class="flex gap-2">
+            <input 
+              type="text" 
+              id="sapp-password" 
+              required 
+              placeholder="أرقام وحروف مخربطة" 
+              class="flex-1 p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin focus:border-teal-500 focus:bg-white focus:outline-none"
+              dir="ltr"
+            >
+            <button type="button" onclick="regeneratePasswordField('sapp-password')" class="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-bold rounded-xl border border-slate-300 transition-colors whitespace-nowrap cursor-pointer flex items-center gap-1" title="توليد كلمة مرور جديدة">
+              <span>توليد</span>
+              <span>🎲</span>
+            </button>
+          </div>
           <span class="text-[10px] text-slate-400">ستستخدم هذه الكلمة لتسجيل الدخول بعد موافقة عمادة الكلية.</span>
         </div>
 
