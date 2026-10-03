@@ -33,6 +33,27 @@
     })();
   </script>
   
+  <!-- Suppress CDN dev warning and Tracking Prevention storage notices in production -->
+  <script>
+    (function() {
+      const _origWarn = console.warn;
+      const _origInfo = console.info;
+      console.warn = function(...args) {
+        if (args[0] && typeof args[0] === 'string' && (
+          args[0].includes('cdn.tailwindcss.com should not be used in production') ||
+          args[0].includes('Tracking Prevention blocked access to storage')
+        )) return;
+        _origWarn.apply(console, args);
+      };
+      if (_origInfo) {
+        console.info = function(...args) {
+          if (args[0] && typeof args[0] === 'string' && args[0].includes('Tracking Prevention blocked access to storage')) return;
+          _origInfo.apply(console, args);
+        };
+      }
+    })();
+  </script>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -60,8 +81,8 @@
     }
   </script>
 
-  <!-- Lucide Icons -->
-  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Lucide Icons (Self-Hosted First-Party) -->
+  <script src="js/lucide.js"></script>
 
   <!-- Custom CSS -->
   <link rel="stylesheet" href="css/styles.css">
@@ -2075,7 +2096,7 @@
   </footer>
 
   <!-- Scripts -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/supabase.js"></script>
   <script src="js/supabase-client.js"></script>
   <script src="js/data.js"></script>
   <script src="js/app.js"></script>

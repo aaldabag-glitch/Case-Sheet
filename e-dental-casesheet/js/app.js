@@ -4,6 +4,38 @@
  */
 
 document.addEventListener('DOMContentLoaded', () => {
+  // Safe storage wrappers to shield against Tracking Prevention exceptions
+  const _appMemStore = {};
+  const safeStorage = (typeof window !== 'undefined' && window.safeStorage) ? window.safeStorage : {
+    getItem(k) {
+      try { if (typeof window !== 'undefined' && window.localStorage) return window.localStorage.getItem(k); } catch (e) {}
+      return Object.prototype.hasOwnProperty.call(_appMemStore, k) ? _appMemStore[k] : null;
+    },
+    setItem(k, v) {
+      try { if (typeof window !== 'undefined' && window.localStorage) window.localStorage.setItem(k, String(v)); } catch (e) {}
+      _appMemStore[k] = String(v);
+    },
+    removeItem(k) {
+      try { if (typeof window !== 'undefined' && window.localStorage) window.localStorage.removeItem(k); } catch (e) {}
+      delete _appMemStore[k];
+    }
+  };
+  const _appSessionMemStore = {};
+  const safeSessionStorage = (typeof window !== 'undefined' && window.safeSessionStorage) ? window.safeSessionStorage : {
+    getItem(k) {
+      try { if (typeof window !== 'undefined' && window.sessionStorage) return window.sessionStorage.getItem(k); } catch (e) {}
+      return Object.prototype.hasOwnProperty.call(_appSessionMemStore, k) ? _appSessionMemStore[k] : null;
+    },
+    setItem(k, v) {
+      try { if (typeof window !== 'undefined' && window.sessionStorage) window.sessionStorage.setItem(k, String(v)); } catch (e) {}
+      _appSessionMemStore[k] = String(v);
+    },
+    removeItem(k) {
+      try { if (typeof window !== 'undefined' && window.sessionStorage) window.sessionStorage.removeItem(k); } catch (e) {}
+      delete _appSessionMemStore[k];
+    }
+  };
+
   // App State
   const state = {
     selectedDeptId: '',
@@ -12,7 +44,7 @@ document.addEventListener('DOMContentLoaded', () => {
     currentOpenSheet: null,
     activeOdontogramTooth: null,
     odontogramData: {}, // { toothNumber: { condition: 'caries', notes: '...' } }
-    savedDrafts: JSON.parse(localStorage.getItem('e_dental_drafts') || '[]'),
+    savedDrafts: JSON.parse(safeStorage.getItem('e_dental_drafts') || '[]'),
     stats: {
       todayCases: STUDENT_SESSION.stats.todayCases,
       savedDrafts: STUDENT_SESSION.stats.savedDrafts,
@@ -67,14 +99,14 @@ document.addEventListener('DOMContentLoaded', () => {
     let activeStudent = null;
     let erpInstructors = [];
     try {
-      const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+      const rawSession = safeSessionStorage.getItem('cosmo_dental_college_session') || safeStorage.getItem('cosmo_dental_college_session');
       if (rawSession) {
         const parsed = JSON.parse(rawSession);
         if (parsed && (parsed.role === 'STUDENT' || parsed.role === 'COLLEGE_ADMIN' || parsed.role === 'INSTRUCTOR')) {
           activeStudent = parsed;
         }
       }
-      const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+      const rawDb = safeStorage.getItem('cosmo_dental_college_erp_v3');
       if (rawDb) {
         const parsedDb = JSON.parse(rawDb);
         if (parsedDb && Array.isArray(parsedDb.instructors)) {
@@ -111,8 +143,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Global logout handler for student
   window.handleStudentLogout = function() {
-    sessionStorage.removeItem('cosmo_dental_college_session');
-    localStorage.removeItem('cosmo_dental_college_session');
+    safeSessionStorage.removeItem('cosmo_dental_college_session');
+    safeStorage.removeItem('cosmo_dental_college_session');
     window.location.href = 'college-portal.html';
   };
 
@@ -251,9 +283,9 @@ document.addEventListener('DOMContentLoaded', () => {
       let activeStudent = null;
       let erpInstructors = [];
       try {
-        const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+        const rawSession = safeSessionStorage.getItem('cosmo_dental_college_session') || safeStorage.getItem('cosmo_dental_college_session');
         if (rawSession) activeStudent = JSON.parse(rawSession);
-        const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+        const rawDb = safeStorage.getItem('cosmo_dental_college_erp_v3');
         if (rawDb) erpInstructors = JSON.parse(rawDb).instructors || [];
       } catch (err) {}
       populateSupervisorsDropdown(activeStudent, erpInstructors, state.selectedDeptId);
@@ -1335,8 +1367,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
       // Check if logged in via College ERP
       try {
-        const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
-        const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+        const rawSession = safeSessionStorage.getItem('cosmo_dental_college_session') || safeStorage.getItem('cosmo_dental_college_session');
+        const rawDb = safeStorage.getItem('cosmo_dental_college_erp_v3');
         if (rawSession && rawDb) {
           const user = JSON.parse(rawSession);
           let db = JSON.parse(rawDb);
@@ -1383,7 +1415,7 @@ document.addEventListener('DOMContentLoaded', () => {
               db = res.db;
             }
 
-            localStorage.setItem('cosmo_dental_college_erp_v3', JSON.stringify(db));
+            safeStorage.setItem('cosmo_dental_college_erp_v3', JSON.stringify(db));
 
             // Cloud push to Netlify Blobs so instructors and deans can see the submitted case immediately
             try {

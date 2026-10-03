@@ -4,6 +4,85 @@
  * Version 1.0 - 2026
  */
 
+// ============================================================================
+// SAFE STORAGE & PRIVACY SHIELD
+// Bulletproof storage abstraction that gracefully falls back to memory
+// prevents Tracking Prevention DOMExceptions, and ensures zero browser warnings
+// ============================================================================
+const _inMemoryStorage = {};
+const safeStorage = {
+  getItem(key) {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        return window.localStorage.getItem(key);
+      }
+    } catch (e) {}
+    return Object.prototype.hasOwnProperty.call(_inMemoryStorage, key) ? _inMemoryStorage[key] : null;
+  },
+  setItem(key, value) {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.setItem(key, String(value));
+      }
+    } catch (e) {}
+    _inMemoryStorage[key] = String(value);
+  },
+  removeItem(key) {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.removeItem(key);
+      }
+    } catch (e) {}
+    delete _inMemoryStorage[key];
+  },
+  clear() {
+    try {
+      if (typeof window !== 'undefined' && window.localStorage) {
+        window.localStorage.clear();
+      }
+    } catch (e) {}
+    for (const k in _inMemoryStorage) delete _inMemoryStorage[k];
+  }
+};
+
+const _inMemorySessionStorage = {};
+const safeSessionStorage = {
+  getItem(key) {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        return window.sessionStorage.getItem(key);
+      }
+    } catch (e) {}
+    return Object.prototype.hasOwnProperty.call(_inMemorySessionStorage, key) ? _inMemorySessionStorage[key] : null;
+  },
+  setItem(key, value) {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.setItem(key, String(value));
+      }
+    } catch (e) {}
+    _inMemorySessionStorage[key] = String(value);
+  },
+  removeItem(key) {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.removeItem(key);
+      }
+    } catch (e) {}
+    delete _inMemorySessionStorage[key];
+  },
+  clear() {
+    try {
+      if (typeof window !== 'undefined' && window.sessionStorage) {
+        window.sessionStorage.clear();
+      }
+    } catch (e) {}
+    for (const k in _inMemorySessionStorage) delete _inMemorySessionStorage[k];
+  }
+};
+window.safeStorage = safeStorage;
+window.safeSessionStorage = safeSessionStorage;
+
 const STORAGE_KEY = 'cosmo_dental_college_erp_v3';
 const SESSION_KEY = 'cosmo_dental_college_session';
 const SAVED_USERS_KEY = 'cosmo_dental_saved_accounts';
@@ -14,12 +93,12 @@ const PURGE_FLAG_KEY = 'cosmo_dental_root_purge_v8_clean_slate_all';
 // ============================================================================
 (function enforceCleanSlateFromRoots() {
   try {
-    if (localStorage.getItem(PURGE_FLAG_KEY) !== 'purged_v8') {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(SESSION_KEY);
-      sessionStorage.removeItem(SESSION_KEY);
-      localStorage.removeItem(SAVED_USERS_KEY);
-      localStorage.setItem(PURGE_FLAG_KEY, 'purged_v8');
+    if (safeStorage.getItem(PURGE_FLAG_KEY) !== 'purged_v8') {
+      safeStorage.removeItem(STORAGE_KEY);
+      safeStorage.removeItem(SESSION_KEY);
+      safeSessionStorage.removeItem(SESSION_KEY);
+      safeStorage.removeItem(SAVED_USERS_KEY);
+      safeStorage.setItem(PURGE_FLAG_KEY, 'purged_v8');
     }
   } catch (e) {}
 })();
@@ -59,7 +138,7 @@ function getInitialSeedDatabase() {
 // ============================================================================
 function getSavedAccounts() {
   try {
-    const raw = localStorage.getItem(SAVED_USERS_KEY);
+    const raw = safeStorage.getItem(SAVED_USERS_KEY);
     if (!raw) return [];
     const list = JSON.parse(raw);
     return Array.isArray(list) ? list : [];
@@ -78,7 +157,7 @@ function saveAccountToDevice(accountData) {
     list.unshift(accountData);
   }
   try {
-    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
+    safeStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
   } catch (e) {}
   renderSavedAccountsList();
 }
@@ -87,14 +166,14 @@ function removeSavedAccount(username) {
   let list = getSavedAccounts();
   list = list.filter(a => a.username.toLowerCase() !== username.toLowerCase());
   try {
-    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
+    safeStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
   } catch (e) {}
   renderSavedAccountsList();
 }
 
 function clearAllSavedAccounts() {
   try {
-    localStorage.removeItem(SAVED_USERS_KEY);
+    safeStorage.removeItem(SAVED_USERS_KEY);
   } catch (e) {}
   renderSavedAccountsList();
 }
@@ -518,11 +597,11 @@ window.autoDeduplicateDb = autoDeduplicateDb;
 // Read database
 function readErpDb() {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY);
+    const raw = safeStorage.getItem(STORAGE_KEY);
     let data;
     if (!raw) {
       data = getInitialSeedDatabase();
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      safeStorage.setItem(STORAGE_KEY, JSON.stringify(data));
       return data;
     }
     data = JSON.parse(raw);
@@ -545,14 +624,14 @@ function readErpDb() {
     const { db: cleanData, modified } = autoDeduplicateDb(data);
     if (modified) {
       try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData));
+        safeStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData));
       } catch (e) {}
     }
 
     return cleanData;
   } catch (e) {
     const initial = getInitialSeedDatabase();
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
+    safeStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
     return initial;
   }
 }
@@ -561,9 +640,9 @@ function readErpDb() {
 function writeErpDb(data) {
   try {
     const { db: cleanData } = autoDeduplicateDb(data);
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData || data));
+    safeStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData || data));
   } catch (e) {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+    safeStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   }
 }
 
@@ -574,7 +653,7 @@ function getCurrentSession() {
   let session = currentSession;
   if (!session) {
     try {
-      const raw = sessionStorage.getItem(SESSION_KEY) || localStorage.getItem(SESSION_KEY);
+      const raw = safeSessionStorage.getItem(SESSION_KEY) || safeStorage.getItem(SESSION_KEY);
       if (raw) session = JSON.parse(raw);
     } catch (e) {}
   }
@@ -591,8 +670,8 @@ function getCurrentSession() {
   const validCollege = (db.colleges || []).some(c => c.id === session.collegeId && c.status === 'Active');
   if (!validCollege) {
     currentSession = null;
-    sessionStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(SESSION_KEY);
+    safeSessionStorage.removeItem(SESSION_KEY);
+    safeStorage.removeItem(SESSION_KEY);
     return null;
   }
 
@@ -603,10 +682,10 @@ function getCurrentSession() {
 function setCurrentSession(user) {
   currentSession = user;
   if (user) {
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    safeSessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
   } else {
-    sessionStorage.removeItem(SESSION_KEY);
-    localStorage.removeItem(SESSION_KEY);
+    safeSessionStorage.removeItem(SESSION_KEY);
+    safeStorage.removeItem(SESSION_KEY);
   }
 }
 
@@ -2498,15 +2577,28 @@ const SB_KEY_KEY = 'cosmo_college_sb_key';
 const DEFAULT_SB_URL = '';
 const DEFAULT_SB_KEY = '';
 
-let erpSupabaseClient = null;
+// Memory-only auth store for Supabase to prevent Edge Tracking Prevention storage blocks
+const erpSupabaseAuthMemory = {};
+const erpSupabaseMemoryStorage = {
+  getItem: function(key) { return erpSupabaseAuthMemory[key] || null; },
+  setItem: function(key, val) { erpSupabaseAuthMemory[key] = String(val); },
+  removeItem: function(key) { delete erpSupabaseAuthMemory[key]; }
+};
 
 function getErpSupabaseClient() {
   if (erpSupabaseClient) return erpSupabaseClient;
-  const url = localStorage.getItem(SB_URL_KEY) || DEFAULT_SB_URL;
-  const key = localStorage.getItem(SB_KEY_KEY) || DEFAULT_SB_KEY;
+  const url = safeStorage.getItem(SB_URL_KEY) || DEFAULT_SB_URL;
+  const key = safeStorage.getItem(SB_KEY_KEY) || DEFAULT_SB_KEY;
   if (url && key && window.supabase && window.supabase.createClient) {
     try {
-      erpSupabaseClient = window.supabase.createClient(url.trim(), key.trim());
+      erpSupabaseClient = window.supabase.createClient(url.trim(), key.trim(), {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false,
+          storage: erpSupabaseMemoryStorage
+        }
+      });
       return erpSupabaseClient;
     } catch (e) {
       console.warn('Supabase client init error:', e);
@@ -2540,8 +2632,8 @@ function updateSupabaseStatusUI() {
 function openSupabaseModal() {
   const urlInput = document.getElementById('sb-input-url');
   const keyInput = document.getElementById('sb-input-key');
-  if (urlInput) urlInput.value = localStorage.getItem(SB_URL_KEY) || DEFAULT_SB_URL;
-  if (keyInput) keyInput.value = localStorage.getItem(SB_KEY_KEY) || DEFAULT_SB_KEY;
+  if (urlInput) urlInput.value = safeStorage.getItem(SB_URL_KEY) || DEFAULT_SB_URL;
+  if (keyInput) keyInput.value = safeStorage.getItem(SB_KEY_KEY) || DEFAULT_SB_KEY;
 
   document.getElementById('modal-supabase-setup')?.classList.remove('hidden');
 }
@@ -2559,8 +2651,8 @@ async function saveSupabaseSettings() {
     return;
   }
 
-  localStorage.setItem(SB_URL_KEY, url);
-  localStorage.setItem(SB_KEY_KEY, key);
+  safeStorage.setItem(SB_URL_KEY, url);
+  safeStorage.setItem(SB_KEY_KEY, key);
   erpSupabaseClient = null;
 
   const client = getErpSupabaseClient();
@@ -2945,13 +3037,13 @@ function clearOldErpData() {
     return;
   }
 
-  localStorage.removeItem(STORAGE_KEY);
-  localStorage.removeItem(SESSION_KEY);
-  sessionStorage.removeItem(SESSION_KEY);
+  safeStorage.removeItem(STORAGE_KEY);
+  safeStorage.removeItem(SESSION_KEY);
+  safeSessionStorage.removeItem(SESSION_KEY);
 
   // Re-seed clean state
   const cleanDb = getInitialSeedDatabase();
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanDb));
+  safeStorage.setItem(STORAGE_KEY, JSON.stringify(cleanDb));
 
   alert('🧹 تم تصفير وحذف البيانات القديمة بنجاح!');
   window.location.reload();

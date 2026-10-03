@@ -81,18 +81,50 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
   const DEFAULT_URL = 'https://hdejjtrgxzjviwyrgwkl.supabase.co';
   const DEFAULT_KEY = 'sb_publishable_h4O11kxPMxgdPhW7IKvTVQ_dWA6Nyr7';
 
+  // Safe storage fallback for Supabase client
+  const _sbMemStore = {};
+  const safeStorage = (typeof window !== 'undefined' && window.safeStorage) ? window.safeStorage : {
+    getItem(k) {
+      try { if (typeof window !== 'undefined' && window.localStorage) return window.localStorage.getItem(k); } catch (e) {}
+      return Object.prototype.hasOwnProperty.call(_sbMemStore, k) ? _sbMemStore[k] : null;
+    },
+    setItem(k, v) {
+      try { if (typeof window !== 'undefined' && window.localStorage) window.localStorage.setItem(k, String(v)); } catch (e) {}
+      _sbMemStore[k] = String(v);
+    },
+    removeItem(k) {
+      try { if (typeof window !== 'undefined' && window.localStorage) window.localStorage.removeItem(k); } catch (e) {}
+      delete _sbMemStore[k];
+    }
+  };
+
+  // Pure memory storage adapter for Supabase Auth to prevent Edge Tracking Prevention storage blocks
+  const _sbAuthMem = {};
+  const SB_AUTH_OPTS = {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false,
+      storage: {
+        getItem: (k) => _sbAuthMem[k] || null,
+        setItem: (k, v) => { _sbAuthMem[k] = String(v); },
+        removeItem: (k) => { delete _sbAuthMem[k]; }
+      }
+    }
+  };
+
   let clientInstance = null;
 
   // Initialize Client
   function getClient() {
     if (clientInstance) return clientInstance;
 
-    const url = localStorage.getItem(STORAGE_KEY_URL) || DEFAULT_URL;
-    const key = localStorage.getItem(STORAGE_KEY_KEY) || DEFAULT_KEY;
+    const url = safeStorage.getItem(STORAGE_KEY_URL) || DEFAULT_URL;
+    const key = safeStorage.getItem(STORAGE_KEY_KEY) || DEFAULT_KEY;
 
     if (url && key && window.supabase && window.supabase.createClient) {
       try {
-        clientInstance = window.supabase.createClient(url.trim(), key.trim());
+        clientInstance = window.supabase.createClient(url.trim(), key.trim(), SB_AUTH_OPTS);
         return clientInstance;
       } catch (err) {
         console.error('Error creating Supabase client:', err);
@@ -104,26 +136,26 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
 
   // Check if configured
   function isConfigured() {
-    const url = localStorage.getItem(STORAGE_KEY_URL) || DEFAULT_URL;
-    const key = localStorage.getItem(STORAGE_KEY_KEY) || DEFAULT_KEY;
+    const url = safeStorage.getItem(STORAGE_KEY_URL) || DEFAULT_URL;
+    const key = safeStorage.getItem(STORAGE_KEY_KEY) || DEFAULT_KEY;
     return Boolean(url && key);
   }
 
   // Get current credentials
   function getCredentials() {
     return {
-      url: localStorage.getItem(STORAGE_KEY_URL) || DEFAULT_URL,
-      key: localStorage.getItem(STORAGE_KEY_KEY) || DEFAULT_KEY,
-      mode: localStorage.getItem(STORAGE_KEY_MODE) || 'live'
+      url: safeStorage.getItem(STORAGE_KEY_URL) || DEFAULT_URL,
+      key: safeStorage.getItem(STORAGE_KEY_KEY) || DEFAULT_KEY,
+      mode: safeStorage.getItem(STORAGE_KEY_MODE) || 'live'
     };
   }
 
   // Save Credentials
   function saveCredentials(url, key) {
     if (url && key) {
-      localStorage.setItem(STORAGE_KEY_URL, url.trim());
-      localStorage.setItem(STORAGE_KEY_KEY, key.trim());
-      localStorage.setItem(STORAGE_KEY_MODE, 'live');
+      safeStorage.setItem(STORAGE_KEY_URL, url.trim());
+      safeStorage.setItem(STORAGE_KEY_KEY, key.trim());
+      safeStorage.setItem(STORAGE_KEY_MODE, 'live');
       clientInstance = null; // reset
       getClient();
       return true;
@@ -133,9 +165,9 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
 
   // Disconnect / Clear
   function disconnect() {
-    localStorage.removeItem(STORAGE_KEY_URL);
-    localStorage.removeItem(STORAGE_KEY_KEY);
-    localStorage.setItem(STORAGE_KEY_MODE, 'offline');
+    safeStorage.removeItem(STORAGE_KEY_URL);
+    safeStorage.removeItem(STORAGE_KEY_KEY);
+    safeStorage.setItem(STORAGE_KEY_MODE, 'offline');
     clientInstance = null;
   }
 
@@ -146,7 +178,7 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
     }
 
     try {
-      const tempClient = window.supabase.createClient(url.trim(), key.trim());
+      const tempClient = window.supabase.createClient(url.trim(), key.trim(), SB_AUTH_OPTS);
       // Query case_sheets table or health check
       const { data, error } = await tempClient.from('case_sheets').select('id').limit(1);
 
@@ -284,7 +316,7 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
   async function fetchCases(studentId = 'STU-4891') {
     const client = getClient();
     if (!client) {
-      const local = JSON.parse(localStorage.getItem('e_dental_drafts') || '[]');
+      const local = JSON.parse(safeStorage.getItem('e_dental_drafts') || '[]');
       return { success: true, source: 'local', data: local };
     }
 
@@ -299,7 +331,7 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
       return { success: true, source: 'supabase', data: data || [] };
     } catch (err) {
       console.warn('Error fetching from Supabase, loading local:', err);
-      const local = JSON.parse(localStorage.getItem('e_dental_drafts') || '[]');
+      const local = JSON.parse(safeStorage.getItem('e_dental_drafts') || '[]');
       return { success: true, source: 'local', data: local, error: err.message };
     }
   }
@@ -307,14 +339,14 @@ CREATE INDEX IF NOT EXISTS idx_case_sheets_status ON public.case_sheets(status);
   // Helper: Save to localStorage as backup
   function saveCaseToLocalFallback(casePayload) {
     try {
-      const localDrafts = JSON.parse(localStorage.getItem('e_dental_drafts') || '[]');
+      const localDrafts = JSON.parse(safeStorage.getItem('e_dental_drafts') || '[]');
       const existingIdx = localDrafts.findIndex(d => d.id === casePayload.id);
       if (existingIdx >= 0) {
         localDrafts[existingIdx] = { ...localDrafts[existingIdx], ...casePayload };
       } else {
         localDrafts.push(casePayload);
       }
-      localStorage.setItem('e_dental_drafts', JSON.stringify(localDrafts));
+      safeStorage.setItem('e_dental_drafts', JSON.stringify(localDrafts));
     } catch (e) {
       console.error('Local backup save failed:', e);
     }
