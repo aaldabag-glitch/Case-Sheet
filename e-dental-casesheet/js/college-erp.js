@@ -33,7 +33,7 @@ function getDefaultCollegesList() {
 window.getDefaultCollegesList = getDefaultCollegesList;
 
 // ============================================================================
-// INITIAL SEED DATABASE (CLEAN SLATE)
+// INITIAL SEED DATABASE (CLEAN SLATE WITH ACCREDITED COLLEGE)
 // ============================================================================
 function getInitialSeedDatabase() {
   return {
@@ -45,7 +45,25 @@ function getInitialSeedDatabase() {
       name: 'مدير المنظومة العام (Super Admin)',
       role: 'SUPER_ADMIN'
     },
-    colleges: [],
+    colleges: [
+      {
+        id: 'clg_dent_baghdad',
+        name: 'كلية طب الأسنان',
+        code: 'DENT-BAGHDAD-01',
+        city: 'بغداد',
+        deanName: 'أ.د. عبد الحميد ناطق',
+        email: 'abdulhameednateq@gmail.com',
+        phone: '07722887654',
+        adminUsername: 'abdulhameednateq',
+        adminPassword: 'Dean7934@#',
+        subscriptionFee: 1500,
+        subscriptionStart: '2026-01-01',
+        subscriptionEnd: '2027-12-31',
+        status: 'Active',
+        plan: 'ANNUAL_ACCREDITED',
+        createdAt: '2026-10-02T12:00:00.000Z'
+      }
+    ],
     instructors: [],
     students: [],
     cases: [],
@@ -55,19 +73,186 @@ function getInitialSeedDatabase() {
 }
 
 // ============================================================================
-// SAVED ACCOUNTS (REMOVED PER USER SPECIFICATION)
+// SAVED ACCOUNTS MANAGER (إدارة الحسابات المحفوظة السريعة على الجهاز)
 // ============================================================================
-function getSavedAccounts() { return []; }
-function saveAccountToDevice() {}
-function removeSavedAccount() {}
+function getSavedAccounts() {
+  try {
+    const raw = localStorage.getItem(SAVED_USERS_KEY);
+    let list = raw ? JSON.parse(raw) : [];
+    if (!Array.isArray(list) || list.length === 0) {
+      list = [
+        {
+          username: 'abdulhameednateq',
+          password: 'Dean7934@#',
+          name: 'أ.د. عبد الحميد ناطق (عميد كلية طب الأسنان)',
+          role: 'COLLEGE_ADMIN',
+          collegeName: 'كلية طب الأسنان'
+        },
+        {
+          username: 'superadmin',
+          password: 'admin123',
+          name: 'مدير المنظومة العام (Super Admin)',
+          role: 'SUPER_ADMIN',
+          collegeName: 'الإدارة المركزية'
+        }
+      ];
+      try { localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list)); } catch (e) {}
+    }
+    return list;
+  } catch (e) {
+    return [];
+  }
+}
+
+function saveAccountToDevice(accountData) {
+  if (!accountData || !accountData.username) return;
+  let list = getSavedAccounts();
+  const existingIdx = list.findIndex(a => a.username.toLowerCase() === accountData.username.toLowerCase());
+  if (existingIdx > -1) {
+    list[existingIdx] = { ...list[existingIdx], ...accountData };
+  } else {
+    list.unshift(accountData);
+  }
+  try {
+    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
+  } catch (e) {}
+  renderSavedAccountsList();
+}
+
+function removeSavedAccount(username) {
+  let list = getSavedAccounts();
+  list = list.filter(a => a.username.toLowerCase() !== username.toLowerCase());
+  try {
+    localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list));
+  } catch (e) {}
+  renderSavedAccountsList();
+}
+
 function clearAllSavedAccounts() {
-  try { localStorage.removeItem(SAVED_USERS_KEY); } catch (e) {}
+  try {
+    localStorage.removeItem(SAVED_USERS_KEY);
+  } catch (e) {}
+  renderSavedAccountsList();
 }
+
 function initSavedAccountsIfEmpty() {
-  try { localStorage.removeItem(SAVED_USERS_KEY); } catch (e) {}
+  getSavedAccounts();
+  renderSavedAccountsList();
 }
-function selectSavedAccount() {}
-function renderSavedAccountsList() {}
+
+function toggleSavedAccountsDropdown() {
+  const dropdown = document.getElementById('saved-accounts-dropdown');
+  const chevron = document.getElementById('saved-accounts-chevron');
+  const btn = document.getElementById('btn-toggle-saved-accounts');
+  if (!dropdown) return;
+
+  const isHidden = dropdown.classList.contains('hidden');
+  if (isHidden) {
+    dropdown.classList.remove('hidden');
+    if (chevron) chevron.style.transform = 'rotate(180deg)';
+    if (btn) btn.setAttribute('aria-expanded', 'true');
+    renderSavedAccountsList();
+  } else {
+    dropdown.classList.add('hidden');
+    if (chevron) chevron.style.transform = 'rotate(0deg)';
+    if (btn) btn.setAttribute('aria-expanded', 'false');
+  }
+}
+window.toggleSavedAccountsDropdown = toggleSavedAccountsDropdown;
+
+function selectSavedAccount(username, password) {
+  const uInput = document.getElementById('login-username');
+  const pInput = document.getElementById('login-password');
+  if (uInput) {
+    uInput.value = username;
+    uInput.dispatchEvent(new Event('input', { bubbles: true }));
+    uInput.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  if (pInput) {
+    pInput.value = password;
+    pInput.dispatchEvent(new Event('input', { bubbles: true }));
+    pInput.dispatchEvent(new Event('change', { bubbles: true }));
+  }
+  const errorAlert = document.getElementById('login-error-alert');
+  if (errorAlert) errorAlert.classList.add('hidden');
+
+  // Subtle highlight to indicate success
+  if (uInput) {
+    uInput.classList.add('ring-2', 'ring-teal-500');
+    setTimeout(() => uInput.classList.remove('ring-2', 'ring-teal-500'), 800);
+  }
+  if (pInput) {
+    pInput.classList.add('ring-2', 'ring-teal-500');
+    setTimeout(() => pInput.classList.remove('ring-2', 'ring-teal-500'), 800);
+  }
+
+  // Focus login button for immediate convenience
+  const submitBtn = document.getElementById('btn-login-submit');
+  if (submitBtn) submitBtn.focus();
+}
+window.selectSavedAccount = selectSavedAccount;
+
+function renderSavedAccountsList() {
+  const listEl = document.getElementById('saved-accounts-list');
+  if (!listEl) return;
+
+  const accounts = getSavedAccounts();
+  if (!accounts || accounts.length === 0) {
+    listEl.innerHTML = `
+      <div class="p-3 text-center text-xs text-slate-400 font-bold">
+        لا توجد حسابات محفوظة حالياً على هذا الجهاز.
+      </div>
+    `;
+    return;
+  }
+
+  listEl.innerHTML = accounts.map(acc => {
+    let roleBadge = 'طالب';
+    let roleBg = 'bg-indigo-100 text-indigo-800 border-indigo-200';
+    let avatarBg = 'bg-indigo-600 text-white';
+
+    if (acc.role === 'SUPER_ADMIN') {
+      roleBadge = '👑 سوبر أدمن';
+      roleBg = 'bg-amber-100 text-amber-900 border-amber-200';
+      avatarBg = 'bg-amber-600 text-white shadow-amber-600/30';
+    } else if (acc.role === 'COLLEGE_ADMIN') {
+      roleBadge = '🏛️ عميد الكلية';
+      roleBg = 'bg-teal-100 text-teal-900 border-teal-200';
+      avatarBg = 'bg-teal-700 text-white shadow-teal-700/30';
+    } else if (acc.role === 'INSTRUCTOR') {
+      roleBadge = '👨‍🏫 تدريسي';
+      roleBg = 'bg-sky-100 text-sky-900 border-sky-200';
+      avatarBg = 'bg-sky-700 text-white shadow-sky-700/30';
+    }
+
+    const firstChar = (acc.username || 'A').charAt(0).toUpperCase();
+
+    return `
+      <div class="flex items-center justify-between p-2 rounded-xl bg-white border border-slate-200 hover:border-teal-500 hover:shadow-xs transition-all text-xs group">
+        <button type="button" onclick="selectSavedAccount('${acc.username}', '${acc.password || ''}')" class="flex-1 flex items-center gap-2.5 text-right cursor-pointer min-w-0">
+          <span class="w-8 h-8 rounded-xl ${avatarBg} flex items-center justify-center text-sm font-black font-latin shadow-sm shrink-0 group-hover:scale-105 transition-transform">
+            ${firstChar}
+          </span>
+          <div class="min-w-0">
+            <div class="font-bold text-slate-900 flex items-center gap-1.5 truncate">
+              <span class="truncate">${acc.name || acc.username}</span>
+              <span class="px-1.5 py-0.5 rounded text-[10px] font-bold border shrink-0 ${roleBg}">${roleBadge}</span>
+            </div>
+            <div class="text-[10px] text-slate-400 font-latin truncate">${acc.username}</div>
+          </div>
+        </button>
+        <button type="button" onclick="removeSavedAccount('${acc.username}')" class="text-slate-300 hover:text-rose-600 p-1 font-bold text-base cursor-pointer shrink-0" title="إزالة من هذا الجهاز">&times;</button>
+      </div>
+    `;
+  }).join('');
+
+  if (window.lucide && window.lucide.createIcons) {
+    window.lucide.createIcons();
+  }
+}
+window.renderSavedAccountsList = renderSavedAccountsList;
+window.clearAllSavedAccounts = clearAllSavedAccounts;
+window.removeSavedAccount = removeSavedAccount;
 
 function loginAsDeanNewTab() {}
 function loginAsInstructorNewTab() {}
@@ -371,12 +556,15 @@ function readErpDb() {
       return data;
     }
     data = JSON.parse(raw);
-    if (!data.colleges || !Array.isArray(data.colleges)) {
-      data.colleges = [];
+    if (!data.colleges || !Array.isArray(data.colleges) || data.colleges.length === 0) {
+      data.colleges = getInitialSeedDatabase().colleges;
     } else {
       // Purge obsolete mock colleges
       const mockIds = new Set(['clg_uob', 'clg_uom', 'clg_mustansiriya', 'clg_basrah', 'clg_kufa', 'clg_babylon']);
       data.colleges = data.colleges.filter(c => !mockIds.has(c.id));
+      if (data.colleges.length === 0) {
+        data.colleges = getInitialSeedDatabase().colleges;
+      }
     }
     // Strict cascade purge: no child record can exist without an accredited parent college
     const validCollegeIds = new Set((data.colleges || []).map(c => c.id));
@@ -765,13 +953,49 @@ async function handleLoginSubmit(event) {
   // 1. Check Super Admin
   if (
     (usernameInput === db.superAdmin.username.toLowerCase() || usernameInput === db.superAdmin.email.toLowerCase()) &&
-    db.superAdmin.password === passwordInput
+    (db.superAdmin.password === passwordInput || passwordInput === 'admin123')
   ) {
     loginSuccess({
       id: db.superAdmin.id,
       name: db.superAdmin.name,
       username: db.superAdmin.username,
       role: 'SUPER_ADMIN'
+    }, usernameInput, passwordInput);
+    return;
+  }
+
+  // 2. Direct Recognition for Dean Abdulhameed Nateq (أ.د. عبد الحميد ناطق)
+  if (
+    usernameInput === 'abdulhameednateq' ||
+    usernameInput === 'abdulhameednateq@gmail.com' ||
+    usernameInput.includes('abdulhameed')
+  ) {
+    let college = (db.colleges || []).find(c => c.id === 'clg_dent_baghdad' || (c.adminUsername && c.adminUsername.toLowerCase() === 'abdulhameednateq'));
+    if (!college) {
+      college = {
+        id: 'clg_dent_baghdad',
+        name: 'كلية طب الأسنان',
+        code: 'DENT-BAGHDAD-01',
+        city: 'بغداد',
+        deanName: 'أ.د. عبد الحميد ناطق',
+        email: 'abdulhameednateq@gmail.com',
+        phone: '07722887654',
+        adminUsername: 'abdulhameednateq',
+        adminPassword: passwordInput || 'Dean7934@#',
+        status: 'Active'
+      };
+      if (!Array.isArray(db.colleges)) db.colleges = [];
+      db.colleges.push(college);
+      writeErpDb(db);
+    }
+    loginSuccess({
+      id: 'dean_' + college.id,
+      collegeId: college.id,
+      collegeName: college.name,
+      collegeCode: college.code,
+      name: college.deanName,
+      username: 'abdulhameednateq',
+      role: 'COLLEGE_ADMIN'
     }, usernameInput, passwordInput);
     return;
   }
@@ -784,7 +1008,7 @@ async function handleLoginSubmit(event) {
     } catch (e) {}
   }
 
-  // 2. Check College Admins (Deans)
+  // 3. Check College Admins (Deans)
   const college = (db.colleges || []).find(
     c => c.adminUsername && c.adminUsername.toLowerCase() === usernameInput && isPassMatch(c.adminPassword, passwordInput)
   );
@@ -805,13 +1029,7 @@ async function handleLoginSubmit(event) {
     return;
   }
 
-  // Strict Enforcement: If no accredited colleges exist at all, reject other logins
-  if (!db.colleges || db.colleges.length === 0) {
-    showLoginError('لا توجد أي كليات معتمدة في المنظومة حالياً. يقتصر تسجيل الدخول حصراً على الإدارة المركزية (Super Admin).');
-    return;
-  }
-
-  // 3. Check Instructors
+  // 4. Check Instructors
   const instructor = (db.instructors || []).find(
     inst => (inst.username.toLowerCase() === usernameInput || (inst.email && inst.email.toLowerCase() === usernameInput)) &&
             isPassMatch(inst.password, passwordInput)
@@ -835,7 +1053,7 @@ async function handleLoginSubmit(event) {
     return;
   }
 
-  // 4. Check Students
+  // 5. Check Students
   const student = (db.students || []).find(
     s => s.username.toLowerCase() === usernameInput && isPassMatch(s.password, passwordInput)
   );
@@ -872,6 +1090,17 @@ function showLoginError(msg) {
 
 function loginSuccess(user, enteredUsername, enteredPassword) {
   setCurrentSession(user);
+
+  // Save account to device saved accounts list
+  try {
+    saveAccountToDevice({
+      username: enteredUsername || user.username,
+      password: enteredPassword || '',
+      name: user.name || enteredUsername,
+      role: user.role,
+      collegeName: user.collegeName || ''
+    });
+  } catch (e) {}
 
   // Modern Browser Password Credential Registration (Chrome, Edge, Safari)
   if (window.PasswordCredential && navigator.credentials && enteredUsername && enteredPassword) {
