@@ -7,19 +7,16 @@
 const STORAGE_KEY = 'cosmo_dental_college_erp_v3';
 const SESSION_KEY = 'cosmo_dental_college_session';
 const SAVED_USERS_KEY = 'cosmo_dental_saved_accounts';
-const PURGE_FLAG_KEY = 'cosmo_dental_root_purge_v6_final';
+const PURGE_FLAG_KEY = 'cosmo_dental_root_purge_v7_device_isolation';
 
 // ============================================================================
-// ENFORCE CLEAN SLATE FROM ROOTS: Wipe all legacy colleges, students, and sessions
+// ENFORCE STRICT PER-DEVICE ISOLATION: Wipe legacy auto-seeded accounts so each PC is 100% isolated
 // ============================================================================
 (function enforceCleanSlateFromRoots() {
   try {
-    if (localStorage.getItem(PURGE_FLAG_KEY) !== 'purged') {
-      localStorage.removeItem(STORAGE_KEY);
-      localStorage.removeItem(SESSION_KEY);
-      sessionStorage.removeItem(SESSION_KEY);
+    if (localStorage.getItem(PURGE_FLAG_KEY) !== 'isolated_v7') {
       localStorage.removeItem(SAVED_USERS_KEY);
-      localStorage.setItem(PURGE_FLAG_KEY, 'purged');
+      localStorage.setItem(PURGE_FLAG_KEY, 'isolated_v7');
     }
   } catch (e) {}
 })();
@@ -78,22 +75,9 @@ function getInitialSeedDatabase() {
 function getSavedAccounts() {
   try {
     const raw = localStorage.getItem(SAVED_USERS_KEY);
-    let list = raw ? JSON.parse(raw) : [];
-    // Strict Isolation & Privacy: Never expose or leak master super admin in public saved accounts
-    list = (Array.isArray(list) ? list : []).filter(acc => acc && acc.role !== 'SUPER_ADMIN' && acc.username !== 'superadmin');
-    if (list.length === 0) {
-      list = [
-        {
-          username: 'abdulhameednateq',
-          password: 'Dean7934@#',
-          name: 'أ.د. عبد الحميد ناطق (عميد كلية طب الأسنان)',
-          role: 'COLLEGE_ADMIN',
-          collegeName: 'كلية طب الأسنان'
-        }
-      ];
-      try { localStorage.setItem(SAVED_USERS_KEY, JSON.stringify(list)); } catch (e) {}
-    }
-    return list;
+    if (!raw) return [];
+    const list = JSON.parse(raw);
+    return Array.isArray(list) ? list : [];
   } catch (e) {
     return [];
   }
@@ -101,8 +85,6 @@ function getSavedAccounts() {
 
 function saveAccountToDevice(accountData) {
   if (!accountData || !accountData.username) return;
-  // Strictly prevent saving super admin to device accounts
-  if (accountData.role === 'SUPER_ADMIN' || accountData.username.toLowerCase() === 'superadmin') return;
   let list = getSavedAccounts();
   const existingIdx = list.findIndex(a => a.username.toLowerCase() === accountData.username.toLowerCase());
   if (existingIdx > -1) {
@@ -133,7 +115,6 @@ function clearAllSavedAccounts() {
 }
 
 function initSavedAccountsIfEmpty() {
-  getSavedAccounts();
   renderSavedAccountsList();
 }
 
@@ -190,25 +171,36 @@ function selectSavedAccount(username, password) {
 window.selectSavedAccount = selectSavedAccount;
 
 function renderSavedAccountsList() {
+  const wrapper = document.getElementById('saved-accounts-wrapper');
   const listEl = document.getElementById('saved-accounts-list');
+  const mainBadge = document.getElementById('saved-account-main-badge');
   if (!listEl) return;
 
   const accounts = getSavedAccounts();
+  // Strict Device Isolation: If no accounts are saved on THIS device, hide the whole box!
   if (!accounts || accounts.length === 0) {
-    listEl.innerHTML = `
-      <div class="p-3 text-center text-xs text-slate-400 font-bold">
-        لا توجد حسابات محفوظة حالياً على هذا الجهاز.
-      </div>
-    `;
+    if (wrapper) wrapper.classList.add('hidden');
+    listEl.innerHTML = '';
     return;
   }
 
-  listEl.innerHTML = accounts.filter(acc => acc && acc.role !== 'SUPER_ADMIN' && acc.username !== 'superadmin').map(acc => {
+  if (wrapper) wrapper.classList.remove('hidden');
+
+  // Dynamic avatar badge from the first account saved on this PC
+  if (mainBadge && accounts[0] && accounts[0].username) {
+    mainBadge.textContent = accounts[0].username.charAt(0).toUpperCase();
+  }
+
+  listEl.innerHTML = accounts.map(acc => {
     let roleBadge = 'طالب';
     let roleBg = 'bg-indigo-100 text-indigo-800 border-indigo-200';
     let avatarBg = 'bg-indigo-600 text-white';
 
-    if (acc.role === 'COLLEGE_ADMIN') {
+    if (acc.role === 'SUPER_ADMIN') {
+      roleBadge = '👑 الإدارة المركزية';
+      roleBg = 'bg-amber-100 text-amber-900 border-amber-200';
+      avatarBg = 'bg-amber-600 text-white shadow-amber-600/30';
+    } else if (acc.role === 'COLLEGE_ADMIN') {
       roleBadge = '🏛️ عميد الكلية';
       roleBg = 'bg-teal-100 text-teal-900 border-teal-200';
       avatarBg = 'bg-teal-700 text-white shadow-teal-700/30';
@@ -1084,18 +1076,16 @@ function showLoginError(msg) {
 function loginSuccess(user, enteredUsername, enteredPassword) {
   setCurrentSession(user);
 
-  // Save account to device saved accounts list (Strict Privacy: never save super admin)
-  if (user && user.role !== 'SUPER_ADMIN' && user.username !== 'superadmin') {
-    try {
-      saveAccountToDevice({
-        username: enteredUsername || user.username,
-        password: enteredPassword || '',
-        name: user.name || enteredUsername,
-        role: user.role,
-        collegeName: user.collegeName || ''
-      });
-    } catch (e) {}
-  }
+  // Save account to THIS DEVICE ONLY (Strict per-device isolation)
+  try {
+    saveAccountToDevice({
+      username: enteredUsername || user.username,
+      password: enteredPassword || '',
+      name: user.name || enteredUsername,
+      role: user.role,
+      collegeName: user.collegeName || ''
+    });
+  } catch (e) {}
 
   // Modern Browser Password Credential Registration (Chrome, Edge, Safari)
   if (window.PasswordCredential && navigator.credentials && enteredUsername && enteredPassword) {
