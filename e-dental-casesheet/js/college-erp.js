@@ -93,6 +93,273 @@ function togglePasswordVisibility(inputId, btnEl) {
 window.togglePasswordVisibility = togglePasswordVisibility;
 
 
+// ============================================================================
+// ANTI-DUPLICATE SUBMISSION LOCKS & DEBOUNCE
+// ============================================================================
+const activeActionLocks = new Set();
+
+function acquireSubmissionLock(actionKey, timeoutMs = 3000) {
+  if (!actionKey) return true;
+  if (activeActionLocks.has(actionKey)) {
+    console.warn(`[Anti-Duplicate Lock] Action "${actionKey}" is already running. Duplicate prevented.`);
+    return false;
+  }
+  activeActionLocks.add(actionKey);
+  setTimeout(() => {
+    activeActionLocks.delete(actionKey);
+  }, timeoutMs);
+  return true;
+}
+window.acquireSubmissionLock = acquireSubmissionLock;
+
+function releaseSubmissionLock(actionKey) {
+  if (actionKey) {
+    activeActionLocks.delete(actionKey);
+  }
+}
+window.releaseSubmissionLock = releaseSubmissionLock;
+
+function lockSubmitButton(btnEl, loadingText = 'جاري المعالجة...') {
+  if (!btnEl) return () => {};
+  const originalDisabled = btnEl.disabled;
+  const originalHtml = btnEl.innerHTML;
+  const originalPointerEvents = btnEl.style.pointerEvents;
+  const originalOpacity = btnEl.style.opacity;
+
+  btnEl.disabled = true;
+  btnEl.style.pointerEvents = 'none';
+  btnEl.style.opacity = '0.65';
+  if (loadingText) {
+    btnEl.innerHTML = `<span class="inline-flex items-center gap-1.5 justify-center"><span>⏳</span><span>${loadingText}</span></span>`;
+  }
+
+  let unlocked = false;
+  return function unlock() {
+    if (unlocked) return;
+    unlocked = true;
+    btnEl.disabled = originalDisabled;
+    btnEl.innerHTML = originalHtml;
+    btnEl.style.pointerEvents = originalPointerEvents;
+    btnEl.style.opacity = originalOpacity;
+    if (window.lucide && window.lucide.createIcons) {
+      try { window.lucide.createIcons(); } catch (e) {}
+    }
+  };
+}
+window.lockSubmitButton = lockSubmitButton;
+
+// ============================================================================
+// AUTOMATIC DATABASE DEDUPLICATION ENGINE (تنظيف فوري وتلقائي لكافة التكرارات)
+// ============================================================================
+function autoDeduplicateDb(db) {
+  if (!db || typeof db !== 'object') return { db, modified: false };
+  let modified = false;
+
+  // 1. Colleges: unique by ID, unique by trimmed lowercase name
+  if (Array.isArray(db.colleges)) {
+    const seenColgIds = new Set();
+    const seenColgNames = new Set();
+    const cleanColleges = [];
+    const collegeIdMap = new Map();
+
+    for (const c of db.colleges) {
+      if (!c || !c.id) { modified = true; continue; }
+      const normName = (c.name || '').trim().toLowerCase();
+      if (seenColgIds.has(c.id) || (normName && seenColgNames.has(normName))) {
+        modified = true;
+        const primary = cleanColleges.find(x => x.id === c.id || (normName && (x.name || '').trim().toLowerCase() === normName));
+        if (primary) collegeIdMap.set(c.id, primary.id);
+        continue;
+      }
+      seenColgIds.add(c.id);
+      if (normName) seenColgNames.add(normName);
+      cleanColleges.push(c);
+      collegeIdMap.set(c.id, c.id);
+    }
+    db.colleges = cleanColleges;
+  }
+
+  // 2. Instructors: unique by ID, unique by collegeId + name, unique by username/email
+  if (Array.isArray(db.instructors)) {
+    const seenInstIds = new Set();
+    const seenInstKeys = new Set();
+    const cleanInsts = [];
+    const instIdMap = new Map();
+
+    for (const inst of db.instructors) {
+      if (!inst || !inst.id) { modified = true; continue; }
+      const nameKey = (inst.collegeId || '') + '___' + (inst.name || '').trim().toLowerCase();
+      const userKey = (inst.username || '').trim().toLowerCase();
+      const emailKey = inst.email ? (inst.email || '').trim().toLowerCase() : null;
+
+      const isDup = seenInstIds.has(inst.id) || 
+                    seenInstKeys.has(nameKey) || 
+                    (userKey && seenInstKeys.has(userKey)) ||
+                    (emailKey && seenInstKeys.has(emailKey));
+
+      if (isDup) {
+        modified = true;
+        const primary = cleanInsts.find(x => 
+          x.id === inst.id || 
+          ((x.collegeId || '') + '___' + (x.name || '').trim().toLowerCase() === nameKey) ||
+          (userKey && (x.username || '').trim().toLowerCase() === userKey)
+        );
+        if (primary) instIdMap.set(inst.id, primary.id);
+        continue;
+      }
+
+      seenInstIds.add(inst.id);
+      seenInstKeys.add(nameKey);
+      if (userKey) seenInstKeys.add(userKey);
+      if (emailKey) seenInstKeys.add(emailKey);
+      cleanInsts.push(inst);
+      instIdMap.set(inst.id, inst.id);
+    }
+    db.instructors = cleanInsts;
+  }
+
+  // 3. Students: strictly deduplicate within college by name, universityId, phone, email, or username
+  if (Array.isArray(db.students)) {
+    const seenStdIds = new Set();
+    const seenStdKeys = new Set();
+    const cleanStudents = [];
+    const stdIdMap = new Map();
+
+    for (const s of db.students) {
+      if (!s || !s.id) { modified = true; continue; }
+      const nameKey = (s.collegeId || '') + '___' + (s.name || '').trim().toLowerCase();
+      const uIdKey = s.universityId ? (s.collegeId || '') + '___u_' + s.universityId.trim() : null;
+      const phoneKey = s.phone ? (s.collegeId || '') + '___p_' + s.phone.trim() : null;
+      const userKey = (s.username || '').trim().toLowerCase();
+
+      const isDup = seenStdIds.has(s.id) || 
+                    seenStdKeys.has(nameKey) || 
+                    (uIdKey && seenStdKeys.has(uIdKey)) || 
+                    (phoneKey && seenStdKeys.has(phoneKey));
+
+      if (isDup) {
+        modified = true;
+        const primary = cleanStudents.find(x => 
+          x.id === s.id || 
+          ((x.collegeId || '') + '___' + (x.name || '').trim().toLowerCase() === nameKey) ||
+          (uIdKey && x.universityId && (x.collegeId || '') + '___u_' + x.universityId.trim() === uIdKey)
+        );
+        if (primary) {
+          stdIdMap.set(s.id, primary.id);
+          // Retain attributes
+          if (!primary.phone && s.phone) primary.phone = s.phone;
+          if (!primary.email && s.email) primary.email = s.email;
+          if (!primary.universityId && s.universityId) primary.universityId = s.universityId;
+          if (!primary.group && s.group) primary.group = s.group;
+        }
+        continue;
+      }
+
+      seenStdIds.add(s.id);
+      seenStdKeys.add(nameKey);
+      if (uIdKey) seenStdKeys.add(uIdKey);
+      if (phoneKey) seenStdKeys.add(phoneKey);
+      if (userKey) seenStdKeys.add(userKey);
+      cleanStudents.push(s);
+      stdIdMap.set(s.id, s.id);
+    }
+    db.students = cleanStudents;
+
+    // Remap cases to retained student IDs
+    if (Array.isArray(db.cases)) {
+      db.cases.forEach(c => {
+        if (c && c.studentId && stdIdMap.has(c.studentId)) {
+          c.studentId = stdIdMap.get(c.studentId);
+        }
+      });
+    }
+  }
+
+  // 4. Cases: unique by ID and unique by student + patient + type + date
+  if (Array.isArray(db.cases)) {
+    const seenCaseIds = new Set();
+    const seenCaseKeys = new Set();
+    const cleanCases = [];
+
+    for (const c of db.cases) {
+      if (!c || !c.id) { modified = true; continue; }
+      const caseKey = (c.studentId || '') + '___' + (c.patientName || '').trim().toLowerCase() + '___' + (c.type || '') + '___' + ((c.createdAt || '').slice(0, 10));
+      if (seenCaseIds.has(c.id) || seenCaseKeys.has(caseKey)) {
+        modified = true;
+        const existing = cleanCases.find(x => x.id === c.id || ((x.studentId || '') + '___' + (x.patientName || '').trim().toLowerCase() + '___' + (x.type || '') + '___' + ((x.createdAt || '').slice(0, 10)) === caseKey));
+        if (existing) {
+          if ((!existing.assignedMark || existing.assignedMark === '-') && c.assignedMark && c.assignedMark !== '-') {
+            existing.assignedMark = c.assignedMark;
+            existing.feedback = c.feedback || existing.feedback;
+            existing.status = c.status || existing.status;
+            existing.forwardedToDean = c.forwardedToDean || existing.forwardedToDean;
+          }
+        }
+        continue;
+      }
+      seenCaseIds.add(c.id);
+      seenCaseKeys.add(caseKey);
+      cleanCases.push(c);
+    }
+    db.cases = cleanCases;
+  }
+
+  // 5. College Applications: purge approved and ones matching permanent colleges
+  if (Array.isArray(db.applications)) {
+    const regCollegeNames = new Set((db.colleges || []).map(c => (c.name || '').trim().toLowerCase()));
+    const regCollegeIds = new Set((db.colleges || []).map(c => c.id));
+    const seenAppIds = new Set();
+    const seenAppNames = new Set();
+    const cleanApps = [];
+
+    for (const app of db.applications) {
+      if (!app || !app.id) { modified = true; continue; }
+      const normName = (app.collegeName || '').trim().toLowerCase();
+      // Purge if approved or already in permanent colleges
+      if (app.status === 'Approved' || regCollegeNames.has(normName) || (app.collegeId && regCollegeIds.has(app.collegeId))) {
+        modified = true;
+        continue;
+      }
+      if (seenAppIds.has(app.id) || (normName && seenAppNames.has(normName))) {
+        modified = true;
+        continue;
+      }
+      seenAppIds.add(app.id);
+      if (normName) seenAppNames.add(normName);
+      cleanApps.push(app);
+    }
+    db.applications = cleanApps;
+  }
+
+  // 6. Student Applications: purge approved and ones matching registered students
+  if (Array.isArray(db.studentApplications)) {
+    const regStudents = new Set((db.students || []).map(s => (s.collegeId || '') + '___' + (s.name || '').trim().toLowerCase()));
+    const seenAppIds = new Set();
+    const seenStdAppKeys = new Set();
+    const cleanStdApps = [];
+
+    for (const app of db.studentApplications) {
+      if (!app || !app.id) { modified = true; continue; }
+      const nameKey = (app.collegeId || '') + '___' + (app.studentName || '').trim().toLowerCase();
+      if (app.status === 'Approved' || regStudents.has(nameKey)) {
+        modified = true;
+        continue;
+      }
+      if (seenAppIds.has(app.id) || seenStdAppKeys.has(nameKey)) {
+        modified = true;
+        continue;
+      }
+      seenAppIds.add(app.id);
+      seenStdAppKeys.add(nameKey);
+      cleanStdApps.push(app);
+    }
+    db.studentApplications = cleanStdApps;
+  }
+
+  return { db, modified };
+}
+window.autoDeduplicateDb = autoDeduplicateDb;
+
 // Read database
 function readErpDb() {
   try {
@@ -119,7 +386,15 @@ function readErpDb() {
     data.studentApplications = (data.studentApplications || []).filter(a => validCollegeIds.has(a.collegeId));
     data.applications = (data.applications || []).filter(a => a && a.id);
 
-    return data;
+    // Strict automatic deduplication across all tables to eliminate double-click duplicates
+    const { db: cleanData, modified } = autoDeduplicateDb(data);
+    if (modified) {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData));
+      } catch (e) {}
+    }
+
+    return cleanData;
   } catch (e) {
     const initial = getInitialSeedDatabase();
     localStorage.setItem(STORAGE_KEY, JSON.stringify(initial));
@@ -129,7 +404,12 @@ function readErpDb() {
 
 // Write database
 function writeErpDb(data) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  try {
+    const { db: cleanData } = autoDeduplicateDb(data);
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(cleanData || data));
+  } catch (e) {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+  }
 }
 
 // Session state
@@ -198,8 +478,262 @@ function getCurrentUserCollege() {
 window.getCurrentUserCollege = getCurrentUserCollege;
 
 // ============================================================================
-// AUTHENTICATION & ROUTING
+// STRICT PLATFORM-WIDE UNIQUENESS & ISOLATION ENGINE
+// Enforce: NO DUPLICATE EMAIL, NO DUPLICATE PASSWORD, NO DUPLICATE NAME
+// Across all roles, entities, colleges, instructors, students, and applications.
 // ============================================================================
+function checkGlobalUniqueness(params = {}) {
+  const db = readErpDb();
+  const excludeId = params.excludeId;
+
+  // 1. Check College Name (No duplicate college names)
+  if (params.collegeName) {
+    const cName = params.collegeName.trim().toLowerCase();
+    const existingCollege = (db.colleges || []).find(c => c.id !== excludeId && (c.name || '').trim().toLowerCase() === cName);
+    if (existingCollege) {
+      return { valid: false, message: `⚠️ اسم الكلية (${params.collegeName}) مسجل مسبقاً في الدليل الدائم! لا يمكن تكرار اسم الكلية مرتين.` };
+    }
+    const existingApp = (db.applications || []).find(a => a.id !== excludeId && a.status === 'Pending' && (a.collegeName || '').trim().toLowerCase() === cName);
+    if (existingApp) {
+      return { valid: false, message: `⚠️ اسم الكلية (${params.collegeName}) مسجل مسبقاً في طلبات التقديم الواردة!` };
+    }
+  }
+
+  // 2. Check College Code (No duplicate college codes)
+  if (params.collegeCode) {
+    const code = params.collegeCode.trim().toUpperCase();
+    const existingCollege = (db.colleges || []).find(c => c.id !== excludeId && (c.code || '').trim().toUpperCase() === code);
+    if (existingCollege) {
+      return { valid: false, message: `⚠️ رمز الكلية الكودي (${params.collegeCode}) مسجل مسبقاً لكلية أخرى! يرجى اختيار رمز فريد.` };
+    }
+  }
+
+  // 3. Check Person / Entity Name (No duplicate names twice across the entire system)
+  const pName = (params.personName || params.name || params.deanName || '').trim().toLowerCase();
+  if (pName && pName.length > 1) {
+    if (db.superAdmin && (db.superAdmin.name || '').trim().toLowerCase() === pName && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
+      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مطابق لاسم مدير المنظومة (Super Admin)! لا يمكن تكرار الأسماء مرتين.` };
+    }
+    const matchCollegeDean = (db.colleges || []).find(c => c.id !== excludeId && (c.deanName || '').trim().toLowerCase() === pName);
+    if (matchCollegeDean) {
+      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مسجل مسبقاً كعميد لكلية (${matchCollegeDean.name})! لا يمكن تكرار الأسماء.` };
+    }
+    const matchInst = (db.instructors || []).find(i => i.id !== excludeId && (i.name || '').trim().toLowerCase() === pName);
+    if (matchInst) {
+      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مسجل مسبقاً لتدريسي في المنظومة! لا يمكن تكرار الأسماء.` };
+    }
+    const matchStudent = (db.students || []).find(s => s.id !== excludeId && (s.name || '').trim().toLowerCase() === pName);
+    if (matchStudent) {
+      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مسجل مسبقاً لطالب في المنظومة! لا يمكن تكرار الأسماء.` };
+    }
+    const matchColApp = (db.applications || []).find(a => a.id !== excludeId && a.status === 'Pending' && (a.deanName || '').trim().toLowerCase() === pName);
+    if (matchColApp) {
+      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مسجل مسبقاً في طلب تقديم لكلية (${matchColApp.collegeName})!` };
+    }
+    const matchStdApp = (db.studentApplications || []).find(sa => sa.id !== excludeId && sa.status === 'Pending' && (sa.studentName || '').trim().toLowerCase() === pName);
+    if (matchStdApp) {
+      return { valid: false, message: `⚠️ الاسم (${params.personName || params.name || params.deanName}) مسجل مسبقاً في طلب انضمام طالب وارد!` };
+    }
+  }
+
+  // 4. Check Email (No duplicate email anywhere across the whole platform)
+  if (params.email) {
+    const email = params.email.trim().toLowerCase();
+    if (email.length > 2) {
+      if (db.superAdmin && (db.superAdmin.email || '').trim().toLowerCase() === email && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
+        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مستخدم مسبقاً في حساب السوبر أدمن! لا يمكن تكرار البريد مرتين.` };
+      }
+      const matchCollege = (db.colleges || []).find(c => c.id !== excludeId && (c.email || '').trim().toLowerCase() === email);
+      if (matchCollege) {
+        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مسجل مسبقاً لكلية (${matchCollege.name})!` };
+      }
+      const matchInst = (db.instructors || []).find(i => i.id !== excludeId && (i.email || '').trim().toLowerCase() === email);
+      if (matchInst) {
+        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مسجل مسبقاً للتدريسي (${matchInst.name})!` };
+      }
+      const matchStudent = (db.students || []).find(s => s.id !== excludeId && (s.email || '').trim().toLowerCase() === email);
+      if (matchStudent) {
+        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مسجل مسبقاً للطالب (${matchStudent.name})!` };
+      }
+      const matchColApp = (db.applications || []).find(a => a.id !== excludeId && a.status === 'Pending' && (a.email || '').trim().toLowerCase() === email);
+      if (matchColApp) {
+        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مسجل مسبقاً في طلب تقديم لكلية (${matchColApp.collegeName})!` };
+      }
+      const matchStdApp = (db.studentApplications || []).find(sa => sa.id !== excludeId && sa.status === 'Pending' && (sa.email || '').trim().toLowerCase() === email);
+      if (matchStdApp) {
+        return { valid: false, message: `⚠️ البريد الإلكتروني (${params.email}) مسجل مسبقاً في طلب انضمام طالب وارد!` };
+      }
+    }
+  }
+
+  // 5. Check Password (Strict isolation: No two accounts or entities share the same password anywhere!)
+  if (params.password) {
+    const pwd = params.password.trim();
+    if (pwd.length > 0) {
+      if (db.superAdmin && db.superAdmin.password === pwd && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
+        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً في حساب السوبر أدمن! من أجل الأمان والعزل الصارم، لا يمكن تكرار كلمة المرور مرتين.` };
+      }
+      const matchCollege = (db.colleges || []).find(c => c.id !== excludeId && c.adminPassword === pwd);
+      if (matchCollege) {
+        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً في حساب عميد كلية (${matchCollege.name})! يرجى اختيار كلمة مرور فريدة.` };
+      }
+      const matchInst = (db.instructors || []).find(i => i.id !== excludeId && i.password === pwd);
+      if (matchInst) {
+        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً لحساب تدريسي آخر! يرجى اختيار كلمة مرور فريدة.` };
+      }
+      const matchStudent = (db.students || []).find(s => s.id !== excludeId && s.password === pwd);
+      if (matchStudent) {
+        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً لحساب طالب آخر! يرجى اختيار كلمة مرور فريدة.` };
+      }
+      const matchColApp = (db.applications || []).find(a => a.id !== excludeId && a.status === 'Pending' && a.proposedPassword === pwd);
+      if (matchColApp) {
+        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً في طلب كلية آخر! يرجى اختيار كلمة مرور فريدة.` };
+      }
+      const matchStdApp = (db.studentApplications || []).find(sa => sa.id !== excludeId && sa.status === 'Pending' && sa.proposedPassword === pwd);
+      if (matchStdApp) {
+        return { valid: false, message: `⚠️ كلمة المرور هذه مستخدمة مسبقاً في طلب انضمام طالب آخر! يرجى اختيار كلمة مرور فريدة.` };
+      }
+    }
+  }
+
+  // 6. Check Username (No duplicate usernames)
+  if (params.username) {
+    const uname = params.username.trim().toLowerCase();
+    if (uname.length > 0) {
+      if (db.superAdmin && (db.superAdmin.username || '').trim().toLowerCase() === uname && excludeId !== 'superadmin' && excludeId !== db.superAdmin.id) {
+        return { valid: false, message: `⚠️ اسم المستخدم (${params.username}) محجوز لمدير المنظومة (Super Admin)!` };
+      }
+      const matchCollege = (db.colleges || []).find(c => c.id !== excludeId && (c.adminUsername || '').trim().toLowerCase() === uname);
+      if (matchCollege) {
+        return { valid: false, message: `⚠️ اسم المستخدم (${params.username}) مسجل لعميد كلية (${matchCollege.name})!` };
+      }
+      const matchInst = (db.instructors || []).find(i => i.id !== excludeId && (i.username || '').trim().toLowerCase() === uname);
+      if (matchInst) {
+        return { valid: false, message: `⚠️ اسم المستخدم (${params.username}) مسجل لتدريسي آخر!` };
+      }
+      const matchStudent = (db.students || []).find(s => s.id !== excludeId && (s.username || '').trim().toLowerCase() === uname);
+      if (matchStudent) {
+        return { valid: false, message: `⚠️ اسم المستخدم (${params.username}) مسجل لطالب آخر!` };
+      }
+    }
+  }
+
+  // 7. Check Phone Number
+  if (params.phone) {
+    const rawPhone = (params.phone || '').replace(/[^0-9]/g, '');
+    if (rawPhone.length >= 7) {
+      const matchCollege = (db.colleges || []).find(c => c.id !== excludeId && (c.phone || '').replace(/[^0-9]/g, '') === rawPhone);
+      if (matchCollege) {
+        return { valid: false, message: `⚠️ رقم الهاتف (${params.phone}) مسجل مسبقاً لكلية (${matchCollege.name})!` };
+      }
+      const matchColApp = (db.applications || []).find(a => a.id !== excludeId && a.status === 'Pending' && (a.phone || '').replace(/[^0-9]/g, '') === rawPhone);
+      if (matchColApp) {
+        return { valid: false, message: `⚠️ رقم الهاتف (${params.phone}) مسجل مسبقاً في طلب تقديم لكلية (${matchColApp.collegeName})!` };
+      }
+      const matchStdApp = (db.studentApplications || []).find(sa => sa.id !== excludeId && sa.status === 'Pending' && (sa.phone || '').replace(/[^0-9]/g, '') === rawPhone);
+      if (matchStdApp) {
+        return { valid: false, message: `⚠️ رقم الهاتف (${params.phone}) مسجل مسبقاً في طلب طالب آخر!` };
+      }
+      const matchStudent = (db.students || []).find(s => s.id !== excludeId && (s.phone || '').replace(/[^0-9]/g, '') === rawPhone);
+      if (matchStudent) {
+        return { valid: false, message: `⚠️ رقم الهاتف (${params.phone}) مسجل مسبقاً لطالب آخر!` };
+      }
+    }
+  }
+
+  // 8. Check University ID
+  if (params.universityId) {
+    const uid = params.universityId.trim();
+    if (uid.length > 0) {
+      const matchStudent = (db.students || []).find(s => s.id !== excludeId && s.universityId === uid);
+      if (matchStudent) {
+        return { valid: false, message: `⚠️ رقم الهوية الجامعية (${uid}) مسجل مسبقاً لطالب آخر!` };
+      }
+      const matchStdApp = (db.studentApplications || []).find(sa => sa.id !== excludeId && sa.status === 'Pending' && sa.universityId === uid);
+      if (matchStdApp) {
+        return { valid: false, message: `⚠️ رقم الهوية الجامعية (${uid}) مسجل مسبقاً في طلب تقديم طالب آخر!` };
+      }
+    }
+  }
+
+  return { valid: true };
+}
+window.checkGlobalUniqueness = checkGlobalUniqueness;
+
+function generateUniquePassword(prefix = 'Dent') {
+  const db = readErpDb();
+  const allPasswords = new Set([
+    db.superAdmin?.password,
+    ...(db.colleges || []).map(c => c.adminPassword),
+    ...(db.instructors || []).map(i => i.password),
+    ...(db.students || []).map(s => s.password),
+    ...(db.applications || []).map(a => a.proposedPassword),
+    ...(db.studentApplications || []).map(sa => sa.proposedPassword)
+  ].filter(Boolean));
+
+  for (let attempt = 0; attempt < 1000; attempt++) {
+    const candidate = `${prefix}${Math.floor(100000 + Math.random() * 900000)}#@`;
+    if (!allPasswords.has(candidate)) {
+      return candidate;
+    }
+  }
+  return `${prefix}${Date.now()}!#`;
+}
+window.generateUniquePassword = generateUniquePassword;
+
+function generateUniqueCollegeCode(collegeName = '', city = '') {
+  const db = readErpDb();
+  const existingCodes = new Set((db.colleges || []).map(c => (c.code || '').trim().toUpperCase()));
+
+  const words = (collegeName || city || 'CLG').replace(/[^a-zA-Zء-ي0-9]/g, ' ').trim().split(/\s+/).filter(Boolean);
+  let prefix = 'DENT';
+  if (words.length > 0) {
+    const key = words[words.length - 1];
+    prefix = 'DENT-' + key.slice(0, 5).toUpperCase();
+  }
+
+  for (let i = 1; i <= 999; i++) {
+    const candidate = `${prefix}-${String(i).padStart(2, '0')}`;
+    if (!existingCodes.has(candidate)) {
+      return candidate;
+    }
+  }
+  return `DENT-${Date.now().toString().slice(-4)}`;
+}
+window.generateUniqueCollegeCode = generateUniqueCollegeCode;
+
+function purgeTransferredApplications() {
+  try {
+    const db = readErpDb();
+    if (!db.applications || db.applications.length === 0) return;
+    const registeredNames = new Set((db.colleges || []).map(c => (c.name || '').trim().toLowerCase()));
+    const registeredIds = new Set((db.colleges || []).map(c => c.id));
+
+    const toPurge = db.applications.filter(a => 
+      a.status === 'Approved' || 
+      registeredNames.has((a.collegeName || '').trim().toLowerCase()) ||
+      (a.collegeId && registeredIds.has(a.collegeId))
+    );
+
+    if (toPurge.length > 0) {
+      db.applications = db.applications.filter(a => 
+        a.status !== 'Approved' && 
+        !registeredNames.has((a.collegeName || '').trim().toLowerCase()) &&
+        (!a.collegeId || !registeredIds.has(a.collegeId))
+      );
+      writeErpDb(db);
+      toPurge.forEach(a => {
+        if (typeof syncDeleteApplication === 'function') {
+          syncDeleteApplication(a.id);
+        }
+      });
+    }
+  } catch (e) {
+    console.warn('purgeTransferredApplications error:', e);
+  }
+}
+window.purgeTransferredApplications = purgeTransferredApplications;
+
 // ============================================================================
 // AUTHENTICATION & ROUTING
 // ============================================================================
@@ -238,7 +772,7 @@ async function handleLoginSubmit(event) {
       name: db.superAdmin.name,
       username: db.superAdmin.username,
       role: 'SUPER_ADMIN'
-    });
+    }, usernameInput, passwordInput);
     return;
   }
 
@@ -267,7 +801,7 @@ async function handleLoginSubmit(event) {
       name: college.deanName,
       username: college.adminUsername,
       role: 'COLLEGE_ADMIN'
-    });
+    }, usernameInput, passwordInput);
     return;
   }
 
@@ -297,7 +831,7 @@ async function handleLoginSubmit(event) {
       department: instructor.department,
       username: instructor.username,
       role: 'INSTRUCTOR'
-    });
+    }, usernameInput, passwordInput);
     return;
   }
 
@@ -320,7 +854,7 @@ async function handleLoginSubmit(event) {
       group: student.group,
       username: student.username,
       role: 'STUDENT'
-    });
+    }, usernameInput, passwordInput);
     return;
   }
 
@@ -336,8 +870,20 @@ function showLoginError(msg) {
   }
 }
 
-function loginSuccess(user) {
+function loginSuccess(user, enteredUsername, enteredPassword) {
   setCurrentSession(user);
+
+  // Modern Browser Password Credential Registration (Chrome, Edge, Safari)
+  if (window.PasswordCredential && navigator.credentials && enteredUsername && enteredPassword) {
+    try {
+      const cred = new PasswordCredential({
+        id: enteredUsername,
+        password: enteredPassword,
+        name: user.name || enteredUsername
+      });
+      navigator.credentials.store(cred).catch(() => {});
+    } catch (e) {}
+  }
 
   // إذا كان المستخدم طالب، يتم توجيهه مباشرة إلى منصة الكيس شيت (واجهة الطالب)
   if (user.role === 'STUDENT') {
@@ -350,6 +896,10 @@ function loginSuccess(user) {
 
 function handleLogout() {
   setCurrentSession(null);
+  const uInput = document.getElementById('login-username');
+  const pInput = document.getElementById('login-password');
+  if (uInput) uInput.value = '';
+  if (pInput) pInput.value = '';
   renderApp();
 }
 window.handleLogout = handleLogout;
@@ -474,6 +1024,7 @@ function renderApp() {
 // 1. SUPER ADMIN CONTROLLER
 // ============================================================================
 function renderSuperAdminDashboard() {
+  purgeTransferredApplications();
   const db = readErpDb();
   const totalColleges = db.colleges.length;
   let totalRevenue = 0;
@@ -627,15 +1178,34 @@ function closeAddCollegeModal() {
 
 function handleCreateCollegeSubmit(event) {
   event.preventDefault();
+  const form = event.target || document.getElementById('form-add-college');
+  const submitBtn = form?.querySelector('button[type="submit"]') || document.getElementById('btn-submit-add-college');
+
+  if (!acquireSubmissionLock('create_college', 4000)) {
+    console.warn('Blocked rapid double click on create college');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري إضافة الكلية...');
+
   const db = readErpDb();
 
   const name = document.getElementById('new-college-name').value.trim();
-  const code = document.getElementById('new-college-code').value.trim().toUpperCase();
   const city = document.getElementById('new-college-city').value.trim();
   const deanName = document.getElementById('new-college-dean').value.trim();
   const adminUsername = document.getElementById('new-dean-username').value.trim().toLowerCase();
   const adminPassword = document.getElementById('new-dean-password').value.trim();
   const subscriptionFee = parseFloat(document.getElementById('new-college-fee')?.value || 1500);
+
+  // Check duplicate college name in existing database
+  if (db.colleges.some(c => c.name.trim().toLowerCase() === name.toLowerCase())) {
+    alert(`⚠️ الكلية (${name}) مسجلة مسبقاً في النظام! لا يمكن تكرار الكلية.`);
+    unlockBtn();
+    releaseSubmissionLock('create_college');
+    return;
+  }
+
+  // Automatically generate unique college code (system generates it automatically)
+  const code = generateUniqueCollegeCode(name, city);
 
   let subscriptionEnd = document.getElementById('new-college-sub-end')?.value;
   if (!subscriptionEnd) {
@@ -644,13 +1214,18 @@ function handleCreateCollegeSubmit(event) {
     subscriptionEnd = nextYear.toISOString().slice(0, 10);
   }
 
-  // Validate unique code & username
-  if (db.colleges.some(c => c.code === code)) {
-    alert('رمز الكلية (Code) مسجل مسبقاً! يرجى اختيار رمز آخر.');
-    return;
-  }
-  if (db.colleges.some(c => c.adminUsername.toLowerCase() === adminUsername)) {
-    alert('اسم المستخدم (Username) مسجل لعميد آخر! يرجى اختيار يوزر نيم آخر.');
+  // Strict global uniqueness check across platform (no duplicate email, password, or name)
+  const uniqueCheck = checkGlobalUniqueness({
+    collegeName: name,
+    collegeCode: code,
+    deanName: deanName,
+    username: adminUsername,
+    password: adminPassword
+  });
+  if (!uniqueCheck.valid) {
+    alert(uniqueCheck.message);
+    unlockBtn();
+    releaseSubmissionLock('create_college');
     return;
   }
 
@@ -685,6 +1260,7 @@ function handleCreateCollegeSubmit(event) {
 
   closeAddCollegeModal();
   renderSuperAdminDashboard();
+  unlockBtn();
   alert(`تمت إضافة ${name} بنجاح!\nتم حفظ حساب العميد (${adminUsername}) على هذا الجهاز بنجاح.`);
 }
 
@@ -1034,6 +1610,15 @@ function handleCreateInstructorSubmit(event) {
   const user = getCurrentSession();
   if (!user || user.role !== 'COLLEGE_ADMIN') return;
 
+  const form = event.target || document.getElementById('form-add-instructor');
+  const submitBtn = form?.querySelector('button[type="submit"]') || document.getElementById('btn-submit-add-instructor');
+
+  if (!acquireSubmissionLock('create_instructor', 4000)) {
+    console.warn('Blocked rapid double click on create instructor');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري تسجيل التدريسي...');
+
   const db = readErpDb();
   const name = document.getElementById('new-inst-name').value.trim();
   const title = document.getElementById('new-inst-title').value;
@@ -1045,9 +1630,25 @@ function handleCreateInstructorSubmit(event) {
   const collegeDomain = (user.collegeCode || 'college').toLowerCase();
   const email = emailInput || `${username}@${collegeDomain}.edu`;
 
-  // Validate duplicate username across platform
-  if (db.instructors.some(i => i.username.toLowerCase() === username) || db.students.some(s => s.username.toLowerCase() === username)) {
-    alert('اسم المستخدم (Username) مسجل مسبقاً! يرجى اختيار يوزر آخر.');
+  // Strict duplicate check within this college
+  if (db.instructors.some(i => i.collegeId === user.collegeId && i.name.trim().toLowerCase() === name.toLowerCase())) {
+    alert(`⚠️ التدريسي (${name}) مسجل مسبقاً في كليتك! لا يمكن تكرار التدريسي.`);
+    unlockBtn();
+    releaseSubmissionLock('create_instructor');
+    return;
+  }
+
+  // Strict global uniqueness check across platform (name, email, password, username)
+  const uniqueCheck = checkGlobalUniqueness({
+    personName: name,
+    username,
+    email,
+    password
+  });
+  if (!uniqueCheck.valid) {
+    alert(uniqueCheck.message);
+    unlockBtn();
+    releaseSubmissionLock('create_instructor');
     return;
   }
 
@@ -1084,6 +1685,7 @@ function handleCreateInstructorSubmit(event) {
 
   closeAddInstructorModal();
   renderCollegeAdminDashboard();
+  unlockBtn();
   alert(`تمت إضافة التدريسي (${name}) بنجاح!\nالمرحلة: ${stage === '5th' ? 'الخامسة' : (stage === '4th' ? 'الرابعة' : 'كافة المراحل')}\nالبريد: ${email}\nاسم المستخدم: ${username}`);
 }
 
@@ -1099,6 +1701,15 @@ function handleCreateStudentSubmit(event) {
   const user = getCurrentSession();
   if (!user || user.role !== 'COLLEGE_ADMIN') return;
 
+  const form = event.target || document.getElementById('form-add-student');
+  const submitBtn = form?.querySelector('button[type="submit"]') || document.getElementById('btn-submit-add-student');
+
+  if (!acquireSubmissionLock('create_student', 4000)) {
+    console.warn('Blocked rapid double click on create student');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري تسجيل الطالب...');
+
   const db = readErpDb();
   const name = document.getElementById('new-std-name').value.trim();
   const stage = document.getElementById('new-std-stage').value;
@@ -1106,8 +1717,24 @@ function handleCreateStudentSubmit(event) {
   const username = document.getElementById('new-std-username').value.trim().toLowerCase();
   const password = document.getElementById('new-std-password').value.trim();
 
-  if (db.students.some(s => s.username.toLowerCase() === username) || db.instructors.some(i => i.username.toLowerCase() === username)) {
-    alert('اسم المستخدم مسجل مسبقاً!');
+  // Strict duplicate check within this college
+  if (db.students.some(s => s.collegeId === user.collegeId && s.name.trim().toLowerCase() === name.toLowerCase())) {
+    alert(`⚠️ الطالب (${name}) مسجل مسبقاً في كليتك! لا يمكن تكرار الطالب.`);
+    unlockBtn();
+    releaseSubmissionLock('create_student');
+    return;
+  }
+
+  // Strict global uniqueness check across platform (name, password, username)
+  const uniqueCheck = checkGlobalUniqueness({
+    personName: name,
+    username,
+    password
+  });
+  if (!uniqueCheck.valid) {
+    alert(uniqueCheck.message);
+    unlockBtn();
+    releaseSubmissionLock('create_student');
     return;
   }
 
@@ -1130,6 +1757,7 @@ function handleCreateStudentSubmit(event) {
 
   closeAddStudentModal();
   renderCollegeAdminDashboard();
+  unlockBtn();
   alert(`تم تسجيل الطالب ${name} بنجاح!`);
 }
 
@@ -1146,6 +1774,15 @@ function handleBulkStudentsSubmit(event) {
   const user = getCurrentSession();
   if (!user || user.role !== 'COLLEGE_ADMIN') return;
 
+  const form = event.target || document.getElementById('form-bulk-students');
+  const submitBtn = form?.querySelector('button[type="submit"]') || document.getElementById('btn-submit-bulk-students');
+
+  if (!acquireSubmissionLock('bulk_students', 6000)) {
+    console.warn('Blocked rapid double click on bulk student generation');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري توليد الحسابات...');
+
   const stage = document.getElementById('bulk-stage').value;
   const count = parseInt(document.getElementById('bulk-count').value) || 50;
   const prefix = (document.getElementById('bulk-prefix').value.trim() || 'std.dent').toLowerCase();
@@ -1160,11 +1797,45 @@ function handleBulkStudentsSubmit(event) {
     'جعفر صادق نعمة', 'عمر فاروق طارق', 'بلال وليد حميد', 'إبراهيم خليل إسماعيل', 'حمزة شاكر محمود'
   ];
 
+  const existingNames = new Set([
+    db.superAdmin?.name?.trim().toLowerCase(),
+    ...(db.colleges || []).map(c => (c.deanName || '').trim().toLowerCase()),
+    ...(db.instructors || []).map(i => (i.name || '').trim().toLowerCase()),
+    ...(db.students || []).map(s => (s.name || '').trim().toLowerCase())
+  ].filter(Boolean));
+
+  const existingUsernames = new Set([
+    db.superAdmin?.username?.toLowerCase(),
+    ...(db.colleges || []).map(c => (c.adminUsername || '').toLowerCase()),
+    ...(db.instructors || []).map(i => (i.username || '').toLowerCase()),
+    ...(db.students || []).map(s => (s.username || '').toLowerCase())
+  ].filter(Boolean));
+
+  const existingPasswords = new Set([
+    db.superAdmin?.password,
+    ...(db.colleges || []).map(c => c.adminPassword),
+    ...(db.instructors || []).map(i => i.password),
+    ...(db.students || []).map(s => s.password)
+  ].filter(Boolean));
+
   for (let i = 1; i <= count; i++) {
     const numStr = String(100 + i);
-    const uname = `${prefix}_${stage}_${numStr}`;
-    const pwd = `Dent${stage}#${Math.floor(1000 + Math.random() * 9000)}`;
-    const randName = commonNames[(i - 1) % commonNames.length] + ` (طالب ${i})`;
+    let uname = `${prefix}_${stage}_${numStr}`;
+    let uCounter = 1;
+    while (existingUsernames.has(uname)) {
+      uname = `${prefix}_${stage}_${numStr}_${uCounter++}`;
+    }
+    existingUsernames.add(uname);
+
+    let pwd = generateUniquePassword(`Dent${stage}`);
+    existingPasswords.add(pwd);
+
+    let randName = commonNames[(i - 1) % commonNames.length] + ` (طالب ${startId.toString().slice(-4)}_${i})`;
+    while (existingNames.has(randName.toLowerCase())) {
+      randName = `${commonNames[(i - 1) % commonNames.length]} (طالب ${Math.floor(1000 + Math.random() * 9000)})`;
+    }
+    existingNames.add(randName.toLowerCase());
+
     const grp = `Group ${String.fromCharCode(65 + Math.floor(i / 15))} / Chair ${String((i % 20) + 1).padStart(2, '0')}`;
 
     const std = {
@@ -1189,6 +1860,7 @@ function handleBulkStudentsSubmit(event) {
 
   closeBulkStudentsModal();
   renderCollegeAdminDashboard();
+  unlockBtn();
 
   alert(`🎉 تم توليد ${count} حساب طالب للمرحلة ${stage === '5th' ? 'الخامسة' : 'الرابعة'} بنجاح تام وتم ترحيلهم لقاعدة بيانات كليتكم!`);
 }
@@ -1368,14 +2040,26 @@ function closeEvalCaseModal() {
 function handleSaveEvaluationSubmit(event) {
   event.preventDefault();
   const user = getCurrentSession();
-  const db = readErpDb();
+  const form = event.target || document.getElementById('form-eval-case');
+  const submitBtn = form?.querySelector('button[type="submit"]') || document.getElementById('btn-submit-eval-case');
 
   const caseId = document.getElementById('eval-case-id').value;
+  if (!acquireSubmissionLock('save_eval_' + caseId, 3000)) {
+    console.warn('Blocked rapid double click on save evaluation');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري رصد الدرجة...');
+
+  const db = readErpDb();
   const mark = document.getElementById('eval-assigned-mark').value;
   const feedback = document.getElementById('eval-feedback-text').value.trim();
 
   const c = db.cases.find(x => x.id === caseId);
-  if (!c) return;
+  if (!c) {
+    unlockBtn();
+    releaseSubmissionLock('save_eval_' + caseId);
+    return;
+  }
 
   c.assignedMark = mark;
   c.feedback = feedback;
@@ -1388,12 +2072,19 @@ function handleSaveEvaluationSubmit(event) {
   syncPushCase(c);
   closeEvalCaseModal();
   renderInstructorDashboard();
+  unlockBtn();
   alert(`✅ تم اعتماد التقييم ورصد الدرجة (${mark} / 10) للطالب ${c.studentName} بنجاح!\n\nيمكنك الآن الضغط على زر "رفع الدرجات المعتمدة إلى العمادة 📤" لترحيلها رسمياً.`);
 }
 
 async function forwardEvaluatedCasesToDean() {
   const user = getCurrentSession();
   if (!user || user.role !== 'INSTRUCTOR') return;
+
+  if (!acquireSubmissionLock('forward_cases_' + user.id, 5000)) {
+    console.warn('Blocked rapid double click on forward cases to dean');
+    return;
+  }
+
   const db = readErpDb();
 
   const casesToForward = (db.cases || []).filter(c => 
@@ -1405,6 +2096,7 @@ async function forwardEvaluatedCasesToDean() {
 
   if (casesToForward.length === 0) {
     alert('⚠️ لا توجد أي درجات مرصودة جاهزة للرفع حالياً.\nيرجى رصد درجات الطلاب أولاً عبر زر "رصد الدرجة (Mark) ✍️" ثم النقر على هذا الزر.');
+    releaseSubmissionLock('forward_cases_' + user.id);
     return;
   }
 
@@ -2478,6 +3170,15 @@ function handleCollegeApplicationSubmit(event) {
     return;
   }
 
+  const form = event.target || document.getElementById('form-college-application');
+  const submitBtn = form?.querySelector('button[type="submit"]') || document.getElementById('btn-submit-college-application');
+
+  if (!acquireSubmissionLock('college_application', 4000)) {
+    console.warn('Blocked rapid double click on college application');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري إرسال الطلب...');
+
   const collegeName = document.getElementById('app-college-name').value.trim();
   const city = document.getElementById('app-college-city').value.trim();
   const deanName = document.getElementById('app-dean-name').value.trim();
@@ -2487,6 +3188,36 @@ function handleCollegeApplicationSubmit(event) {
   const notes = document.getElementById('app-notes')?.value.trim() || '';
 
   const db = readErpDb();
+
+  // Strict check: if college already exists or is pending application
+  if ((db.colleges || []).some(c => c.name.trim().toLowerCase() === collegeName.toLowerCase())) {
+    alert(`⚠️ كلية (${collegeName}) معتمدة ومسجلة في النظام مسبقاً!`);
+    unlockBtn();
+    releaseSubmissionLock('college_application');
+    return;
+  }
+  if ((db.applications || []).some(a => a.collegeName.trim().toLowerCase() === collegeName.toLowerCase())) {
+    alert(`⚠️ يوجد طلب تسجيل قيد المراجعة مسبقاً لكلية (${collegeName})!`);
+    unlockBtn();
+    releaseSubmissionLock('college_application');
+    return;
+  }
+
+  // Strict global uniqueness check across platform (collegeName, deanName, email, phone, proposedPassword)
+  const uniqueCheck = checkGlobalUniqueness({
+    collegeName,
+    deanName,
+    email,
+    phone,
+    password: proposedPassword
+  });
+  if (!uniqueCheck.valid) {
+    alert(uniqueCheck.message);
+    unlockBtn();
+    releaseSubmissionLock('college_application');
+    return;
+  }
+
   if (!db.applications) db.applications = [];
 
   const requestId = 'REQ-' + new Date().getFullYear() + '-' + Math.floor(1000 + Math.random() * 9000);
@@ -2513,6 +3244,7 @@ function handleCollegeApplicationSubmit(event) {
 
   closeCollegeApplicationModal();
   renderSuperAdminApplications();
+  unlockBtn();
 
   alert(`🎉 تم تقديم طلب تسجيل الكلية بنجاح تام!\n\nرقم حجز ومتابعة الطلب: ${requestId}\nاسم الكلية: ${collegeName}\nالبريد: ${email}\n\nسيقوم مدير المنظومة (Super Admin) بمراجعة الطلب واعتماده وتفعيل الكلية فوراً.`);
 }
@@ -2550,7 +3282,18 @@ window.getWhatsAppUrl = getWhatsAppUrl;
 
 function renderSuperAdminApplications() {
   const db = readErpDb();
-  const applications = db.applications || [];
+  
+  // Strict Isolation: College already transferred/registered must NOT appear in incoming applications
+  const registeredCollegeNames = new Set((db.colleges || []).map(c => (c.name || '').trim().toLowerCase()));
+  const registeredCollegeIds = new Set((db.colleges || []).map(c => c.id));
+
+  const applications = (db.applications || []).filter(app => {
+    if (app.status === 'Approved') return false;
+    if (app.collegeId && registeredCollegeIds.has(app.collegeId)) return false;
+    if (registeredCollegeNames.has((app.collegeName || '').trim().toLowerCase())) return false;
+    return true;
+  });
+
   const tbody = document.getElementById('applications-table-body');
   const badge = document.getElementById('stat-apps-badge');
 
@@ -2565,7 +3308,7 @@ function renderSuperAdminApplications() {
   if (!tbody) return;
 
   if (applications.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد طلبات تسجيل كليات واردة حالياً. اضغط على زر "تحديث الطلبات السحابية 🔄" أعلاه للمزامنة.</td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8" class="text-center p-8 text-slate-400 font-semibold">لا توجد طلبات تسجيل كليات واردة حالياً (جميع الكليات المعتمدة تم تحويلها للدليل الدائم بالأعلى 🏛️ ⬆️). اضغط على زر "تحديث الطلبات السحابية 🔄" أعلاه للمزامنة.</td></tr>`;
     return;
   }
 
@@ -2618,16 +3361,17 @@ function renderSuperAdminApplications() {
         <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
           ${statusHtml}
         </td>
-        <td class="p-3.5 text-center whitespace-nowrap min-w-[220px]">
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[240px]">
           <div class="flex items-center justify-center gap-1.5 flex-wrap">
             ${isPending ? `
               <button 
                 type="button"
                 onclick="openApproveApplicationModal('${app.id}')"
-                class="px-2.5 py-1.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-black text-[11px] shadow-xs transition-all flex items-center gap-1 cursor-pointer"
-                title="الموافقة على الطلب واعتماد الكلية وتوليد حساب العميد"
+                class="px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-700 hover:from-emerald-700 hover:to-teal-800 text-white rounded-lg font-black text-[11px] shadow-sm transition-all flex items-center gap-1.5 cursor-pointer ring-1 ring-emerald-500/30"
+                title="تحويل الكلية بعد القبول إلى الدائم أو الرئيسي ونقلها للأعلى فوراً"
               >
-                <span>الموافقة على الطلب ✅</span>
+                <i data-lucide="arrow-up-circle" class="w-3.5 h-3.5"></i>
+                <span>تحويل الكلية بعد القبول إلى الدائم 🏛️ ⬆️</span>
               </button>
               <a 
                 href="${waLink}"
@@ -2688,27 +3432,28 @@ function openApproveApplicationModal(appId) {
 
   const idInput = document.getElementById('approve-app-id');
   const nameEl = document.getElementById('approve-app-college-name');
-  const codeInput = document.getElementById('approve-college-code');
   const userInput = document.getElementById('approve-dean-username');
   const feeInput = document.getElementById('approve-subscription-fee');
   const endInput = document.getElementById('approve-subscription-end');
   const pwdInput = document.getElementById('approve-dean-password');
 
   if (idInput) idInput.value = app.id;
-  if (nameEl) nameEl.textContent = `${app.collegeName} (${app.city})`;
+  if (nameEl) nameEl.textContent = `${app.collegeName} (${app.city || 'العراق'})`;
 
-  // Generate unique code based on college name
-  const words = app.collegeName.replace(/[^a-zA-Zء-ي0-9]/g, ' ').split(/\s+/).filter(Boolean);
-  let prefix = 'DENT';
-  if (words.length > 1) {
-    prefix = 'DENT-' + (words[words.length - 1] || 'CLG').slice(0, 5).toUpperCase();
-  }
-  const autoCode = (prefix + '-' + Math.floor(10 + Math.random() * 90)).toUpperCase();
-  if (codeInput) codeInput.value = autoCode;
-
-  // Generate admin username (e.g. dean.city or email before @)
+  // Generate unique admin username (e.g. dean.city or email before @)
   const userPrefix = app.email ? app.email.split('@')[0].toLowerCase() : ('dean.' + Math.floor(100 + Math.random() * 900));
-  if (userInput) userInput.value = userPrefix;
+  let candidateUsername = userPrefix;
+  let uCounter = 1;
+  const existingUsernames = new Set([
+    db.superAdmin?.username?.toLowerCase(),
+    ...(db.colleges || []).map(c => (c.adminUsername || '').toLowerCase()),
+    ...(db.instructors || []).map(i => (i.username || '').toLowerCase()),
+    ...(db.students || []).map(s => (s.username || '').toLowerCase())
+  ].filter(Boolean));
+  while (existingUsernames.has(candidateUsername)) {
+    candidateUsername = `${userPrefix}.${uCounter++}`;
+  }
+  if (userInput) userInput.value = candidateUsername;
 
   if (feeInput) feeInput.value = 1500;
 
@@ -2716,7 +3461,18 @@ function openApproveApplicationModal(appId) {
   nextYear.setFullYear(nextYear.getFullYear() + 1);
   if (endInput) endInput.value = nextYear.toISOString().slice(0, 10);
 
-  if (pwdInput) pwdInput.value = app.proposedPassword || ('Dean' + Math.floor(1000 + Math.random() * 9000) + '@#');
+  // Generate unique password (no duplicate passwords across system)
+  let candidatePassword = app.proposedPassword;
+  const existingPasswords = new Set([
+    db.superAdmin?.password,
+    ...(db.colleges || []).map(c => c.adminPassword),
+    ...(db.instructors || []).map(i => i.password),
+    ...(db.students || []).map(s => s.password)
+  ].filter(Boolean));
+  if (!candidatePassword || existingPasswords.has(candidatePassword)) {
+    candidatePassword = generateUniquePassword('Dean');
+  }
+  if (pwdInput) pwdInput.value = candidatePassword;
 
   document.getElementById('modal-approve-application')?.classList.remove('hidden');
   if (window.lucide) window.lucide.createIcons();
@@ -2728,34 +3484,72 @@ function closeApproveApplicationModal() {
 
 function handleApproveApplicationSubmit(event) {
   event.preventDefault();
-  const db = readErpDb();
-  const appId = document.getElementById('approve-app-id').value;
-  const app = (db.applications || []).find(a => a.id === appId);
-  if (!app) return;
+  const form = event.target || document.getElementById('form-approve-application');
+  const submitBtn = form?.querySelector('button[type="submit"]') || document.getElementById('btn-submit-approve-app');
 
-  const code = document.getElementById('approve-college-code').value.trim().toUpperCase();
+  const appId = document.getElementById('approve-app-id').value;
+  if (!acquireSubmissionLock('approve_app_' + appId, 5000)) {
+    console.warn('Blocked rapid double click on approve application');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري التحويل والاعتماد...');
+
+  const db = readErpDb();
+  const app = (db.applications || []).find(a => a.id === appId);
+  if (!app) {
+    unlockBtn();
+    releaseSubmissionLock('approve_app_' + appId);
+    return;
+  }
+
+  // Check if college already exists in db.colleges
+  if ((db.colleges || []).some(c => c.name.trim().toLowerCase() === app.collegeName.trim().toLowerCase())) {
+    alert(`⚠️ كلية (${app.collegeName}) معتمدة وموجودة بالفعل في الكليات الدائمة! سيتم نقل الطلب تلقائياً.`);
+    db.applications = (db.applications || []).filter(a => a.id !== appId);
+    writeErpDb(db);
+    closeApproveApplicationModal();
+    renderSuperAdminDashboard();
+    renderSuperAdminApplications();
+    unlockBtn();
+    releaseSubmissionLock('approve_app_' + appId);
+    return;
+  }
+
+  // Auto generate unique college code (system generates it automatically)
+  const code = generateUniqueCollegeCode(app.collegeName, app.city);
   const adminUsername = document.getElementById('approve-dean-username').value.trim().toLowerCase();
   const subscriptionFee = parseFloat(document.getElementById('approve-subscription-fee')?.value || 1500);
   const subscriptionEnd = document.getElementById('approve-subscription-end')?.value;
   const adminPassword = document.getElementById('approve-dean-password').value.trim();
 
-  // Validate duplicate code or username
-  if (db.colleges.some(c => c.code === code)) {
-    alert('رمز الكلية (Code) مسجل مسبقاً! يرجى اختيار رمز آخر.');
-    return;
-  }
-  if (db.colleges.some(c => c.adminUsername.toLowerCase() === adminUsername)) {
-    alert('اسم المستخدم (Username) مسجل لعميد آخر! يرجى اختيار يوزر نيم آخر.');
+  // Strict global uniqueness check across platform (email, password, names, usernames)
+  const uniqueCheck = checkGlobalUniqueness({
+    collegeName: app.collegeName,
+    collegeCode: code,
+    deanName: app.deanName,
+    email: app.email,
+    phone: app.phone,
+    username: adminUsername,
+    password: adminPassword,
+    excludeId: appId
+  });
+
+  if (!uniqueCheck.valid) {
+    alert(uniqueCheck.message);
+    unlockBtn();
+    releaseSubmissionLock('approve_app_' + appId);
     return;
   }
 
-  // Create official College
+  // Create official College in permanent directory
   const newCollege = {
     id: 'clg_' + Date.now(),
     name: app.collegeName,
     code,
     city: app.city,
     deanName: app.deanName,
+    email: app.email,
+    phone: app.phone,
     adminUsername,
     adminPassword,
     subscriptionFee,
@@ -2768,14 +3562,15 @@ function handleApproveApplicationSubmit(event) {
 
   db.colleges.push(newCollege);
 
-  // Mark application as Approved
-  app.status = 'Approved';
-  app.approvedAt = new Date().toISOString();
-  app.collegeId = newCollege.id;
+  // STRICT SEPARATION: Remove application completely so it moves UP to the permanent table only!
+  db.applications = (db.applications || []).filter(a => a.id !== appId);
 
   writeErpDb(db);
   syncPushCollege(newCollege);
-  syncPushApplication(app);
+  if (typeof syncPushCollegeToCloud === 'function') {
+    syncPushCollegeToCloud(newCollege);
+  }
+  syncDeleteApplication(appId);
 
   // Save dean credentials to device
   saveAccountToDevice({
@@ -2789,9 +3584,10 @@ function handleApproveApplicationSubmit(event) {
   closeApproveApplicationModal();
   renderSuperAdminDashboard();
   renderSuperAdminApplications();
+  unlockBtn();
 
   const waUrl = getWhatsAppUrl(app.phone, app.collegeName, app.deanName, app.requestId, adminUsername, adminPassword);
-  if (confirm(`🎉 تم اعتماد كلية ${app.collegeName} بنجاح!\nتم إنشاء حساب العميد (${adminUsername}).\n\nهل ترغب في فتح محادثة واتساب الآن لإرسال رسالة الترحيب وبيانات الدخول للعميد فوراً؟`)) {
+  if (confirm(`🎉 تم تحويل كلية ${app.collegeName} إلى الدائم واعتمادها بنجاح تام!\nتم إنشاء حساب العميد (${adminUsername}).\n\nهل ترغب في فتح محادثة واتساب الآن لإرسال رسالة الترحيب وبيانات الدخول للعميد فوراً؟`)) {
     window.open(waUrl, '_blank');
   } else if (confirm('هل ترغب في طباعة سند ترخيص الكلية الآن؟')) {
     openPrintReceiptModal(newCollege.id, false);
@@ -2818,6 +3614,13 @@ function deleteApplication(appId) {
   syncDeleteApplication(appId);
   renderSuperAdminApplications();
 }
+window.openApproveApplicationModal = openApproveApplicationModal;
+window.closeApproveApplicationModal = closeApproveApplicationModal;
+window.handleApproveApplicationSubmit = handleApproveApplicationSubmit;
+window.rejectApplication = rejectApplication;
+window.deleteApplication = deleteApplication;
+window.handleCollegeApplicationSubmit = handleCollegeApplicationSubmit;
+window.handleCreateCollegeSubmit = handleCreateCollegeSubmit;
 
 async function syncPushApplication(app) {
   const candidateEndpoints = [
@@ -2921,13 +3724,24 @@ async function syncPullApplicationsFromCloud(showFeedback = false) {
           db.applications = db.applications.filter(a => cloudIds.has(a.id));
           if (db.applications.length !== initialLen) changed = true;
 
+          // Automatically purge transferred/approved applications so they don't persist in applications table
+          const registeredCollegeNames = new Set((db.colleges || []).map(c => (c.name || '').trim().toLowerCase()));
+          const registeredCollegeIds = new Set((db.colleges || []).map(c => c.id));
+          const beforePurgeLen = db.applications.length;
+          db.applications = db.applications.filter(a => 
+            a.status !== 'Approved' && 
+            !registeredCollegeNames.has((a.collegeName || '').trim().toLowerCase()) &&
+            (!a.collegeId || !registeredCollegeIds.has(a.collegeId))
+          );
+          if (db.applications.length !== beforePurgeLen) changed = true;
+
           if (changed) {
             writeErpDb(db);
-            renderSuperAdminApplications();
           }
+          renderSuperAdminApplications();
 
           if (showFeedback) {
-            alert(`✅ تم تحديث ومزامنة طلبات الكليات بنجاح (${data.applications.length} طلبات مسجلة)`);
+            alert(`✅ تم تحديث ومزامنة طلبات الكليات بنجاح (${db.applications.length} طلبات جديدة واردة)`);
           }
           return true;
         }
@@ -3357,13 +4171,45 @@ async function handleStudentApplicationSubmit(event) {
   }
 
   const submitBtn = document.getElementById('btn-submit-student-app');
-  if (submitBtn) {
-    submitBtn.disabled = true;
-    submitBtn.innerHTML = '<span>جاري إرسال الطلب سحابياً... ⏳</span>';
+  if (!acquireSubmissionLock('student_application', 4000)) {
+    console.warn('Blocked rapid double click on student application');
+    return;
+  }
+  const unlockBtn = lockSubmitButton(submitBtn, 'جاري إرسال الطلب سحابياً...');
+
+  const db = readErpDb();
+
+  // Check if student already registered in college
+  if ((db.students || []).some(s => s.collegeId === collegeId && s.name.trim().toLowerCase() === studentName.toLowerCase())) {
+    alert(`⚠️ الطالب (${studentName}) مسجل ومعتمد مسبقاً في هذه الكلية! يمكنك تسجيل الدخول مباشرة.`);
+    unlockBtn();
+    releaseSubmissionLock('student_application');
+    return;
+  }
+  // Check if application already submitted and pending
+  if ((db.studentApplications || []).some(a => a.collegeId === collegeId && a.studentName.trim().toLowerCase() === studentName.toLowerCase() && a.status === 'Pending')) {
+    alert(`⚠️ يوجد طلب انضمام قيد المراجعة مسبقاً للطالب (${studentName}) لدى عمادة الكلية!`);
+    unlockBtn();
+    releaseSubmissionLock('student_application');
+    return;
+  }
+
+  // Strict global uniqueness check across platform (studentName, universityId, phone, email, password)
+  const uniqueCheck = checkGlobalUniqueness({
+    personName: studentName,
+    universityId,
+    phone,
+    email,
+    password: proposedPassword
+  });
+  if (!uniqueCheck.valid) {
+    alert(uniqueCheck.message);
+    unlockBtn();
+    releaseSubmissionLock('student_application');
+    return;
   }
 
   try {
-    const db = readErpDb();
     const college = (db.colleges || []).find(c => c.id === collegeId);
     const collegeName = college ? college.name : 'كلية طب الأسنان';
 
@@ -3404,11 +4250,7 @@ async function handleStudentApplicationSubmit(event) {
     console.error('Error submitting student application:', err);
     alert('حدث خطأ أثناء إرسال الطلب، يرجى المحاولة مرة أخرى.');
   } finally {
-    if (submitBtn) {
-      submitBtn.disabled = false;
-      submitBtn.innerHTML = '<i data-lucide="send" class="w-4 h-4"></i><span>إرسال طلب الانضمام لعمادة الكلية 🚀</span>';
-      if (window.lucide) window.lucide.createIcons();
-    }
+    unlockBtn();
   }
 }
 window.handleStudentApplicationSubmit = handleStudentApplicationSubmit;
@@ -3649,23 +4491,87 @@ function renderCollegeStudentApplications() {
 window.renderCollegeStudentApplications = renderCollegeStudentApplications;
 
 async function approveStudentApplication(appId) {
-  const db = readErpDb();
-  const app = (db.studentApplications || []).find(a => a.id === appId);
-  if (!app) return;
-
-  if (!confirm(`هل أنت متأكد من الموافقة على طلب انضمام الطالب (${app.studentName}) برقم الهوية الجامعية (${app.universityId})؟`)) {
+  if (!acquireSubmissionLock('approve_student_' + appId, 5000)) {
+    console.warn('Blocked rapid double click on approve student application');
     return;
   }
 
-  // Create student in college students
+  const db = readErpDb();
+  const app = (db.studentApplications || []).find(a => a.id === appId);
+  if (!app) {
+    releaseSubmissionLock('approve_student_' + appId);
+    return;
+  }
+
+  if (app.status === 'Approved') {
+    alert('⚠️ تمت الموافقة على هذا الطالب مسبقاً!');
+    releaseSubmissionLock('approve_student_' + appId);
+    return;
+  }
+
+  // Check if student already exists in college
+  const alreadyInStudents = (db.students || []).find(s => 
+    s.collegeId === app.collegeId && (
+      (s.name && app.studentName && s.name.trim().toLowerCase() === app.studentName.trim().toLowerCase()) ||
+      (s.universityId && app.universityId && s.universityId.trim() === app.universityId.trim())
+    )
+  );
+  if (alreadyInStudents) {
+    app.status = 'Approved';
+    app.studentId = alreadyInStudents.id;
+    writeErpDb(db);
+    renderCollegeStudents();
+    renderCollegeStudentApplications();
+    alert(`⚠️ الطالب (${alreadyInStudents.name}) معتمد ومسجل مسبقاً في سجلات الكلية!`);
+    releaseSubmissionLock('approve_student_' + appId);
+    return;
+  }
+
+  if (!confirm(`هل أنت متأكد من الموافقة على طلب انضمام الطالب (${app.studentName}) برقم الهوية الجامعية (${app.universityId})؟`)) {
+    releaseSubmissionLock('approve_student_' + appId);
+    return;
+  }
+
+  // Create student in college students with guaranteed uniqueness
+  const existingUsernames = new Set([
+    db.superAdmin?.username?.toLowerCase(),
+    ...(db.colleges || []).map(c => (c.adminUsername || '').toLowerCase()),
+    ...(db.instructors || []).map(i => (i.username || '').toLowerCase()),
+    ...(db.students || []).map(s => (s.username || '').toLowerCase())
+  ].filter(Boolean));
+
   const userPrefix = app.email ? app.email.split('@')[0].toLowerCase() : ('stu.' + app.universityId.slice(-4));
   let username = userPrefix;
   let counter = 1;
-  while (db.students.some(s => s.username === username)) {
+  while (existingUsernames.has(username)) {
     username = `${userPrefix}${counter++}`;
   }
 
-  const password = app.proposedPassword || ('Stu' + Math.floor(1000 + Math.random() * 9000) + '#');
+  const existingPasswords = new Set([
+    db.superAdmin?.password,
+    ...(db.colleges || []).map(c => c.adminPassword),
+    ...(db.instructors || []).map(i => i.password),
+    ...(db.students || []).map(s => s.password)
+  ].filter(Boolean));
+
+  let password = app.proposedPassword;
+  if (!password || existingPasswords.has(password)) {
+    password = generateUniquePassword('Stu');
+  }
+
+  // Strict global uniqueness check across platform
+  const uniqueCheck = checkGlobalUniqueness({
+    personName: app.studentName,
+    universityId: app.universityId,
+    username,
+    password,
+    excludeId: appId
+  });
+  if (!uniqueCheck.valid) {
+    alert(uniqueCheck.message);
+    releaseSubmissionLock('approve_student_' + appId);
+    return;
+  }
 
   const newStudent = {
     id: 'stu_' + Date.now(),
@@ -3755,6 +4661,7 @@ window.addEventListener('DOMContentLoaded', () => {
   initSavedAccountsIfEmpty();
   checkImpersonation();
   updateSupabaseStatusUI();
+  purgeTransferredApplications();
   syncPullCollegesFromCloud();
   syncPullApplicationsFromCloud();
   syncPullStudentApplicationsFromCloud();

@@ -1270,10 +1270,15 @@ document.addEventListener('DOMContentLoaded', () => {
       date: new Date().toISOString()
     };
 
-    // Update state & stats
-    state.savedDrafts.push(payload);
-    state.stats.savedDrafts++;
-    updateStatsDisplay();
+    // Update state & stats idempotently
+    const existingDraftIdx = state.savedDrafts.findIndex(d => d.id === caseIdText || (d.patientName === patientName && d.sheetId === payload.sheetId));
+    if (existingDraftIdx > -1) {
+      state.savedDrafts[existingDraftIdx] = payload;
+    } else {
+      state.savedDrafts.push(payload);
+      state.stats.savedDrafts++;
+      updateStatsDisplay();
+    }
 
     // Save with Supabase Sync
     if (window.EDentalSupabase) {
@@ -1293,95 +1298,132 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!state.currentOpenSheet) return;
 
     const modalCaseId = document.getElementById('modal-case-id');
-    const caseIdText = modalCaseId ? modalCaseId.textContent : ('CASE-' + Math.floor(1000 + Math.random() * 9000));
+    const caseIdText = modalCaseId ? modalCaseId.textContent.trim() : ('CASE-' + Math.floor(1000 + Math.random() * 9000));
 
-    // Get selected instructor name
-    const footerSelect = document.getElementById('footer-instructor-select');
-    const caseSelect = document.getElementById('case-selected-supervisor');
-    const selectedSupervisor = (footerSelect && footerSelect.value) || (caseSelect && caseSelect.value) || '';
-
-    if (!selectedSupervisor || selectedSupervisor.includes('--')) {
-      alert('⚠️ يرجى اختيار التدريسي المشرف المعتمد من كليتك لاعتماد الكيس شيت سريرياً.');
+    // Debounce / Double-click prevention lock
+    if (window.acquireSubmissionLock && !window.acquireSubmissionLock('submit_case_' + caseIdText, 4000)) {
+      console.warn('Blocked duplicate click on submit case to supervisor');
       return;
     }
 
-    const patientName = document.getElementById('modal-patient-name')?.value.trim() || 'مريض تدريب سريري';
-    const isAlqabas = state.currentOpenSheet.sheet.id === 'omfs-ext-01' || state.currentOpenSheet.dept.id === 'omfs';
-    const scoreVal = calculateTotalScore();
-    const finalScore = isAlqabas ? (scoreVal !== null ? `${scoreVal} / 10` : 'قيد تقييم المشرف') : '9/10';
-    const finalNotes = isAlqabas ? (document.getElementById('p2-notes')?.value || 'Oral Surgery Case submitted') : 'تم تقديم الكيس شيت للاعتماد السريري من قبل الطالب';
-
-    state.stats.todayCases++;
-    if (state.stats.approvedRequirements < state.stats.totalRequired) {
-      state.stats.approvedRequirements++;
+    const submitSupervisorBtn = document.getElementById('submit-supervisor-btn');
+    let unlockBtn = () => {};
+    if (window.lockSubmitButton && submitSupervisorBtn) {
+      unlockBtn = window.lockSubmitButton(submitSupervisorBtn, 'جاري إرسال الطبلة للمشرف...');
+    } else if (submitSupervisorBtn) {
+      submitSupervisorBtn.disabled = true;
     }
-    updateStatsDisplay();
 
-    // Check if logged in via College ERP
     try {
-      const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
-      const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
-      if (rawSession && rawDb) {
-        const user = JSON.parse(rawSession);
-        const db = JSON.parse(rawDb);
-        if (user && user.role === 'STUDENT' && db && Array.isArray(db.cases)) {
-          // Find matching instructor in db
-          const matchedInst = db.instructors?.find(i => selectedSupervisor.includes(i.name) && i.collegeId === user.collegeId);
+      // Get selected instructor name
+      const footerSelect = document.getElementById('footer-instructor-select');
+      const caseSelect = document.getElementById('case-selected-supervisor');
+      const selectedSupervisor = (footerSelect && footerSelect.value) || (caseSelect && caseSelect.value) || '';
 
-          const newCase = {
-            id: caseIdText,
-            collegeId: user.collegeId,
-            studentId: user.id,
-            studentName: user.name,
-            stage: user.stage || '5th',
-            type: state.currentOpenSheet.sheet.titleAr || 'جراحة الفم والقلع',
-            patientName: patientName,
-            status: 'Pending',
-            assignedMark: '-',
-            feedback: '',
-            instructorId: matchedInst ? matchedInst.id : (db.instructors?.[0]?.id || 'inst_default'),
-            instructorName: selectedSupervisor,
-            createdAt: new Date().toISOString()
-          };
-          db.cases.push(newCase);
-          localStorage.setItem('cosmo_dental_college_erp_v3', JSON.stringify(db));
-
-          // Cloud push to Netlify Blobs so instructors and deans can see the submitted case immediately
-          try {
-            const candidateEndpoints = [
-              '/api/cases',
-              '/.netlify/functions/applications?type=cases',
-              'https://dental-casesheet-erp.netlify.app/api/cases',
-              'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=cases'
-            ];
-            for (const ep of candidateEndpoints) {
-              try {
-                const res = await fetch(ep, {
-                  method: 'POST',
-                  headers: { 'Content-Type': 'application/json' },
-                  body: JSON.stringify({ action: 'upsert', type: 'cases', case: newCase })
-                });
-                if (res.ok) break;
-              } catch (e) {}
-            }
-          } catch (e) {}
-        }
+      if (!selectedSupervisor || selectedSupervisor.includes('--')) {
+        alert('⚠️ يرجى اختيار التدريسي المشرف المعتمد من كليتك لاعتماد الكيس شيت سريرياً.');
+        if (window.releaseSubmissionLock) window.releaseSubmissionLock('submit_case_' + caseIdText);
+        unlockBtn();
+        return;
       }
-    } catch (e) {
-      console.warn('ERP sync notice:', e);
-    }
 
-    if (window.EDentalSupabase && caseIdText) {
-      await window.EDentalSupabase.submitCaseReview(caseIdText, {
-        status: 'submitted',
-        score: finalScore,
-        notes: finalNotes,
-        supervisor: selectedSupervisor
-      });
-    }
+      const patientName = document.getElementById('modal-patient-name')?.value.trim() || 'مريض تدريب سريري';
+      const isAlqabas = state.currentOpenSheet.sheet.id === 'omfs-ext-01' || state.currentOpenSheet.dept.id === 'omfs';
+      const scoreVal = calculateTotalScore();
+      const finalScore = isAlqabas ? (scoreVal !== null ? `${scoreVal} / 10` : 'قيد تقييم المشرف') : '9/10';
+      const finalNotes = isAlqabas ? (document.getElementById('p2-notes')?.value || 'Oral Surgery Case submitted') : 'تم تقديم الكيس شيت للاعتماد السريري من قبل الطالب';
 
-    closeCaseModal();
-    showToast(`تم إرسال الطبلة للاعتماد السريري إلى (${selectedSupervisor}) بنجاح! 🎓`, 'success');
+      // Check if logged in via College ERP
+      try {
+        const rawSession = sessionStorage.getItem('cosmo_dental_college_session') || localStorage.getItem('cosmo_dental_college_session');
+        const rawDb = localStorage.getItem('cosmo_dental_college_erp_v3');
+        if (rawSession && rawDb) {
+          const user = JSON.parse(rawSession);
+          let db = JSON.parse(rawDb);
+          if (user && user.role === 'STUDENT' && db && Array.isArray(db.cases)) {
+            // Find matching instructor in db
+            const matchedInst = db.instructors?.find(i => selectedSupervisor.includes(i.name) && i.collegeId === user.collegeId);
+
+            const newCase = {
+              id: caseIdText,
+              collegeId: user.collegeId,
+              studentId: user.id,
+              studentName: user.name,
+              stage: user.stage || '5th',
+              type: state.currentOpenSheet.sheet.titleAr || 'جراحة الفم والقلع',
+              patientName: patientName,
+              status: 'Pending',
+              assignedMark: '-',
+              feedback: '',
+              instructorId: matchedInst ? matchedInst.id : (db.instructors?.[0]?.id || 'inst_default'),
+              instructorName: selectedSupervisor,
+              createdAt: new Date().toISOString()
+            };
+
+            // Idempotent duplicate check: update if already exists, else push once
+            const existingCaseIdx = db.cases.findIndex(c => 
+              c.id === caseIdText || 
+              (c.studentId === user.id && c.patientName.trim().toLowerCase() === patientName.toLowerCase() && c.type === newCase.type)
+            );
+
+            if (existingCaseIdx > -1) {
+              db.cases[existingCaseIdx] = { ...db.cases[existingCaseIdx], ...newCase, id: db.cases[existingCaseIdx].id };
+            } else {
+              db.cases.push(newCase);
+              state.stats.todayCases++;
+              if (state.stats.approvedRequirements < state.stats.totalRequired) {
+                state.stats.approvedRequirements++;
+              }
+              updateStatsDisplay();
+            }
+
+            // Auto deduplicate DB if function available
+            if (window.autoDeduplicateDb) {
+              const res = window.autoDeduplicateDb(db);
+              db = res.db;
+            }
+
+            localStorage.setItem('cosmo_dental_college_erp_v3', JSON.stringify(db));
+
+            // Cloud push to Netlify Blobs so instructors and deans can see the submitted case immediately
+            try {
+              const candidateEndpoints = [
+                '/api/cases',
+                '/.netlify/functions/applications?type=cases',
+                'https://dental-casesheet-erp.netlify.app/api/cases',
+                'https://dental-casesheet-erp.netlify.app/.netlify/functions/applications?type=cases'
+              ];
+              for (const ep of candidateEndpoints) {
+                try {
+                  const res = await fetch(ep, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: 'upsert', type: 'cases', case: newCase })
+                  });
+                  if (res.ok) break;
+                } catch (e) {}
+              }
+            } catch (e) {}
+          }
+        }
+      } catch (e) {
+        console.warn('ERP sync notice:', e);
+      }
+
+      if (window.EDentalSupabase && caseIdText) {
+        await window.EDentalSupabase.submitCaseReview(caseIdText, {
+          status: 'submitted',
+          score: finalScore,
+          notes: finalNotes,
+          supervisor: selectedSupervisor
+        });
+      }
+
+      closeCaseModal();
+      showToast(`تم إرسال الطبلة للاعتماد السريري إلى (${selectedSupervisor}) بنجاح! 🎓`, 'success');
+    } finally {
+      unlockBtn();
+    }
   }
 
   // Update Stats Display in Dashboard Bar
