@@ -354,10 +354,10 @@
 
         <div class="glass-card rounded-xl sm:rounded-2xl p-3.5 sm:p-5 border border-slate-200">
           <div class="flex items-center justify-between text-slate-500 text-xs font-bold mb-1.5 sm:mb-2">
-            <span>إجمالي إيرادات الاشتراكات</span>
-            <i data-lucide="badge-dollar-sign" class="w-4 h-4 text-emerald-600"></i>
+            <span>إجمالي إيرادات الاشتراكات (د.ع)</span>
+            <i data-lucide="wallet" class="w-4 h-4 text-emerald-600"></i>
           </div>
-          <div id="stat-revenue-total" class="text-xl sm:text-2xl md:text-3xl font-black text-emerald-700 font-latin">$0</div>
+          <div id="stat-revenue-total" class="text-xl sm:text-2xl md:text-3xl font-black text-emerald-700 font-latin">0 د.ع</div>
           <p class="text-[10px] sm:text-[11px] text-emerald-800 font-semibold mt-0.5 sm:mt-1">المبالغ المسددة بالكامل</p>
         </div>
 
@@ -419,7 +419,7 @@
                 <th class="p-3.5 whitespace-nowrap">الرمز والكود</th>
                 <th class="p-3.5 whitespace-nowrap">العميد / المشرف</th>
                 <th class="p-3.5 whitespace-nowrap">بيانات الدخول للأدمن</th>
-                <th class="p-3.5 text-center whitespace-nowrap">الاشتراك المالي</th>
+                <th class="p-3.5 text-center whitespace-nowrap">الاشتراك (د.ع)</th>
                 <th class="p-3.5 text-center whitespace-nowrap">تاريخ الانتهاء</th>
                 <th class="p-3.5 text-center whitespace-nowrap">حالة الاشتراك</th>
                 <th class="p-3.5 text-center whitespace-nowrap">الإجراءات</th>
@@ -1044,12 +1044,45 @@
         </div>
 
         <!-- Financial Subscription Details -->
-        <div class="p-3 bg-emerald-50/80 border border-emerald-200 rounded-2xl space-y-2">
-          <span class="block font-bold text-emerald-900 text-xs">بيانات اشتراك الكلية المالي (للسوبر أدمن فقط):</span>
+        <div class="p-3.5 bg-emerald-50/90 border border-emerald-300 rounded-2xl space-y-3">
+          <div class="flex items-center justify-between">
+            <span class="block font-bold text-emerald-950 text-xs flex items-center gap-1.5">
+              <i data-lucide="wallet" class="w-4 h-4 text-emerald-700"></i>
+              <span>بيانات اشتراك الكلية المالي (بالدينار العراقي):</span>
+            </span>
+            <input type="hidden" id="new-college-plan-type" value="annual">
+          </div>
+
+          <!-- Subscription Plan Toggle Buttons (سنوي مليون / شهري 100 ألف) -->
+          <div>
+            <label class="block font-bold text-slate-700 mb-1.5 text-xs">نوع وخطة الاشتراك:</label>
+            <div class="grid grid-cols-2 gap-2 p-1 bg-white border border-emerald-300 rounded-xl">
+              <button 
+                type="button" 
+                id="btn-plan-annual-add"
+                onclick="setCollegeSubscriptionPlan('add', 'annual')" 
+                class="py-2 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-emerald-600 text-white shadow-sm"
+              >
+                <span>📅 سنوي (1,000,000 د.ع)</span>
+              </button>
+              <button 
+                type="button" 
+                id="btn-plan-monthly-add"
+                onclick="setCollegeSubscriptionPlan('add', 'monthly')" 
+                class="py-2 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200"
+              >
+                <span>🗓️ شهري (100,000 د.ع)</span>
+              </button>
+            </div>
+          </div>
+
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div>
-              <label class="block font-bold text-slate-700 mb-1">قيمة الاشتراك السنوي ($) *</label>
-              <input type="number" inputmode="numeric" id="new-college-fee" required value="1500" placeholder="1500" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+              <label class="block font-bold text-slate-700 mb-1">قيمة الاشتراك (د.ع) *</label>
+              <div class="relative">
+                <input type="number" inputmode="numeric" id="new-college-fee" required value="1000000" placeholder="1000000" class="w-full p-2.5 bg-white border border-slate-300 rounded-xl font-black font-latin pl-14" dir="ltr">
+                <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-emerald-700 pointer-events-none">د.ع</span>
+              </div>
             </div>
             <div>
               <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص *</label>
@@ -1380,8 +1413,8 @@
             </div>
           </div>
           <div id="receipt-amount-row" class="col-span-1 sm:col-span-2 flex items-center justify-between p-3 bg-white border border-slate-300 rounded-xl">
-            <span class="text-slate-700 font-bold">مبلغ الاشتراك السنوي المسدد:</span>
-            <strong id="receipt-amount" class="text-slate-900 font-latin text-sm sm:text-base font-black">$1,500 USD (مدفوع بالكامل)</strong>
+            <span class="text-slate-700 font-bold">مبلغ الاشتراك المسدد:</span>
+            <strong id="receipt-amount" class="text-emerald-950 font-latin text-sm sm:text-base font-black">1,000,000 د.ع (مدفوع بالكامل)</strong>
           </div>
         </div>
 
@@ -1431,9 +1464,36 @@
           <span class="block font-bold text-slate-500 mb-1">الكلية:</span>
           <strong id="renew-college-name" class="text-sm font-black text-teal-900 block">-</strong>
         </div>
+        <!-- Renewal Plan Toggle Buttons (سنوي مليون / شهري 100 ألف) -->
         <div>
-          <label class="block font-bold text-slate-700 mb-1">قيمة رسوم التجديد ($) *</label>
-          <input type="number" inputmode="numeric" id="renew-amount" required value="1500" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+          <label class="block font-bold text-slate-700 mb-1.5 text-xs">نوع وخطة التجديد:</label>
+          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-50 border border-slate-300 rounded-xl">
+            <button 
+              type="button" 
+              id="btn-plan-annual-renew"
+              onclick="setCollegeSubscriptionPlan('renew', 'annual')" 
+              class="py-2 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-emerald-600 text-white shadow-sm"
+            >
+              <span>📅 تجديد سنوي (1,000,000 د.ع)</span>
+            </button>
+            <button 
+              type="button" 
+              id="btn-plan-monthly-renew"
+              onclick="setCollegeSubscriptionPlan('renew', 'monthly')" 
+              class="py-2 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200"
+            >
+              <span>🗓️ تجديد شهري (100,000 د.ع)</span>
+            </button>
+          </div>
+          <input type="hidden" id="renew-plan-type" value="annual">
+        </div>
+
+        <div>
+          <label class="block font-bold text-slate-700 mb-1">قيمة رسوم التجديد (د.ع) *</label>
+          <div class="relative">
+            <input type="number" inputmode="numeric" id="renew-amount" required value="1000000" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-black font-latin pl-14" dir="ltr">
+            <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-emerald-700 pointer-events-none">د.ع</span>
+          </div>
         </div>
         <div>
           <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص الجديد *</label>
@@ -1687,10 +1747,37 @@
           <input type="text" id="approve-dean-username" required class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
         </div>
 
+        <!-- Approval Plan Toggle Buttons (سنوي مليون / شهري 100 ألف) -->
+        <div>
+          <label class="block font-bold text-slate-700 mb-1.5 text-xs">نوع وخطة الاشتراك المالي:</label>
+          <div class="grid grid-cols-2 gap-2 p-1 bg-slate-50 border border-slate-300 rounded-xl">
+            <button 
+              type="button" 
+              id="btn-plan-annual-approve"
+              onclick="setCollegeSubscriptionPlan('approve', 'annual')" 
+              class="py-2 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-emerald-600 text-white shadow-sm"
+            >
+              <span>📅 سنوي (1,000,000 د.ع)</span>
+            </button>
+            <button 
+              type="button" 
+              id="btn-plan-monthly-approve"
+              onclick="setCollegeSubscriptionPlan('approve', 'monthly')" 
+              class="py-2 px-3 text-xs font-black rounded-lg transition-all flex items-center justify-center gap-1.5 cursor-pointer bg-slate-100 text-slate-700 hover:bg-slate-200"
+            >
+              <span>🗓️ شهري (100,000 د.ع)</span>
+            </button>
+          </div>
+          <input type="hidden" id="approve-subscription-plan-type" value="annual">
+        </div>
+
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div>
-            <label class="block font-bold text-slate-700 mb-1">قيمة الاشتراك السنوي ($) *</label>
-            <input type="number" inputmode="numeric" id="approve-subscription-fee" required value="1500" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-semibold font-latin" dir="ltr">
+            <label class="block font-bold text-slate-700 mb-1">قيمة الاشتراك (د.ع) *</label>
+            <div class="relative">
+              <input type="number" inputmode="numeric" id="approve-subscription-fee" required value="1000000" class="w-full p-2.5 bg-slate-50 border border-slate-300 rounded-xl font-black font-latin pl-14" dir="ltr">
+              <span class="absolute left-3 top-1/2 -translate-y-1/2 text-xs font-black text-emerald-700 pointer-events-none">د.ع</span>
+            </div>
           </div>
           <div>
             <label class="block font-bold text-slate-700 mb-1">تاريخ انتهاء الترخيص *</label>

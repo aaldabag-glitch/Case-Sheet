@@ -906,6 +906,64 @@ function regeneratePasswordField(inputId) {
 }
 window.regeneratePasswordField = regeneratePasswordField;
 
+function setCollegeSubscriptionPlan(context, plan = 'annual') {
+  const isMonthly = plan === 'monthly';
+  const fee = isMonthly ? 100000 : 1000000;
+
+  let feeInput, endInput, planTypeInput, btnAnnual, btnMonthly;
+
+  if (context === 'add') {
+    feeInput = document.getElementById('new-college-fee');
+    endInput = document.getElementById('new-college-sub-end');
+    planTypeInput = document.getElementById('new-college-plan-type');
+    btnAnnual = document.getElementById('btn-plan-annual-add');
+    btnMonthly = document.getElementById('btn-plan-monthly-add');
+  } else if (context === 'approve') {
+    feeInput = document.getElementById('approve-subscription-fee');
+    endInput = document.getElementById('approve-subscription-end');
+    planTypeInput = document.getElementById('approve-subscription-plan-type');
+    btnAnnual = document.getElementById('btn-plan-annual-approve');
+    btnMonthly = document.getElementById('btn-plan-monthly-approve');
+  } else if (context === 'renew') {
+    feeInput = document.getElementById('renew-amount');
+    endInput = document.getElementById('renew-new-date');
+    planTypeInput = document.getElementById('renew-plan-type');
+    btnAnnual = document.getElementById('btn-plan-annual-renew');
+    btnMonthly = document.getElementById('btn-plan-monthly-renew');
+  }
+
+  if (feeInput) feeInput.value = fee;
+  if (planTypeInput) planTypeInput.value = isMonthly ? 'monthly' : 'annual';
+
+  const targetDate = new Date();
+  if (isMonthly) {
+    targetDate.setMonth(targetDate.getMonth() + 1);
+  } else {
+    targetDate.setFullYear(targetDate.getFullYear() + 1);
+  }
+  if (endInput) {
+    endInput.value = targetDate.toISOString().slice(0, 10);
+  }
+
+  const activeClasses = ['bg-emerald-600', 'text-white', 'shadow-sm'];
+  const inactiveClasses = ['bg-slate-100', 'text-slate-700'];
+
+  if (btnAnnual && btnMonthly) {
+    if (isMonthly) {
+      btnMonthly.classList.add(...activeClasses);
+      btnMonthly.classList.remove(...inactiveClasses);
+      btnAnnual.classList.remove(...activeClasses);
+      btnAnnual.classList.add(...inactiveClasses);
+    } else {
+      btnAnnual.classList.add(...activeClasses);
+      btnAnnual.classList.remove(...inactiveClasses);
+      btnMonthly.classList.remove(...activeClasses);
+      btnMonthly.classList.add(...inactiveClasses);
+    }
+  }
+}
+window.setCollegeSubscriptionPlan = setCollegeSubscriptionPlan;
+
 function generateUniqueCollegeCode(collegeName = '', city = '') {
   const db = readErpDb();
   const existingCodes = new Set((db.colleges || []).map(c => (c.code || '').trim().toUpperCase()));
@@ -1265,7 +1323,7 @@ function renderSuperAdminDashboard() {
 
   const now = new Date();
   db.colleges.forEach(c => {
-    const fee = parseFloat(c.subscriptionFee) || 1500;
+    const fee = parseFloat(c.subscriptionFee) || (c.subscriptionType === 'monthly' ? 100000 : 1000000);
     totalRevenue += fee;
     const isPaused = c.status === 'Paused';
     const endDate = c.subscriptionEnd ? new Date(c.subscriptionEnd) : null;
@@ -1284,7 +1342,7 @@ function renderSuperAdminDashboard() {
   const statStudentApps = document.getElementById('stat-student-apps-count');
 
   if (statColleges) statColleges.textContent = totalColleges;
-  if (statRev) statRev.textContent = '$' + totalRevenue.toLocaleString('en-US');
+  if (statRev) statRev.textContent = totalRevenue.toLocaleString() + ' د.ع';
   if (statActive) statActive.textContent = activeSubs;
   if (statPending) statPending.textContent = pendingSubs;
   if (statStudentApps) statStudentApps.textContent = (db.studentApplications || []).length;
@@ -1315,7 +1373,9 @@ function renderSuperAdminColleges() {
   const now = new Date();
   tbody.innerHTML = filtered.map(c => {
     const isPaused = c.status === 'Paused';
-    const fee = parseFloat(c.subscriptionFee) || 1500;
+    const fee = parseFloat(c.subscriptionFee) || (c.subscriptionType === 'monthly' ? 100000 : 1000000);
+    const isMonthly = c.subscriptionType === 'monthly' || fee <= 150000;
+    const planLabel = isMonthly ? 'شهري مدفوع' : 'سنوي مدفوع';
     const subEnd = c.subscriptionEnd || '2027-10-01';
     const isExpired = new Date(subEnd) < now;
 
@@ -1344,9 +1404,9 @@ function renderSuperAdminColleges() {
             <span class="block text-slate-500">رمز: <strong class="font-latin text-slate-700">${c.adminPassword}</strong></span>
           </div>
         </td>
-        <td class="p-3.5 text-center whitespace-nowrap min-w-[110px]">
-          <span class="font-latin font-black text-emerald-700 text-sm">$${fee.toLocaleString()}</span>
-          <span class="block text-[10px] text-slate-400">سنوي مدفوع</span>
+        <td class="p-3.5 text-center whitespace-nowrap min-w-[130px]">
+          <span class="font-latin font-black text-emerald-700 text-sm">${fee.toLocaleString()} د.ع</span>
+          <span class="block text-[10px] ${isMonthly ? 'text-amber-700 font-bold' : 'text-slate-500 font-bold'}">${planLabel}</span>
         </td>
         <td class="p-3.5 text-center font-latin font-semibold text-slate-700 text-xs whitespace-nowrap min-w-[100px]">
           ${subEnd}
@@ -1395,12 +1455,7 @@ function renderSuperAdminColleges() {
 }
 
 function openAddCollegeModal() {
-  const nextYear = new Date();
-  nextYear.setFullYear(nextYear.getFullYear() + 1);
-  const endInput = document.getElementById('new-college-sub-end');
-  if (endInput && !endInput.value) {
-    endInput.value = nextYear.toISOString().slice(0, 10);
-  }
+  setCollegeSubscriptionPlan('add', 'annual');
   const pwdInput = document.getElementById('new-dean-password');
   if (pwdInput) {
     pwdInput.value = generateUniquePassword();
@@ -1430,7 +1485,8 @@ function handleCreateCollegeSubmit(event) {
   const deanName = document.getElementById('new-college-dean').value.trim();
   const adminUsername = document.getElementById('new-dean-username').value.trim().toLowerCase();
   const adminPassword = document.getElementById('new-dean-password').value.trim();
-  const subscriptionFee = parseFloat(document.getElementById('new-college-fee')?.value || 1500);
+  const subscriptionFee = parseFloat(document.getElementById('new-college-fee')?.value || 1000000);
+  const planType = document.getElementById('new-college-plan-type')?.value || (subscriptionFee <= 150000 ? 'monthly' : 'annual');
 
   // Check duplicate college name in existing database
   if (db.colleges.some(c => c.name.trim().toLowerCase() === name.toLowerCase())) {
@@ -1446,7 +1502,11 @@ function handleCreateCollegeSubmit(event) {
   let subscriptionEnd = document.getElementById('new-college-sub-end')?.value;
   if (!subscriptionEnd) {
     const nextYear = new Date();
-    nextYear.setFullYear(nextYear.getFullYear() + 1);
+    if (planType === 'monthly') {
+      nextYear.setMonth(nextYear.getMonth() + 1);
+    } else {
+      nextYear.setFullYear(nextYear.getFullYear() + 1);
+    }
     subscriptionEnd = nextYear.toISOString().slice(0, 10);
   }
 
@@ -1474,10 +1534,11 @@ function handleCreateCollegeSubmit(event) {
     adminUsername,
     adminPassword,
     subscriptionFee,
+    subscriptionType: planType,
     subscriptionStart: new Date().toISOString().slice(0, 10),
     subscriptionEnd,
     status: 'Active',
-    plan: 'ANNUAL_ACCREDITED',
+    plan: planType === 'monthly' ? 'MONTHLY_ACCREDITED' : 'ANNUAL_ACCREDITED',
     createdAt: new Date().toISOString()
   };
 
@@ -3063,8 +3124,10 @@ function openPrintReceiptModal(collegeId, hideAmount = false) {
   if (deanEl) deanEl.textContent = clg.deanName;
   if (validEl) validEl.textContent = clg.subscriptionEnd || '2027-10-01';
   
-  const fee = parseFloat(clg.subscriptionFee) || 1500;
-  if (amtEl) amtEl.textContent = `$${fee.toLocaleString()} USD (مدفوع بالكامل)`;
+  const fee = parseFloat(clg.subscriptionFee) || (clg.subscriptionType === 'monthly' ? 100000 : 1000000);
+  const isMonthly = clg.subscriptionType === 'monthly' || fee <= 150000;
+  const planName = isMonthly ? 'اشتراك شهري' : 'اشتراك سنوي';
+  if (amtEl) amtEl.textContent = `${fee.toLocaleString()} دينار عراقي (${planName} - مدفوع بالكامل)`;
 
   if (amtRow) {
     if (hideAmount) {
@@ -3095,19 +3158,12 @@ function openRenewSubModal(collegeId) {
 
   const idInput = document.getElementById('renew-college-id');
   const nameEl = document.getElementById('renew-college-name');
-  const amtInput = document.getElementById('renew-amount');
-  const dateInput = document.getElementById('renew-new-date');
 
   if (idInput) idInput.value = clg.id;
   if (nameEl) nameEl.textContent = `${clg.name} (${clg.code})`;
-  if (amtInput) amtInput.value = clg.subscriptionFee || 1500;
 
-  // Next renewal date: 1 year after current expiry or 1 year from now
-  const baseDate = (clg.subscriptionEnd && new Date(clg.subscriptionEnd) > new Date()) 
-    ? new Date(clg.subscriptionEnd) 
-    : new Date();
-  baseDate.setFullYear(baseDate.getFullYear() + 1);
-  if (dateInput) dateInput.value = baseDate.toISOString().slice(0, 10);
+  const currentPlan = clg.subscriptionType || (parseFloat(clg.subscriptionFee) <= 150000 ? 'monthly' : 'annual');
+  setCollegeSubscriptionPlan('renew', currentPlan);
 
   document.getElementById('modal-renew-sub')?.classList.remove('hidden');
   if (window.lucide) window.lucide.createIcons();
@@ -3121,13 +3177,16 @@ function handleRenewSubscriptionSubmit(event) {
   event.preventDefault();
   const db = readErpDb();
   const collegeId = document.getElementById('renew-college-id')?.value;
-  const newAmount = parseFloat(document.getElementById('renew-amount')?.value || 1500);
+  const newAmount = parseFloat(document.getElementById('renew-amount')?.value || 1000000);
   const newDate = document.getElementById('renew-new-date')?.value;
+  const newPlan = document.getElementById('renew-plan-type')?.value || (newAmount <= 150000 ? 'monthly' : 'annual');
 
   const clg = db.colleges.find(c => c.id === collegeId);
   if (!clg) return;
 
   clg.subscriptionFee = newAmount;
+  clg.subscriptionType = newPlan;
+  clg.plan = newPlan === 'monthly' ? 'MONTHLY_ACCREDITED' : 'ANNUAL_ACCREDITED';
   clg.subscriptionEnd = newDate;
   clg.status = 'Active';
 
@@ -3137,7 +3196,7 @@ function handleRenewSubscriptionSubmit(event) {
   closeRenewSubModal();
   renderSuperAdminDashboard();
 
-  if (confirm(`✅ تم تجديد ترخيص ${clg.name} حتى ${newDate} بنجاح!\nهل ترغب في طباعة سند التجديد الآن؟`)) {
+  if (confirm(`✅ تم تجديد ترخيص ${clg.name} بقيمة ${newAmount.toLocaleString()} د.ع (${newPlan === 'monthly' ? 'شهري' : 'سنوي'}) حتى ${newDate} بنجاح!\nهل ترغب في طباعة سند التجديد الآن؟`)) {
     openPrintReceiptModal(clg.id, false);
   }
 }
@@ -3699,11 +3758,8 @@ function openApproveApplicationModal(appId) {
   }
   if (userInput) userInput.value = candidateUsername;
 
-  if (feeInput) feeInput.value = 1500;
-
-  const nextYear = new Date();
-  nextYear.setFullYear(nextYear.getFullYear() + 1);
-  if (endInput) endInput.value = nextYear.toISOString().slice(0, 10);
+  // Initialize subscription plan (defaults to annual 1,000,000 IQD)
+  setCollegeSubscriptionPlan('approve', 'annual');
 
   // Generate unique password (no duplicate passwords across system, alphanumeric only)
   let candidatePassword = app.proposedPassword;
@@ -3762,7 +3818,8 @@ function handleApproveApplicationSubmit(event) {
   // Auto generate unique college code (system generates it automatically)
   const code = generateUniqueCollegeCode(app.collegeName, app.city);
   const adminUsername = document.getElementById('approve-dean-username').value.trim().toLowerCase();
-  const subscriptionFee = parseFloat(document.getElementById('approve-subscription-fee')?.value || 1500);
+  const subscriptionFee = parseFloat(document.getElementById('approve-subscription-fee')?.value || 1000000);
+  const planType = document.getElementById('approve-subscription-plan-type')?.value || (subscriptionFee <= 150000 ? 'monthly' : 'annual');
   const subscriptionEnd = document.getElementById('approve-subscription-end')?.value;
   const adminPassword = document.getElementById('approve-dean-password').value.trim();
 
@@ -3797,10 +3854,11 @@ function handleApproveApplicationSubmit(event) {
     adminUsername,
     adminPassword,
     subscriptionFee,
+    subscriptionType: planType,
     subscriptionStart: new Date().toISOString().slice(0, 10),
-    subscriptionEnd: subscriptionEnd || new Date(Date.now() + 365*24*60*60*1000).toISOString().slice(0, 10),
+    subscriptionEnd: subscriptionEnd || (planType === 'monthly' ? new Date(Date.now() + 30*24*60*60*1000) : new Date(Date.now() + 365*24*60*60*1000)).toISOString().slice(0, 10),
     status: 'Active',
-    plan: 'ANNUAL_ACCREDITED',
+    plan: planType === 'monthly' ? 'MONTHLY_ACCREDITED' : 'ANNUAL_ACCREDITED',
     createdAt: new Date().toISOString()
   };
 
